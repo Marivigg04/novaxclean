@@ -1,6 +1,6 @@
 import { heroStats } from './content';
 
-export default function HeroSection({ onExploreCatalog }) {
+export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
   return (
     <section
       id="catalogo"
@@ -32,8 +32,8 @@ export default function HeroSection({ onExploreCatalog }) {
             <button className="rounded-xl bg-white px-8 py-4 text-headline-md font-bold text-primary shadow-xl transition-transform hover:scale-105" type="button" onClick={onExploreCatalog}>
               Explorar catálogo
             </button>
-            <button className="rounded-xl border border-white/40 px-8 py-4 text-headline-md font-bold text-white transition-colors hover:bg-white/10">
-              Saber más
+            <button className="rounded-xl border border-white/40 px-8 py-4 text-headline-md font-bold text-white transition-colors hover:bg-white/10" type="button" onClick={onOpenAuth}>
+              Iniciar sesión / registrarse
             </button>
           </div>
 

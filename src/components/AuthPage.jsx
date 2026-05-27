@@ -10,7 +10,7 @@ const carouselData = [
   { title: "Soporte 24/7", desc: "Gestión integral de servicios con atención personalizada." }
 ];
 
-export default function AuthPage() {
+export default function AuthPage({ onBackToLanding }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLogin, setIsLogin] = useState(false);
 
@@ -20,7 +20,10 @@ export default function AuthPage() {
   }, []);
 
   return (
-    <div className="bg-[#f6faff] min-h-screen flex items-center justify-center p-4">
+    <div className="relative bg-[#f6faff] min-h-screen flex items-center justify-center p-4">
+      <button className="absolute left-4 top-4 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-[#001337] shadow-sm transition-colors hover:bg-gray-50" type="button" onClick={onBackToLanding}>
+        Volver al inicio
+      </button>
       <main className="w-full max-w-[1000px] h-[600px] bg-white rounded-xl shadow-2xl flex overflow-hidden border border-gray-200">
         <Carousel data={carouselData} currentIndex={currentSlide} onDotClick={setCurrentSlide} />
         

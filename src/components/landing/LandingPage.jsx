@@ -6,12 +6,12 @@ import CompanySection from './CompanySection';
 import ContactSection from './ContactSection';
 import Footer from './Footer';
 
-export default function LandingPage({ onExploreCatalog, onOpenCart }) {
+export default function LandingPage({ onExploreCatalog, onOpenCart, onOpenAuth }) {
   return (
     <div className="bg-background text-on-surface">
-      <Header onExploreCatalog={onExploreCatalog} onOpenCart={onOpenCart} />
-      <main className="pt-24">
-        <HeroSection onExploreCatalog={onExploreCatalog} />
+      <Header onExploreCatalog={onExploreCatalog} onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+      <main className="pt-28 lg:pt-36">
+        <HeroSection onExploreCatalog={onExploreCatalog} onOpenAuth={onOpenAuth} />
         <BenefitsSection />
         <InfoSection />
         <CompanySection />

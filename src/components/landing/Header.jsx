@@ -1,30 +1,26 @@
 import { navigationLinks } from './content';
 
-export default function Header({ onExploreCatalog, onOpenCart }) {
+export default function Header({ onOpenCart, onOpenAuth }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-outline-variant bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300">
-      <nav className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 py-4 md:px-16">
-        <div className="flex items-center gap-4">
-          <img
-            alt="NovaxClean Logo"
-            className="h-10 w-auto"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY9WX5RCerwHXn4XDK8ir8ZzsZ3G_dglhe8QEZ1mUyIN_taGiyoh2VuIrtvL3jr_S_aSRTWVtiSYQCK3zoV4Ddn1IM6ec8VJjisH0a49EViOKuZmfi8L9zRkxN-ygT1GFZSgbkW43fTYV8v0tpcdjYFJw3DXIqJkTw7QQcsfo0rMEDnFWnc_wJUiW4alccm8L9VG1I6MjLWa_HViB7_Q5X5FOQyoO9cXoAypb-GqgjPDwkYY738dxGmSV_bJqgV9bv9L_eee_KqWM"
-          />
-
-          <div className="hidden items-center rounded-full border border-outline-variant bg-surface-container px-4 py-2 md:flex">
-            <span className="material-symbols-outlined mr-2 text-outline">search</span>
-            <input
-              className="w-64 border-none bg-transparent text-body-md focus:ring-0"
-              placeholder="Busca productos de limpieza..."
-              type="text"
-            />
-            <button className="rounded-full bg-primary px-4 py-1 text-label-md font-bold text-on-primary">
-              Buscar
-            </button>
-          </div>
+      <nav className="mx-auto flex w-full max-w-[1280px] items-center gap-6 px-4 py-4 md:px-16 md:py-5">
+        <div className="shrink-0">
+          <span className="text-lg font-bold">NovaxClean</span>
         </div>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden min-w-0 flex-1 lg:flex-[6] items-center rounded-full border border-outline-variant bg-surface-container px-4 py-2 lg:flex">
+          <span className="material-symbols-outlined mr-2 text-outline">search</span>
+          <input
+            className="min-w-0 flex-1 border-none bg-transparent text-sm placeholder:text-sm focus:ring-0"
+            placeholder="Busca productos de limpieza..."
+            type="text"
+          />
+          <button className="rounded-full bg-primary px-2 py-0.5 text-sm leading-none font-medium text-on-primary">
+            Buscar
+          </button>
+        </div>
+
+        <div className="hidden items-center gap-6 lg:flex flex-none">
           {navigationLinks.map((link, index) => (
             <a
               key={link.label}
@@ -40,9 +36,9 @@ export default function Header({ onExploreCatalog, onOpenCart }) {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="hidden rounded-xl border border-primary px-4 py-2 font-bold text-primary transition-colors hover:bg-surface-variant lg:block" type="button" onClick={onExploreCatalog}>
-            Ver catálogo
+        <div className="ml-auto flex items-center gap-3 shrink-0">
+          <button className="hidden rounded-xl bg-secondary px-6 py-2 font-bold text-on-secondary shadow-sm transition-transform duration-100 hover:scale-95 lg:block" type="button" onClick={onOpenAuth}>
+            Iniciar sesión
           </button>
           <button className="flex items-center gap-2 rounded-xl bg-secondary px-6 py-2 font-bold text-on-secondary shadow-sm transition-transform duration-100 hover:scale-95" type="button" onClick={onOpenCart}>
             <span className="material-symbols-outlined">shopping_cart</span>

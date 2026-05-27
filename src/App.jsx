@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import LandingPage from './components/landing/LandingPage';
 import CatalogPage from './components/catalog/CatalogPage';
 import CartPage from './components/cart/CartPage';
+import AuthPage from './components/AuthPage';
 
 export default function App() {
-  const getViewFromHash = () => {
+  const [currentView, setCurrentView] = useState(() => {
     if (window.location.hash === '#catalogo') {
       return 'catalogo';
     }
@@ -13,27 +14,53 @@ export default function App() {
       return 'carrito';
     }
 
-    return 'landing';
-  };
+    if (window.location.hash === '#auth') {
+      return 'auth';
+    }
 
-  const [currentView, setCurrentView] = useState(getViewFromHash);
+    return 'landing';
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentView(getViewFromHash());
+      if (window.location.hash === '#catalogo') {
+        setCurrentView('catalogo');
+        return;
+      }
+
+      if (window.location.hash === '#carrito') {
+        setCurrentView('carrito');
+        return;
+      }
+
+      if (window.location.hash === '#auth') {
+        setCurrentView('auth');
+        return;
+      }
+
+      setCurrentView('landing');
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  const navigateTo = (view, hash = '') => {
+    setCurrentView(view);
+    window.location.hash = hash;
+  };
+
   if (currentView === 'catalogo') {
-    return <CatalogPage onBackToLanding={() => (window.location.hash = '')} onOpenCart={() => (window.location.hash = '#carrito')} />;
+    return <CatalogPage onBackToLanding={() => navigateTo('landing')} onOpenCart={() => navigateTo('carrito', '#carrito')} />;
   }
 
   if (currentView === 'carrito') {
-    return <CartPage onBackToLanding={() => (window.location.hash = '')} onBackToCatalog={() => (window.location.hash = '#catalogo')} />;
+    return <CartPage onBackToLanding={() => navigateTo('landing')} onBackToCatalog={() => navigateTo('catalogo', '#catalogo')} />;
   }
 
-  return <LandingPage onExploreCatalog={() => (window.location.hash = '#catalogo')} onOpenCart={() => (window.location.hash = '#carrito')} />;
+  if (currentView === 'auth') {
+    return <AuthPage onBackToLanding={() => navigateTo('landing')} />;
+  }
+
+  return <LandingPage onExploreCatalog={() => navigateTo('catalogo', '#catalogo')} onOpenCart={() => navigateTo('carrito', '#carrito')} onOpenAuth={() => navigateTo('auth', '#auth')} />;
 }
