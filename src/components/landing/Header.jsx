@@ -8,14 +8,14 @@ export default function Header({ onOpenCart, onOpenAuth }) {
           <span className="text-lg font-bold">NovaxClean</span>
         </div>
 
-        <div className="hidden min-w-0 flex-1 lg:flex-[6] items-center rounded-full border border-outline-variant bg-surface-container px-4 py-2 lg:flex">
+        <div className="hidden min-w-0 flex-1 lg:flex-[6] items-center rounded-full border border-outline-variant bg-surface-container px-4 py-1 lg:flex">
           <span className="material-symbols-outlined mr-2 text-outline">search</span>
           <input
-            className="min-w-0 flex-1 border-none bg-transparent text-sm placeholder:text-sm focus:ring-0"
+            className="min-w-0 flex-1 border-none bg-transparent text-xs placeholder:text-xs focus:ring-0"
             placeholder="Busca productos de limpieza..."
             type="text"
           />
-          <button className="rounded-full bg-primary px-2 py-0.5 text-sm leading-none font-medium text-on-primary">
+          <button className="rounded-full bg-primary px-2.5 py-1.5 !text-xs !leading-none font-normal text-on-primary">
             Buscar
           </button>
         </div>
