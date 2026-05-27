@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  /* Aquí defines tus colores personalizados si los necesitas */
+  --color-primary: #0f2854;
+  --color-surface: #f6faff;
+}
+
+/* El resto de tus estilos globales van aquí */
+body {
+  margin: 0;
+  padding: 0;
+}
