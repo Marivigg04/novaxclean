@@ -21,14 +21,10 @@ export default function Header({ onOpenCart, onOpenAuth }) {
         </div>
 
         <div className="hidden items-center gap-6 lg:flex flex-none">
-          {navigationLinks.map((link, index) => (
+          {navigationLinks.map((link) => (
             <a
               key={link.label}
-              className={`text-label-md font-bold transition-colors ${
-                index === 0
-                  ? 'border-b-2 border-secondary pb-1 text-secondary'
-                  : 'text-on-surface-variant hover:text-secondary'
-              }`}
+              className="text-label-md font-bold text-on-surface-variant transition-colors hover:text-secondary"
               href={link.href}
             >
               {link.label}
