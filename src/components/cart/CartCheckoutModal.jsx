@@ -75,7 +75,7 @@ export default function CartCheckoutModal({ isOpen, onClose }) {
             <p className="mt-2 text-body-md text-on-surface-variant">Selecciona un método de pago y completa los datos para continuar con la orden.</p>
           </div>
 
-          <button className="rounded-full border border-outline-variant px-3 py-2 text-label-md font-bold text-on-surface-variant transition-colors hover:bg-surface-container-lowest" type="button" onClick={onClose}>
+          <button className="rounded-xl border border-outline-variant px-3 py-2 text-label-md font-bold text-on-surface-variant transition-colors hover:bg-surface-container-lowest" type="button" onClick={onClose}>
             Cerrar
           </button>
         </div>
