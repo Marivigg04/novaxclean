@@ -164,6 +164,24 @@
   background: linear-gradient(180deg, #7c9fcd, #5b7ba5);
 }
 
+/* Sidebar logo switching by theme */
+.sidebar-logo-light,
+.sidebar-logo-dark {
+  display: none;
+}
+
+.sidebar-logo-light {
+  display: inline-block;
+}
+
+.dark .sidebar-logo-light {
+  display: none;
+}
+
+.dark .sidebar-logo-dark {
+  display: inline-block;
+}
+
 html {
   scroll-behavior: smooth;
 }

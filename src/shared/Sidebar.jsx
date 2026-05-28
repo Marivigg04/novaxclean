@@ -4,6 +4,8 @@ import {
   Settings2,
   ShoppingCart,
 } from 'lucide-react'
+import logoAumc from '../assets/Logo AUMC.png'
+import logoAumo from '../assets/Logo AUMO.png'
 
 const items = [
   { key: 'ventas', label: 'Ventas', icon: ShoppingCart },
@@ -22,9 +24,13 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
       aria-label="Sidebar de navegación"
     >
       <div className="flex h-20 items-center border-b border-[var(--color-app-panel-border)] px-5">
-        <div>
-          <h2 className="text-lg font-semibold leading-tight">Novaxclean</h2>
-          <p className="text-sm text-[var(--color-base-text)]/65">Panel de control</p>
+        <div className="flex items-center gap-3">
+          <img alt="Logo AUMC" src={logoAumc} className="sidebar-logo-light h-25 w-25 rounded-xl object-cover" />
+          <img alt="Logo AUMO" src={logoAumo} className="sidebar-logo-dark h-25 w-25 rounded-xl object-cover" />
+          <div>
+            <h2 className="text-lg font-semibold leading-tight">Novaxclean</h2>
+            <p className="text-sm text-[var(--color-base-text)]/65">Panel de control</p>
+          </div>
         </div>
       </div>
 
