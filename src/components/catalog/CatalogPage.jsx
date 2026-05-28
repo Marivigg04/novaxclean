@@ -8,7 +8,7 @@ import ProductGrid from './ProductGrid';
 import MiniCart from './MiniCart';
 import Footer from '../layout/Footer';
 
-export default function CatalogPage({ onBackToLanding, onOpenCart, onOpenAuth }) {
+export default function CatalogPage({ onOpenCart, onOpenAuth }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('Todos');
 
