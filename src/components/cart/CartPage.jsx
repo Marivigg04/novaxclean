@@ -1,15 +1,15 @@
 import { cartItems, footerLinks, recommendedItems } from './data';
-import CartHeader from './CartHeader';
+import Header from '../landing/Header';
 import CartTable from './CartTable';
 import CartSummary from './CartSummary';
 import CartRecommendations from './CartRecommendations';
 import CartFooter from './CartFooter';
 
-export default function CartPage({ onBackToLanding, onBackToCatalog }) {
+export default function CartPage({ onBackToLanding, onBackToCatalog, onOpenCart, onOpenAuth }) {
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <CartHeader onBackToLanding={onBackToLanding} />
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 md:px-16">
+      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 pt-24 md:px-16">
         <div className="mb-10">
           <h1 className="mb-2 text-headline-xl font-bold text-primary">Tu Carrito de Compras</h1>
           <p className="text-body-md text-on-surface-variant">Revisa tus productos y optimiza tu inventario para este periodo.</p>

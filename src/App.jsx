@@ -51,11 +51,11 @@ export default function App() {
   };
 
   if (currentView === 'catalogo') {
-    return <CatalogPage onBackToLanding={() => navigateTo('landing')} onOpenCart={() => navigateTo('carrito', '#carrito')} />;
+    return <CatalogPage onBackToLanding={() => navigateTo('landing')} onOpenCart={() => navigateTo('carrito', '#carrito')} onOpenAuth={() => navigateTo('auth', '#auth')} />;
   }
 
   if (currentView === 'carrito') {
-    return <CartPage onBackToLanding={() => navigateTo('landing')} onBackToCatalog={() => navigateTo('catalogo', '#catalogo')} />;
+    return <CartPage onBackToLanding={() => navigateTo('landing')} onBackToCatalog={() => navigateTo('catalogo', '#catalogo')} onOpenCart={() => navigateTo('carrito', '#carrito')} onOpenAuth={() => navigateTo('auth', '#auth')} />;
   }
 
   if (currentView === 'auth') {

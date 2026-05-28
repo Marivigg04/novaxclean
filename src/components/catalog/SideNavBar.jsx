@@ -1,6 +1,6 @@
 export default function SideNavBar({ links }) {
   return (
-    <aside className="sticky top-[73px] hidden h-[calc(100vh-73px)] w-64 shrink-0 border-r border-outline-variant bg-surface-container-low p-4 lg:flex lg:flex-col">
+    <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-64 shrink-0 border-r border-outline-variant bg-surface-container-low p-4 lg:flex lg:flex-col">
       <div className="mb-8 px-1">
         <p className="mb-1 text-label-md uppercase tracking-widest text-outline">Panel Admin</p>
         <h3 className="text-headline-md font-black text-primary">Gestión</h3>
