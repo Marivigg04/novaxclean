@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
-import { cartItems, filterChips, footerLinks, products, sidebarLinks } from './data';
+import { cartItems, filterChips, footerLinks, products } from './data';
 import Header from '../layout/Header';
-import SideNavBar from './SideNavBar';
 import CatalogHeader from './CatalogHeader';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
@@ -27,14 +26,11 @@ export default function CatalogPage({ onOpenCart, onOpenAuth }) {
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
-      <div className="flex pt-[72px]">
-        <SideNavBar links={sidebarLinks} />
-        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 md:px-16">
-          <CatalogHeader />
-          <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-          <ProductGrid products={visibleProducts} />
-        </main>
-      </div>
+      <main className="mx-auto w-full max-w-[1280px] px-4 pt-[88px] pb-10 md:px-16">
+        <CatalogHeader />
+        <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+        <ProductGrid products={visibleProducts} />
+      </main>
 
       <MiniCart
         isOpen={isCartOpen}

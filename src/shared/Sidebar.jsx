@@ -1,5 +1,4 @@
 import {
-  Bubbles,
   LogOut,
   Package,
   Settings2,
@@ -22,15 +21,10 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
       style={{ fontFamily: 'Inter, sans-serif' }}
       aria-label="Sidebar de navegación"
     >
-      <div className="h-20 px-5 border-b border-[var(--color-app-panel-border)] flex items-center">
-        <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--color-brand)]">
-            <Bubbles className="h-5 w-5 text-[var(--color-base-surface)]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold leading-tight">Novaxclean</h2>
-            <p className="text-sm text-[var(--color-base-text)]/65">Panel de control</p>
-          </div>
+      <div className="flex h-20 items-center border-b border-[var(--color-app-panel-border)] px-5">
+        <div>
+          <h2 className="text-lg font-semibold leading-tight">Novaxclean</h2>
+          <p className="text-sm text-[var(--color-base-text)]/65">Panel de control</p>
         </div>
       </div>
 

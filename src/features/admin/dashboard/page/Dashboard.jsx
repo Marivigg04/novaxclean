@@ -71,7 +71,7 @@ export default function Dashboard() {
       />
 
       <main className="flex min-h-screen flex-1 flex-col overflow-auto">
-        <Header onOpenAuth={() => {}} onOpenCart={() => {}} showCartButton={false} className="md:left-72" />
+        <Header onOpenAuth={() => {}} onOpenCart={() => {}} showCartButton={false} showSearch={false} className="md:left-72" />
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px]">

@@ -29,13 +29,13 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
     if (creds?.email === ADMIN_EMAIL && creds?.password === ADMIN_PASSWORD) {
       try {
         window.localStorage.setItem('isAdmin', 'true');
-      } catch (e) {
+      } catch {
         // ignore
       }
       // inform auth context so Header updates immediately
       try {
         login();
-      } catch (e) {
+      } catch {
         // ignore
       }
 
