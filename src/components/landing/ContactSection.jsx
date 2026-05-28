@@ -22,7 +22,7 @@ export default function ContactSection() {
           </div>
         </div>
 
-        <div className="p-8 md:w-1/2 md:p-12">
+        <div className="bg-surface-container-low p-8 md:w-1/2 md:p-12">
           <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="space-y-2">

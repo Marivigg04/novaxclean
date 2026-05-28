@@ -16,7 +16,7 @@ export const benefits = [
     icon: 'verified_user',
     title: 'Calidad certificada',
     description: 'Productos aprobados por normas sanitarias internacionales de alto nivel.',
-    iconColor: 'bg-primary-container text-on-primary',
+    iconColor: 'bg-secondary-container text-on-secondary-container',
   },
   {
     icon: 'eco',

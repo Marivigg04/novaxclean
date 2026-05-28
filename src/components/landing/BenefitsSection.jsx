@@ -15,7 +15,7 @@ export default function BenefitsSection() {
         {benefits.map((benefit) => (
           <article
             key={benefit.title}
-            className="cloud-shadow border border-surface-variant bg-white p-6 transition-transform duration-300 hover:-translate-y-2"
+            className="cloud-shadow rounded-2xl border border-outline-variant bg-surface-container-low p-6 transition-transform duration-300 hover:-translate-y-2"
           >
             <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-2xl ${benefit.iconColor}`}>
               <span className="material-symbols-outlined text-3xl">{benefit.icon}</span>
