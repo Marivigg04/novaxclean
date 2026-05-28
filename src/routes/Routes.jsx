@@ -4,6 +4,7 @@ import CatalogPage from '../components/catalog/CatalogPage';
 import CartPage from '../components/cart/CartPage';
 import AuthPage from '../components/AuthPage';
 import Dashboard from '../features/admin/dashboard/page/Dashboard';
+import Settings from '@/features/admin/settings/page/Settings';
 
 function LandingRoute() {
 	const navigate = useNavigate();
@@ -70,6 +71,7 @@ function AppRoutes() {
 			{/* Rutas privadas */}
 			<Route element={<PrivateRoute />}>
 				<Route path="/admin" element={<Dashboard />} />
+				<Route path="/admin/settings" element={<Settings />} />
 				<Route path="/dashboard" element={<Dashboard />} />
 			</Route>
 

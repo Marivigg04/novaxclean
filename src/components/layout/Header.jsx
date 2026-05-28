@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigationLinks } from '../landing/content';
 import { ThemeToggle } from '../../shared/ThemeToggle';
+import UserAvatarIcon from '../../shared/UserAvatarIcon';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, showSearch = true, className = '' }) {
@@ -62,7 +63,7 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
                 onClick={() => setMenuOpen((s) => !s)}
                 type="button"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-on-primary font-bold">{user?.avatar ?? user?.name?.[0]}</div>
+                <UserAvatarIcon avatar={user?.avatar} name={user?.name} size="sm" />
                 <span className="hidden sm:inline">{user?.name}</span>
               </button>
 
