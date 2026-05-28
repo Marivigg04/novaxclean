@@ -65,6 +65,12 @@ export default function Dashboard() {
             return
           }
 
+          if (key === 'ajustes') {
+            setIsSidebarOpen(false)
+            navigate('/admin/settings')
+            return
+          }
+
           setActive(key)
           setIsSidebarOpen(false)
         }}
