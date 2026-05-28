@@ -6,7 +6,8 @@ import ShippingTable from './ShippingTable';
 import InventoryMetrics from './InventoryMetrics';
 import LocationCard from './LocationCard';
 import AlertCard from './AlertCard';
-import AdminFooter from './AdminFooter';
+import Footer from '../layout/Footer';
+import { footerLinks } from './data';
 import FloatingActionButton from './FloatingActionButton';
 
 export default function AdminDashboardPage() {
@@ -38,7 +39,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-        <AdminFooter />
+        <Footer links={footerLinks} />
       </main>
       <FloatingActionButton />
     </div>

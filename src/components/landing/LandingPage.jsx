@@ -1,10 +1,11 @@
-import Header from './Header';
+import Header from '../layout/Header';
 import HeroSection from './HeroSection';
 import BenefitsSection from './BenefitsSection';
 import InfoSection from './InfoSection';
 import CompanySection from './CompanySection';
 import ContactSection from './ContactSection';
-import Footer from './Footer';
+import Footer from '../layout/Footer';
+import { footerLinks } from './content';
 
 export default function LandingPage({ onExploreCatalog, onOpenCart, onOpenAuth }) {
   return (
@@ -17,7 +18,7 @@ export default function LandingPage({ onExploreCatalog, onOpenCart, onOpenAuth }
         <CompanySection />
         <ContactSection />
       </main>
-      <Footer />
+      <Footer links={footerLinks} />
     </div>
   );
 }

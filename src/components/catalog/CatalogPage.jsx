@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { cartItems, filterChips, footerLinks, products, sidebarLinks } from './data';
-import Header from '../landing/Header';
+import Header from '../layout/Header';
 import SideNavBar from './SideNavBar';
 import CatalogHeader from './CatalogHeader';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
 import MiniCart from './MiniCart';
-import CatalogFooter from './CatalogFooter';
+import Footer from '../layout/Footer';
 
 export default function CatalogPage({ onBackToLanding, onOpenCart, onOpenAuth }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -42,7 +42,7 @@ export default function CatalogPage({ onBackToLanding, onOpenCart, onOpenAuth })
         onToggle={() => setIsCartOpen((value) => !value)}
         items={cartItems}
       />
-      <CatalogFooter links={footerLinks} onBackToLanding={onBackToLanding} />
+      <Footer links={footerLinks} />
     </div>
   );
 }

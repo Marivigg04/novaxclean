@@ -1,14 +1,14 @@
 import { cartItems, footerLinks, recommendedItems } from './data';
-import Header from '../landing/Header';
+import Header from '../layout/Header';
 import CartTable from './CartTable';
 import CartSummary from './CartSummary';
 import CartRecommendations from './CartRecommendations';
-import CartFooter from './CartFooter';
+import Footer from '../layout/Footer';
 
 export default function CartPage({ onBackToLanding, onBackToCatalog, onOpenCart, onOpenAuth }) {
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} />
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 pt-24 md:px-16">
         <div className="mb-10">
           <h1 className="mb-2 text-headline-xl font-bold text-primary">Tu Carrito de Compras</h1>
@@ -27,7 +27,7 @@ export default function CartPage({ onBackToLanding, onBackToCatalog, onOpenCart,
 
         <CartRecommendations items={recommendedItems} />
       </main>
-      <CartFooter links={footerLinks} onBackToLanding={onBackToLanding} />
+      <Footer links={footerLinks} />
     </div>
   );
 }
