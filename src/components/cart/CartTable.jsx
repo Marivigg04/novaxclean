@@ -1,13 +1,15 @@
-export default function CartTable({ items, onBackToCatalog }) {
+export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, onIncreaseQuantity }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow">
+    <section className="cart-subtle-float overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead className="border-b border-outline-variant bg-surface-container-low">
             <tr>
               <th className="px-6 py-4 text-label-md font-semibold text-on-surface-variant">Producto</th>
               <th className="px-6 py-4 text-label-md font-semibold text-on-surface-variant">Precio</th>
-              <th className="px-6 py-4 text-label-md font-semibold text-on-surface-variant">Cantidad</th>
+              <th className="px-6 py-4 text-center text-label-md font-semibold text-on-surface-variant">
+                <span className="inline-flex w-full justify-center">Cantidad</span>
+              </th>
               <th className="px-6 py-4 text-right text-label-md font-semibold text-on-surface-variant">Subtotal</th>
             </tr>
           </thead>
@@ -30,15 +32,23 @@ export default function CartTable({ items, onBackToCatalog }) {
                   </div>
                 </td>
                 <td className="px-6 py-6 text-body-md font-medium text-on-surface">{item.price}</td>
-                <td className="px-6 py-6">
-                  <div className="flex w-fit items-center rounded-lg border border-outline">
-                    <button className="px-2 py-1 hover:bg-surface-variant" type="button">-</button>
-                    <input className="w-10 border-none bg-transparent text-center text-label-md focus:ring-0" type="text" value={item.quantity} readOnly />
-                    <button className="px-2 py-1 hover:bg-surface-variant" type="button">+</button>
+                <td className="px-6 py-6 align-middle text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className={`cart-quantity-control ${item.pulse === 'increase' ? 'cart-quantity-control-increase' : item.pulse === 'decrease' ? 'cart-quantity-control-decrease' : ''}`}>
+                      <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.name)} aria-label={`Disminuir cantidad de ${item.name}`}>
+                        -
+                      </button>
+                      <input className="cart-quantity-input" type="text" value={item.quantity} readOnly />
+                      <button className="cart-quantity-button" type="button" onClick={() => onIncreaseQuantity(item.name)} aria-label={`Aumentar cantidad de ${item.name}`}>
+                        +
+                      </button>
+                    </div>
+                    {item.stockLabel ? <span className="max-w-[10rem] text-center text-[10px] font-bold leading-tight text-secondary">{item.stockLabel}</span> : null}
                   </div>
-                  {item.stockLabel ? <span className="mt-1 block text-[10px] font-bold text-secondary">{item.stockLabel}</span> : null}
                 </td>
-                <td className="px-6 py-6 text-right text-body-md font-bold text-primary">{item.subtotal}</td>
+                <td className="px-6 py-6 text-right text-body-md font-bold text-primary">
+                  <span className="cart-subtotal-value">{item.subtotal}</span>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -115,6 +115,133 @@ textarea {
   animation: float 6s ease-in-out infinite;
 }
 
+.cart-entrance {
+  animation: cart-entrance 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.cart-entrance-delayed {
+  animation: cart-entrance 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  will-change: transform, opacity;
+}
+
+.cart-subtle-float {
+  animation: cart-subtle-float 5s ease-in-out infinite;
+}
+
+.cart-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #89b4fe #edf4fc;
+}
+
+.cart-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.cart-scrollbar::-webkit-scrollbar-track {
+  background: #edf4fc;
+  border-radius: 999px;
+}
+
+.cart-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #89b4fe, #2f5ea2);
+  border-radius: 999px;
+  border: 2px solid #edf4fc;
+}
+
+.cart-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a9c7ff, #0c4688);
+}
+
+.cart-quantity-control {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-outline);
+  border-radius: 999px;
+  background: var(--color-surface-container-lowest);
+  box-shadow: 0 8px 24px -18px rgba(15, 40, 84, 0.35);
+}
+
+.cart-quantity-button {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  transition: background-color 180ms ease, transform 180ms ease, color 180ms ease;
+}
+
+.cart-quantity-button:hover {
+  background: var(--color-surface-container);
+}
+
+.cart-quantity-button:active {
+  transform: scale(0.94);
+}
+
+.cart-quantity-input {
+  width: 2.25rem;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  outline: none;
+}
+
+.cart-subtotal-value {
+  display: inline-block;
+  min-width: 6.5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cart-quantity-control-increase {
+  animation: cart-quantity-pop 180ms ease-out;
+}
+
+.cart-quantity-control-decrease {
+  animation: cart-quantity-pop 180ms ease-out;
+}
+
+@keyframes cart-quantity-pop {
+  0% {
+    transform: scale(0.98);
+  }
+
+  60% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cart-modal-overlay-enter {
+  animation: cart-modal-overlay-enter 240ms ease-out both;
+}
+
+.cart-modal-overlay-exit {
+  animation: cart-modal-overlay-exit 220ms ease-in both;
+}
+
+.cart-modal-panel-enter {
+  animation: cart-modal-panel-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cart-modal-panel-exit {
+  animation: cart-modal-panel-exit 220ms ease-in both;
+}
+
 @keyframes float {
   0%,
   100% {
@@ -123,5 +250,90 @@ textarea {
 
   50% {
     transform: translateY(-20px);
+  }
+}
+
+@keyframes cart-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cart-subtle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes cart-modal-overlay-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cart-modal-overlay-exit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes cart-modal-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cart-modal-panel-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-entrance,
+  .cart-entrance-delayed,
+  .cart-subtle-float,
+  .bubble-anim,
+  .cart-modal-overlay-enter,
+  .cart-modal-overlay-exit,
+  .cart-modal-panel-enter,
+  .cart-modal-panel-exit {
+    animation: none;
+  }
+
+  .cart-quantity-control-increase,
+  .cart-quantity-control-decrease {
+    animation: none;
   }
 }
