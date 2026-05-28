@@ -1,11 +1,13 @@
 import { navigationLinks } from './content';
 
-export default function Header({ onOpenCart, onOpenAuth }) {
+export default function Header({ onBackToLanding, onOpenCart, onOpenAuth }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-outline-variant bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300">
       <nav className="mx-auto flex w-full max-w-[1280px] items-center gap-6 px-4 py-4 md:px-16 md:py-5">
         <div className="shrink-0">
-          <span className="text-lg font-bold">NovaxClean</span>
+          <button className="text-lg font-bold" type="button" onClick={onBackToLanding}>
+            NovaxClean
+          </button>
         </div>
 
         <div className="hidden min-w-0 flex-1 lg:flex-[6] items-center rounded-full border border-outline-variant bg-surface-container px-4 py-1 lg:flex">
