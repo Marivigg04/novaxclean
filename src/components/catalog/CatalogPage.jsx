@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { cartItems, filterChips, footerLinks, products, sidebarLinks, topNavLinks } from './data';
-import TopNavBar from './TopNavBar';
+import { cartItems, filterChips, footerLinks, products, sidebarLinks } from './data';
+import Header from '../landing/Header';
 import SideNavBar from './SideNavBar';
 import CatalogHeader from './CatalogHeader';
 import FilterBar from './FilterBar';
@@ -8,7 +8,7 @@ import ProductGrid from './ProductGrid';
 import MiniCart from './MiniCart';
 import CatalogFooter from './CatalogFooter';
 
-export default function CatalogPage({ onBackToLanding, onOpenCart }) {
+export default function CatalogPage({ onBackToLanding, onOpenCart, onOpenAuth }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('Todos');
 
@@ -26,8 +26,8 @@ export default function CatalogPage({ onBackToLanding, onOpenCart }) {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar links={topNavLinks} onBackToLanding={onBackToLanding} onOpenCart={onOpenCart} />
-      <div className="flex pt-[73px]">
+      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+      <div className="flex pt-[72px]">
         <SideNavBar links={sidebarLinks} />
         <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-10 md:px-16">
           <CatalogHeader />
