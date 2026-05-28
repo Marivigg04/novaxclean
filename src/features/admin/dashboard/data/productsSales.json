@@ -1,0 +1,100 @@
+{
+  "period": "Mayo 2026",
+  "currency": "unidades",
+  "products": [
+    {
+      "id": "detergente-x",
+      "name": "Detergente X",
+      "category": "Limpieza general",
+      "soldTotal": 1240,
+      "revenue": 37200
+    },
+    {
+      "id": "desinfectante-y",
+      "name": "Desinfectante Y",
+      "category": "Desinfección",
+      "soldTotal": 980,
+      "revenue": 29400
+    },
+    {
+      "id": "limpiador-z",
+      "name": "Limpiador Z",
+      "category": "Superficies",
+      "soldTotal": 860,
+      "revenue": 21500
+    },
+    {
+      "id": "suavizante-a",
+      "name": "Suavizante A",
+      "category": "Lavandería",
+      "soldTotal": 640,
+      "revenue": 16000
+    },
+    {
+      "id": "multiuso-b",
+      "name": "Multiuso B",
+      "category": "Hogar",
+      "soldTotal": 520,
+      "revenue": 13000
+    },
+    {
+      "id": "alcohol-c",
+      "name": "Alcohol C",
+      "category": "Desinfección",
+      "soldTotal": 430,
+      "revenue": 10750
+    },
+    {
+      "id": "esponja-d",
+      "name": "Esponja D",
+      "category": "Accesorios",
+      "soldTotal": 210,
+      "revenue": 4200
+    },
+    {
+      "id": "guantes-e",
+      "name": "Guantes E",
+      "category": "Accesorios",
+      "soldTotal": 140,
+      "revenue": 2800
+    }
+  ],
+  "zones": [
+    {
+      "id": "norte",
+      "name": "Zona Norte",
+      "soldTotal": 1580,
+      "type": "top"
+    },
+    {
+      "id": "centro",
+      "name": "Zona Centro",
+      "soldTotal": 1240,
+      "type": "top"
+    },
+    {
+      "id": "occidente",
+      "name": "Zona Occidente",
+      "soldTotal": 980,
+      "type": "mid"
+    },
+    {
+      "id": "oriente",
+      "name": "Zona Oriente",
+      "soldTotal": 760,
+      "type": "mid"
+    },
+    {
+      "id": "sur",
+      "name": "Zona Sur",
+      "soldTotal": 430,
+      "type": "bottom"
+    },
+    {
+      "id": "suroeste",
+      "name": "Zona Suroeste",
+      "soldTotal": 210,
+      "type": "bottom"
+    }
+  ]
+}

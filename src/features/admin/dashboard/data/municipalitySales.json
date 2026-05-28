@@ -1,0 +1,11 @@
+{
+  "period": "Mayo 2026",
+  "currency": "ventas",
+  "municipalities": [
+    { "id": "Libertador", "value": 8500 },
+    { "id": "Baruta", "value": 11800 },
+    { "id": "Chacao", "value": 12400 },
+    { "id": "ElHatillo", "value": 4300 },
+    { "id": "Sucre", "value": 9200 }
+  ]
+}

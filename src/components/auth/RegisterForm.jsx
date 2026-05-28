@@ -1,33 +1,39 @@
+import { ThemeToggle } from '../../shared/ThemeToggle';
+
 export default function RegisterForm({ onToggle }) {
   return (
-    <div className="max-w-[360px] mx-auto w-full">
-      <h1 className="text-3xl font-bold text-[#001337] mb-2">Crear Cuenta</h1>
-      <p className="text-gray-600 mb-6">Únete a la red de limpieza NovaxClean.</p>
+    <div className="relative mx-auto w-full max-w-[360px]">
+      <div className="absolute right-0 top-0">
+        <ThemeToggle />
+      </div>
+
+      <h1 className="mb-2 pr-14 text-3xl font-bold text-primary">Crear Cuenta</h1>
+      <p className="mb-6 text-on-surface-variant">Únete a la red de limpieza NovaxClean.</p>
       
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         {/* Nombre completo */}
         <div>
-          <label className="block text-sm font-semibold text-[#001337] mb-1">Nombre completo</label>
-          <input className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej. Juan Pérez" type="text" />
+          <label className="mb-1 block text-sm font-semibold text-primary">Nombre completo</label>
+          <input className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary" placeholder="Ej. Juan Perez" type="text" />
         </div>
         
         {/* Correo */}
         <div>
-          <label className="block text-sm font-semibold text-[#001337] mb-1">Correo electrónico</label>
-          <input className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="nombre@empresa.com" type="email" />
+          <label className="mb-1 block text-sm font-semibold text-primary">Correo electrónico</label>
+          <input className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary" placeholder="nombre@empresa.com" type="email" />
         </div>
         
         {/* Contraseña */}
         <div>
-          <label className="block text-sm font-semibold text-[#001337] mb-1">Contraseña</label>
-          <input className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" type="password" />
+          <label className="mb-1 block text-sm font-semibold text-primary">Contraseña</label>
+          <input className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary" placeholder="••••••••" type="password" />
         </div>
 
-        <button className="w-full bg-[#001337] text-white py-3 rounded-lg hover:bg-blue-900 transition-all font-semibold mt-2">Registrarse</button>
+        <button className="mt-2 w-full rounded-lg bg-primary py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container">Registrarse</button>
       </form>
 
       <div className="mt-6 text-center">
-        <button className="text-blue-600 font-bold hover:underline" onClick={onToggle}>¿Ya tienes cuenta? Inicia sesión</button>
+        <button className="font-bold text-secondary hover:underline" onClick={onToggle}>¿Ya tienes cuenta? Inicia sesión</button>
       </div>
     </div>
   );
