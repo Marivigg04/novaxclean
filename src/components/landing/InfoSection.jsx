@@ -9,7 +9,7 @@ export default function InfoSection() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4 pt-12">
                 {infoHighlights.slice(0, 2).map((item) => (
-                  <div key={item.title} className="cloud-shadow flex flex-col items-center rounded-3xl bg-white p-6 text-center">
+                  <div key={item.title} className="cloud-shadow flex flex-col items-center rounded-3xl border border-outline-variant bg-surface-container-low p-6 text-center">
                     <span className={`material-symbols-outlined mb-4 text-4xl ${item.iconColor}`}>{item.icon}</span>
                     <h4 className="font-bold text-primary">{item.title}</h4>
                     <p className="text-sm text-outline">{item.subtitle}</p>
@@ -19,7 +19,7 @@ export default function InfoSection() {
 
               <div className="space-y-4">
                 {infoHighlights.slice(2).map((item) => (
-                  <div key={item.title} className="cloud-shadow flex flex-col items-center rounded-3xl bg-white p-6 text-center">
+                  <div key={item.title} className="cloud-shadow flex flex-col items-center rounded-3xl border border-outline-variant bg-surface-container-low p-6 text-center">
                     <span className={`material-symbols-outlined mb-4 text-4xl ${item.iconColor}`}>{item.icon}</span>
                     <h4 className="font-bold text-primary">{item.title}</h4>
                     <p className="text-sm text-outline">{item.subtitle}</p>
