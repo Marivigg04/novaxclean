@@ -72,7 +72,7 @@ export default function CartPage({ onBackToCatalog, onOpenCart, onOpenAuth }) {
         </div>
       </main>
       <Footer links={footerLinks} />
-      <CartCheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
+      <CartCheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} onGoToCatalog={onBackToCatalog} />
     </div>
   );
 }
