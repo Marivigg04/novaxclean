@@ -20,6 +20,7 @@ import InventoryAlerts from '@/features/admin/inventory/components/InventoryAler
 import DeleteProductModal from '@/features/admin/inventory/components/modal/DeleteProductModal';
 import NewProductModal from '@/features/admin/inventory/components/modal/NewProductModal';
 import EditProductModal from '@/features/admin/inventory/components/modal/EditProductModal';
+import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal';
 
 export default function Inventory() {
   const [active, setActive] = useState('inventario');
@@ -33,6 +34,7 @@ export default function Inventory() {
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('Todos');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -164,7 +166,12 @@ export default function Inventory() {
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px] space-y-6">
             <InventoryAlerts alerts={alerts} onDismiss={handleDismissAlert} />
-            <InventoryHeader search={search} setSearch={setSearch} onNew={() => setIsNewModalOpen(true)} />
+            <InventoryHeader
+              search={search}
+              setSearch={setSearch}
+              onNew={() => setIsNewModalOpen(true)}
+              onReport={() => setIsReportModalOpen(true)}
+            />
 
             <InventoryStats stats={inventoryStats} />
 
@@ -202,6 +209,8 @@ export default function Inventory() {
               onClose={() => setProductToEdit(null)}
               onSubmit={handleUpdateProduct}
             />
+
+            <ReportGeneratorModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} preset="inventory" />
           </div>
         </div>
 

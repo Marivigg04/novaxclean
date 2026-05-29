@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DollarSign, ShoppingCart, Truck } from 'lucide-react'
+import { DollarSign, FileDown, ShoppingCart, Truck } from 'lucide-react'
 
 import Sidebar from '@/shared/Sidebar'
 import Header from '@/components/layout/Header'
@@ -13,12 +13,14 @@ import productsSales from '@/features/admin/dashboard/data/productsSales.json'
 import { footerLinks } from '@/components/landing/content'
 import { useAuth } from '@/context/AuthContext'
 import PageHeader from '@/shared/PageHeader'
+import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal'
 
 export default function Dashboard() {
   const [active, setActive] = useState('ventas')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortOrder, setSortOrder] = useState('desc')
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const { logout } = useAuth()
   const navigate = useNavigate()
 
@@ -89,7 +91,16 @@ export default function Dashboard() {
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px]">
-            <PageHeader title="Panel de control" subtitle="Visión general de ventas, ingresos y pedidos." />
+            <PageHeader title="Panel de control" subtitle="Visión general de ventas, ingresos y pedidos.">
+              <button
+                type="button"
+                onClick={() => setIsReportModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+              >
+                <FileDown className="h-4 w-4" />
+                Generar Reporte
+              </button>
+            </PageHeader>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <Card
                 title="Ingresos"
@@ -143,6 +154,8 @@ export default function Dashboard() {
 
         <Footer links={footerLinks} />
       </main>
+
+      <ReportGeneratorModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} preset="sales" />
     </div>
   )
 }

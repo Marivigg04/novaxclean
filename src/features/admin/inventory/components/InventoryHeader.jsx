@@ -1,10 +1,20 @@
-import { Search, Plus } from 'lucide-react';
+import { FileDown, Search, Plus } from 'lucide-react';
 import PageHeader from '@/shared/PageHeader';
 
-export default function InventoryHeader({ search, setSearch, onNew = () => {} }) {
+export default function InventoryHeader({ search, setSearch, onNew = () => {}, onReport = () => {} }) {
   return (
     <PageHeader title="Inventario" subtitle="Controla stock, alertas y valor del inventario.">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex w-full flex-col gap-3 xl:w-auto">
+        <button
+          type="button"
+          onClick={onReport}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap self-end rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+        >
+          <FileDown className="h-4 w-4" />
+          Generar Reporte
+        </button>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative w-full sm:w-[280px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-base-text)]/45" />
           <input
@@ -23,6 +33,7 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {} })
           <Plus className="h-4 w-4" />
           Nuevo producto
         </button>
+        </div>
       </div>
     </PageHeader>
   );

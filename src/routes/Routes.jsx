@@ -5,6 +5,7 @@ import CartPage from '../components/cart/CartPage';
 import AuthPage from '../components/AuthPage';
 import Dashboard from '../features/admin/dashboard/page/Dashboard';
 import Inventory from '@/features/admin/inventory/page/Inventory';
+import Materials from '@/features/admin/materials/page/Materials';
 import Settings from '@/features/admin/settings/page/Settings';
 import Profile from '@/features/user/profile/page/Profile';
 
@@ -79,6 +80,7 @@ function AppRoutes() {
 			<Route element={<PrivateRoute />}>
 				<Route path="/admin" element={<Dashboard />} />
 				<Route path="/admin/inventory" element={<Inventory />} />
+				<Route path="/admin/raw-materials" element={<Materials />} />
 				<Route path="/admin/settings" element={<Settings />} />
 				<Route path="/dashboard" element={<Dashboard />} />
 			</Route>

@@ -1,4 +1,5 @@
 import {
+  FlaskConical,
   LogOut,
   Package,
   Settings2,
@@ -11,6 +12,7 @@ import logoAumo from '../assets/Logo AUMO.png'
 const items = [
   { key: 'ventas', label: 'Ventas', icon: ShoppingCart, to: '/admin', end: true },
   { key: 'inventario', label: 'Inventario', icon: Package, to: '/admin/inventory' },
+  { key: 'materia-prima', label: 'Materia Prima', icon: FlaskConical, to: '/admin/raw-materials' },
   { key: 'ajustes', label: 'Ajustes', icon: Settings2, to: '/admin/settings' },
   { key: 'cerrar-sesion', label: 'Cerrar sesión', icon: LogOut },
 ]
