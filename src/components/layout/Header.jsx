@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { navigationLinks } from '../landing/content';
 import { ThemeToggle } from '../../shared/ThemeToggle';
@@ -12,6 +12,7 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const notifications = useMemo(() => {
     const lowStock = inventoryProducts
@@ -47,9 +48,9 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 border-b border-outline-variant bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}>
       <nav className="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-4 md:px-16 md:py-5">
-        {!isAuthenticated && (
+        {(!isAuthenticated || user?.role !== 'Admin') && (
           <div className="shrink-0">
-            <span className="text-lg font-bold">NovaxClean</span>
+            <Link to="/" className="text-lg font-bold text-on-surface">NovaxClean</Link>
           </div>
         )}
 
@@ -67,16 +68,16 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
           </div>
         ) : null}
 
-        {!isAuthenticated && (
-          <div className="hidden flex-none items-center gap-6 lg:flex">
+        {(!isAuthenticated || user?.role !== 'Admin') && (
+          <div className="hidden flex-none items-center gap-6 xl:flex">
             {navigationLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 className="text-label-md font-bold text-on-surface-variant transition-colors hover:text-secondary"
-                href={link.href}
+                to={link.href}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         )}
@@ -103,10 +104,40 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
               </div>
 
               <div className="relative">
-                <div className="flex items-center gap-3 rounded-full px-3 py-1 text-sm font-medium">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((s) => !s)}
+                  className="flex items-center gap-3 rounded-full px-3 py-1.5 text-sm font-medium hover:bg-surface-container transition-colors"
+                >
                   <UserAvatarIcon avatar={user?.avatar} name={user?.name} size="sm" />
-                  <span className="hidden sm:inline">{user?.name}</span>
-                </div>
+                  <span className="hidden sm:inline font-bold">{user?.name}</span>
+                </button>
+
+                {menuOpen ? (
+                  <>
+                    <button type="button" className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setMenuOpen(false)} aria-label="Cerrar menú" />
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl border border-outline-variant bg-surface-container-lowest shadow-xl overflow-hidden z-50">
+                      <div className="px-4 py-3 border-b border-outline-variant bg-surface-container/50">
+                        <p className="text-sm font-bold text-primary truncate">{user?.name}</p>
+                        <p className="text-xs text-on-surface-variant truncate mt-0.5">{user?.role === 'Admin' ? 'Administrador' : 'Usuario Preatorio'}</p>
+                      </div>
+                      <div className="p-1.5">
+                        {user?.role === 'Admin' ? (
+                          <button className="w-full text-left px-3 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-container rounded-lg transition-colors" onClick={() => { setMenuOpen(false); navigate('/admin'); }}>
+                            Panel de Control
+                          </button>
+                        ) : (
+                          <button className="w-full text-left px-3 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-container rounded-lg transition-colors" onClick={() => { setMenuOpen(false); navigate('/perfil'); }}>
+                            Mi Perfil
+                          </button>
+                        )}
+                        <button className="w-full text-left px-3 py-2.5 text-sm font-medium text-error hover:bg-error-container/50 rounded-lg transition-colors mt-1" onClick={() => { setMenuOpen(false); handleLogout(); }}>
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
           ) : (
@@ -115,8 +146,8 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
             </button>
           )}
 
-          {/* hide cart when authenticated */}
-          {!isAuthenticated && showCartButton ? (
+          {/* show cart button based on prop */}
+          {showCartButton ? (
             <button className="flex items-center gap-2 rounded-xl bg-secondary px-6 py-2 font-bold text-on-secondary shadow-sm transition-transform duration-100 hover:scale-95" type="button" onClick={onOpenCart}>
               <span className="material-symbols-outlined">shopping_cart</span>
               Carrito

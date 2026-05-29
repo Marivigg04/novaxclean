@@ -24,15 +24,22 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = () => {
+  const login = (userData) => {
+    // Si no se pasa data asumimos el Admin legado por compatibilidad
+    const newUser = userData || { name: 'Jade', role: 'Admin', avatar: 'J' };
+
     try {
-      window.localStorage.setItem('isAdmin', 'true');
-      window.localStorage.setItem('user', JSON.stringify({ name: 'Jade', role: 'Admin', avatar: 'J' }));
+      window.localStorage.setItem('user', JSON.stringify(newUser));
+      if (newUser.role === 'Admin') {
+        window.localStorage.setItem('isAdmin', 'true');
+      } else {
+        window.localStorage.removeItem('isAdmin');
+      }
     } catch (e) {
       // ignore
     }
 
-    setUser({ name: "Jade", role: "Admin", avatar: "J" });
+    setUser(newUser);
   };
 
   const logout = () => {
@@ -47,7 +54,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isAdmin: user?.role === 'Admin' }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,8 @@
 export const navigationLinks = [
-  { label: 'Catálogo', href: '#catalogo' },
-  { label: 'Información', href: '#informacion' },
-  { label: 'Empresa', href: '#empresa' },
-  { label: 'Contacto', href: '#contacto' },
+  { label: 'Catálogo', href: '/catalogo' },
+  { label: 'Información', href: '/#informacion' },
+  { label: 'Empresa', href: '/#empresa' },
+  { label: 'Contacto', href: '/#contacto' },
 ];
 
 export const heroStats = [

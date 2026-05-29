@@ -26,26 +26,36 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
     const ADMIN_EMAIL = 'admin@novaxclean.com';
     const ADMIN_PASSWORD = 'Admin1234';
 
+    const USER_EMAIL = 'user@novaxclean.com';
+    const USER_PASSWORD = 'User1234';
+
     if (creds?.email === ADMIN_EMAIL && creds?.password === ADMIN_PASSWORD) {
       try {
-        window.localStorage.setItem('isAdmin', 'true');
-      } catch {
-        // ignore
-      }
-      // inform auth context so Header updates immediately
-      try {
-        login();
+        login({ name: 'Jade', role: 'Admin', avatar: 'J' });
       } catch {
         // ignore
       }
 
       if (typeof onAuthSuccess === 'function') {
-        onAuthSuccess();
+        onAuthSuccess('Admin');
       }
       return;
     }
 
-    alert('Credenciales inválidas para admin. Usa admin@novaxclean.com / Admin1234');
+    if (creds?.email === USER_EMAIL && creds?.password === USER_PASSWORD) {
+      try {
+        login({ name: 'Usuario', role: 'User', avatar: 'U' });
+      } catch {
+        // ignore
+      }
+
+      if (typeof onAuthSuccess === 'function') {
+        onAuthSuccess('User');
+      }
+      return;
+    }
+
+    alert('Credenciales inválidas. Usa admin@novaxclean.com / Admin1234 o user@novaxclean.com / User1234');
   };
 
   return (

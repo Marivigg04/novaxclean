@@ -6,6 +6,7 @@ import AuthPage from '../components/AuthPage';
 import Dashboard from '../features/admin/dashboard/page/Dashboard';
 import Inventory from '@/features/admin/inventory/page/Inventory';
 import Settings from '@/features/admin/settings/page/Settings';
+import Profile from '@/features/user/profile/page/Profile';
 
 function LandingRoute() {
 	const navigate = useNavigate();
@@ -50,7 +51,7 @@ function AuthRoute() {
 	return (
 		<AuthPage
 			onBackToLanding={() => navigate('/')}
-			onAuthSuccess={() => navigate('/admin')}
+			onAuthSuccess={(role) => navigate(role === 'Admin' ? '/admin' : '/')}
 		/>
 	);
 }
@@ -58,6 +59,11 @@ function AuthRoute() {
 function PrivateRoute() {
 	const isAdmin = typeof window !== 'undefined' && window.localStorage?.getItem('isAdmin') === 'true';
 	return isAdmin ? <Outlet /> : <Navigate to="/auth" replace />;
+}
+
+function UserRoute() {
+	const hasUser = typeof window !== 'undefined' && !!window.localStorage?.getItem('user');
+	return hasUser ? <Outlet /> : <Navigate to="/auth" replace />;
 }
 
 function AppRoutes() {
@@ -75,6 +81,10 @@ function AppRoutes() {
 				<Route path="/admin/inventory" element={<Inventory />} />
 				<Route path="/admin/settings" element={<Settings />} />
 				<Route path="/dashboard" element={<Dashboard />} />
+			</Route>
+
+			<Route element={<UserRoute />}>
+				<Route path="/perfil" element={<Profile />} />
 			</Route>
 
 			<Route path="*" element={<Navigate to="/" replace />} />
