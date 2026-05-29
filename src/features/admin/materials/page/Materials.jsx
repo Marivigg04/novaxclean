@@ -16,6 +16,7 @@ import MaterialsFilters from '../components/MaterialsFilters';
 import MaterialsEntryModal from '../components/MaterialsEntryModal';
 import MaterialsDeleteModal from '../components/MaterialsDeleteModal';
 import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal';
+import ReplenishmentModal from '@/features/admin/replenishment/components/ReplenishmentModal';
 import {
   formulaCategories,
   formulaStatuses,
@@ -47,6 +48,7 @@ export default function Materials() {
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -185,6 +187,20 @@ export default function Materials() {
     setDeletingEntry(null);
   };
 
+  const handleReceiveMaterials = (updatedItems, lineItems) => {
+    setMaterials(updatedItems);
+    setIsReplenishmentOpen(false);
+    setAlerts((current) => [
+      {
+        id: `replenish-${Date.now()}`,
+        type: 'success',
+        title: 'Reabastecimiento completado',
+        message: `${lineItems.length} insumos se ingresaron a materia prima y el stock fue actualizado.`,
+      },
+      ...current,
+    ]);
+  };
+
   return (
     <div className="flex min-h-screen bg-[var(--color-base-bg)] premium-mesh-bg">
       {isSidebarOpen ? (
@@ -265,6 +281,7 @@ export default function Materials() {
                 setActiveView={setActiveView}
                 onNew={() => setIsEntryModalOpen(true)}
                 onReport={() => setIsReportModalOpen(true)}
+                onReplenish={() => setIsReplenishmentOpen(true)}
               />
             </PageHeader>
 
@@ -327,6 +344,14 @@ export default function Materials() {
       />
 
       <ReportGeneratorModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} preset="materials" />
+
+      <ReplenishmentModal
+        isOpen={isReplenishmentOpen}
+        onClose={() => setIsReplenishmentOpen(false)}
+        context="materials"
+        items={materials}
+        onReceiveStock={handleReceiveMaterials}
+      />
     </div>
   );
 }

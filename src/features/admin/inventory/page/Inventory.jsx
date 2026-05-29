@@ -21,6 +21,7 @@ import DeleteProductModal from '@/features/admin/inventory/components/modal/Dele
 import NewProductModal from '@/features/admin/inventory/components/modal/NewProductModal';
 import EditProductModal from '@/features/admin/inventory/components/modal/EditProductModal';
 import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal';
+import ReplenishmentModal from '@/features/admin/replenishment/components/ReplenishmentModal';
 
 export default function Inventory() {
   const [active, setActive] = useState('inventario');
@@ -35,6 +36,7 @@ export default function Inventory() {
   const [status, setStatus] = useState('Todos');
   const [sortOrder, setSortOrder] = useState('desc');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -90,6 +92,20 @@ export default function Inventory() {
         type: 'edit',
         title: 'Producto actualizado',
         message: `${updated.name} se actualizó correctamente.`,
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleReceiveInventory = (updatedItems, lineItems) => {
+    setProducts(updatedItems);
+    setIsReplenishmentOpen(false);
+    setAlerts((prev) => [
+      {
+        id: `replenish-${Date.now()}`,
+        type: 'success',
+        title: 'Reabastecimiento completado',
+        message: `${lineItems.length} productos se ingresaron al inventario y el stock fue actualizado.`,
       },
       ...prev,
     ]);
@@ -152,6 +168,14 @@ export default function Inventory() {
           if (key === 'inventario') {
             setActive('inventario');
             setIsSidebarOpen(false);
+            navigate('/admin/inventory');
+            return;
+          }
+
+          if (key === 'materia-prima') {
+            setActive('materia-prima');
+            setIsSidebarOpen(false);
+            navigate('/admin/raw-materials');
             return;
           }
 
@@ -171,6 +195,7 @@ export default function Inventory() {
               setSearch={setSearch}
               onNew={() => setIsNewModalOpen(true)}
               onReport={() => setIsReportModalOpen(true)}
+              onReplenish={() => setIsReplenishmentOpen(true)}
             />
 
             <InventoryStats stats={inventoryStats} />
@@ -211,6 +236,14 @@ export default function Inventory() {
             />
 
             <ReportGeneratorModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} preset="inventory" />
+
+            <ReplenishmentModal
+              isOpen={isReplenishmentOpen}
+              onClose={() => setIsReplenishmentOpen(false)}
+              context="inventory"
+              items={products}
+              onReceiveStock={handleReceiveInventory}
+            />
           </div>
         </div>
 

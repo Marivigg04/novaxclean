@@ -1,18 +1,29 @@
-import { FileDown, Search, Plus } from 'lucide-react';
+import { FileDown, Search, Plus, Truck } from 'lucide-react';
 import PageHeader from '@/shared/PageHeader';
 
-export default function InventoryHeader({ search, setSearch, onNew = () => {}, onReport = () => {} }) {
+export default function InventoryHeader({ search, setSearch, onNew = () => {}, onReport = () => {}, onReplenish = () => {} }) {
   return (
     <PageHeader title="Inventario" subtitle="Controla stock, alertas y valor del inventario.">
       <div className="flex w-full flex-col gap-3 xl:w-auto">
-        <button
-          type="button"
-          onClick={onReport}
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap self-end rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
-        >
-          <FileDown className="h-4 w-4" />
-          Generar Reporte
-        </button>
+        <div className="flex items-center gap-3 self-end">
+          <button
+            type="button"
+            onClick={onReport}
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+          >
+            <FileDown className="h-4 w-4" />
+            Generar Reporte
+          </button>
+
+          <button
+            type="button"
+            onClick={onReplenish}
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+          >
+            <Truck className="h-4 w-4" />
+            Reabastecer
+          </button>
+        </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative w-full sm:w-[280px]">

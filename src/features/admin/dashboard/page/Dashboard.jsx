@@ -81,6 +81,13 @@ export default function Dashboard() {
             return
           }
 
+          if (key === 'materia-prima') {
+            setActive('materia-prima')
+            setIsSidebarOpen(false)
+            navigate('/admin/raw-materials')
+            return
+          }
+
           setActive(key)
           setIsSidebarOpen(false)
         }}

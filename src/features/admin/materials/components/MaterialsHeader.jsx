@@ -1,23 +1,34 @@
-import { FileDown, Plus, Search } from 'lucide-react';
+import { FileDown, Plus, Search, Truck } from 'lucide-react';
 
 const views = [
   { value: 'insumos', label: 'Inventario de Insumos' },
   { value: 'formulas', label: 'Fórmulas de Producción' },
 ];
 
-export default function MaterialsHeader({ search, setSearch, activeView, setActiveView, onNew = () => {}, onReport = () => {} }) {
+export default function MaterialsHeader({ search, setSearch, activeView, setActiveView, onNew = () => {}, onReport = () => {}, onReplenish = () => {} }) {
   const placeholder = activeView === 'formulas' ? 'Buscar fórmula o SKU...' : 'Buscar por nombre o SKU...';
 
   return (
     <div className="flex w-full flex-col gap-3 xl:w-auto">
-      <button
-        type="button"
-        onClick={onReport}
-        className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap self-end rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
-      >
-        <FileDown className="h-4 w-4" />
-        Generar Reporte
-      </button>
+      <div className="flex items-center gap-3 self-end">
+        <button
+          type="button"
+          onClick={onReport}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+        >
+          <FileDown className="h-4 w-4" />
+          Generar Reporte
+        </button>
+
+        <button
+          type="button"
+          onClick={onReplenish}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+        >
+          <Truck className="h-4 w-4" />
+          Reabastecer
+        </button>
+      </div>
 
       <div className="flex w-full flex-col gap-3 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-center">
         <div className="relative w-full xl:w-[320px]">

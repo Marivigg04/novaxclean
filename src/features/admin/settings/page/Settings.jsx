@@ -83,6 +83,11 @@ export default function Settings() {
                 return
               }
 
+              if (key === 'materia-prima') {
+                navigate('/admin/raw-materials')
+                return
+              }
+
               if (key === 'ajustes') {
                 setActive('ajustes')
                 setIsSidebarOpen(false)
