@@ -1,18 +1,46 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Bell } from 'lucide-react';
 import { navigationLinks } from '../landing/content';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 import UserAvatarIcon from '../../shared/UserAvatarIcon';
 import { useAuth } from '../../context/AuthContext';
+import Notification from '../../shared/Notification';
+import { inventoryProducts } from '../../features/admin/inventory/data/mockup';
 
 export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, showSearch = true, className = '' }) {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const notifications = useMemo(() => {
+    const lowStock = inventoryProducts
+      .filter((product) => product.status === 'Stock bajo')
+      .slice(0, 3)
+      .map((product, index) => ({
+        id: `low-${product.sku}`,
+        type: 'warning',
+        title: 'Stock bajo',
+        message: `${product.name} tiene ${product.stock} unidades y requiere reposición pronto.`,
+        time: `${index + 1} h atrás`,
+      }));
+
+    const outOfStock = inventoryProducts
+      .filter((product) => product.status === 'Agotado')
+      .slice(0, 3)
+      .map((product, index) => ({
+        id: `out-${product.sku}`,
+        type: 'danger',
+        title: 'Producto agotado',
+        message: `${product.name} se agotó y ya no está disponible en inventario.`,
+        time: `${index + 2} h atrás`,
+      }));
+
+    return [...lowStock, ...outOfStock];
+  }, []);
 
   const handleLogout = () => {
     logout();
-    setMenuOpen(false);
     navigate('/');
   };
 
@@ -57,23 +85,29 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
           <ThemeToggle />
 
           {isAuthenticated ? (
-            <div className="relative">
-              <button
-                className="flex items-center gap-3 rounded-full px-3 py-1 text-sm font-medium hover:bg-surface-container"
-                onClick={() => setMenuOpen((s) => !s)}
-                type="button"
-              >
-                <UserAvatarIcon avatar={user?.avatar} name={user?.name} size="sm" />
-                <span className="hidden sm:inline">{user?.name}</span>
-              </button>
+            <div className="relative flex items-center gap-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="Notificaciones"
+                  onClick={() => setNotificationsOpen((current) => !current)}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+                >
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
+                </button>
 
-              {menuOpen ? (
-                <div className="absolute right-0 mt-2 w-40 rounded-md border border-outline-variant bg-surface-container-lowest shadow-lg">
-                  <button className="w-full px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-container" onClick={handleLogout}>
-                    Cerrar sesión
-                  </button>
+                {notificationsOpen ? (
+                  <Notification notifications={notifications} onClose={() => setNotificationsOpen(false)} />
+                ) : null}
+              </div>
+
+              <div className="relative">
+                <div className="flex items-center gap-3 rounded-full px-3 py-1 text-sm font-medium">
+                  <UserAvatarIcon avatar={user?.avatar} name={user?.name} size="sm" />
+                  <span className="hidden sm:inline">{user?.name}</span>
                 </div>
-              ) : null}
+              </div>
             </div>
           ) : (
             <button className="hidden rounded-xl bg-secondary px-6 py-2 font-bold text-on-secondary shadow-sm transition-transform duration-100 hover:scale-95 lg:block" type="button" onClick={onOpenAuth}>

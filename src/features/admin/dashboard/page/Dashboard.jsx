@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DollarSign, ShoppingCart, Users } from 'lucide-react'
+import { DollarSign, ShoppingCart, Truck } from 'lucide-react'
 
 import Sidebar from '@/shared/Sidebar'
 import Header from '@/components/layout/Header'
@@ -12,6 +12,7 @@ import Map from '@/features/admin/dashboard/components/Map'
 import productsSales from '@/features/admin/dashboard/data/productsSales.json'
 import { footerLinks } from '@/components/landing/content'
 import { useAuth } from '@/context/AuthContext'
+import PageHeader from '@/shared/PageHeader'
 
 export default function Dashboard() {
   const [active, setActive] = useState('ventas')
@@ -71,6 +72,13 @@ export default function Dashboard() {
             return
           }
 
+          if (key === 'inventario') {
+            setActive('inventario')
+            setIsSidebarOpen(false)
+            navigate('/admin/inventory')
+            return
+          }
+
           setActive(key)
           setIsSidebarOpen(false)
         }}
@@ -81,6 +89,7 @@ export default function Dashboard() {
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px]">
+            <PageHeader title="Panel de control" subtitle="Visión general de ventas, ingresos y pedidos." />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <Card
                 title="Ingresos"
@@ -99,10 +108,10 @@ export default function Dashboard() {
               />
 
               <Card
-                title="Usuarios"
+                title="Envíos realizados"
                 value="845"
-                description="Usuarios activos"
-                icon={Users}
+                description="Envíos completados"
+                icon={Truck}
                 trend={8.1}
               />
             </div>

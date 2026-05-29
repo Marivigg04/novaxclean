@@ -7,10 +7,11 @@ import { footerLinks } from '@/components/landing/content';
 import { useAuth } from '@/context/AuthContext';
 import SettingsPanel from '@/features/admin/settings/components/SettingsPanel';
 import Sidebar from '@/shared/Sidebar';
+import PageHeader from '@/shared/PageHeader';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [active, setActive] = useState('ajustes');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -57,35 +58,41 @@ export default function Settings() {
       )}
 
       <div className="flex min-h-screen flex-1">
-        <Sidebar
-          active={active}
-          isOpen={isSidebarOpen}
-          onSelect={(key) => {
-            if (key === 'cerrar-sesion') {
-              try {
-                window.localStorage.removeItem('isAdmin');
-              } catch {
-                // ignore
+          <Sidebar
+            active={active}
+            isOpen={isSidebarOpen}
+            onSelect={(key) => {
+              if (key === 'cerrar-sesion') {
+                try {
+                  logout();
+                } catch {
+                  // ignore
+                }
+                setIsSidebarOpen(false)
+                navigate('/')
+                return
               }
-              navigate('/')
-              return
-            }
 
-            if (key === 'ventas') {
-              navigate('/admin')
-              return
-            }
+              if (key === 'ventas') {
+                navigate('/admin')
+                return
+              }
 
-            if (key === 'ajustes') {
-              setActive('ajustes')
+              if (key === 'inventario') {
+                navigate('/admin/inventory')
+                return
+              }
+
+              if (key === 'ajustes') {
+                setActive('ajustes')
+                setIsSidebarOpen(false)
+                return
+              }
+
+              setActive(key)
               setIsSidebarOpen(false)
-              return
-            }
-
-            setActive(key)
-            setIsSidebarOpen(false)
-          }}
-        />
+            }}
+          />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Header
@@ -98,10 +105,7 @@ export default function Settings() {
 
           <main className="flex-1 px-4 py-6 pt-24 md:px-6 md:pl-8">
             <div className="mx-auto w-full max-w-[1280px]">
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold tracking-tight">Ajustes</h1>
-                <p className="mt-1 text-sm text-[var(--color-base-text)]/62">Administra tu cuenta y preferencias.</p>
-              </div>
+              <PageHeader title="Ajustes" subtitle="Administra tu cuenta y preferencias." />
 
               <SettingsPanel
                 defaultTab="perfil"

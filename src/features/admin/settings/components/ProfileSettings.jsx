@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Upload, Trash2, Save } from 'lucide-react';
 import PhotoUploadModal from './PhotoUploadModal';
 import ConfirmChangesModal from './ConfirmChangesModal';
+import RemovePhotoModal from './RemovePhotoModal';
 import UserAvatarIcon from '@/shared/UserAvatarIcon';
 
 function Field({ label, children, className = '' }) {
@@ -33,6 +34,7 @@ export default function ProfileSettings({
   const [profile, setProfile] = useState(fallbackProfile);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isRemovePhotoModalOpen, setIsRemovePhotoModalOpen] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -50,6 +52,11 @@ export default function ProfileSettings({
 
   const handleUploadFiles = (selectedFiles) => {
     onUploadPhoto(selectedFiles);
+  };
+
+  const handleConfirmRemovePhoto = () => {
+    onRemovePhoto();
+    setIsRemovePhotoModalOpen(false);
   };
 
   return (
@@ -75,11 +82,11 @@ export default function ProfileSettings({
 
             <button
               type="button"
-              onClick={onRemovePhoto}
+              onClick={() => setIsRemovePhotoModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-transparent px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/75 transition-colors hover:bg-red-500/10 hover:text-red-600"
             >
               <Trash2 className="h-4 w-4" />
-              Eliminar
+              Eliminar foto
             </button>
           </div>
         </div>
@@ -137,6 +144,12 @@ export default function ProfileSettings({
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmSave}
+      />
+
+      <RemovePhotoModal
+        isOpen={isRemovePhotoModalOpen}
+        onClose={() => setIsRemovePhotoModalOpen(false)}
+        onConfirm={handleConfirmRemovePhoto}
       />
     </section>
   );

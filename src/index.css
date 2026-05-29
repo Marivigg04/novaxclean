@@ -265,6 +265,47 @@ textarea {
   background: linear-gradient(180deg, #a9c7ff, #0c4688);
 }
 
+.notification-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #89b4fe #edf4fc;
+}
+
+.notification-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.notification-scrollbar::-webkit-scrollbar-track {
+  background: #edf4fc;
+  border-radius: 999px;
+}
+
+.notification-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #89b4fe, #2f5ea2);
+  border-radius: 999px;
+  border: 2px solid #edf4fc;
+}
+
+.notification-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a9c7ff, #0c4688);
+}
+
+.dark .notification-scrollbar {
+  scrollbar-color: #5f7ea9 #17263d;
+}
+
+.dark .notification-scrollbar::-webkit-scrollbar-track {
+  background: #17263d;
+}
+
+.dark .notification-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6f8fbe, #4f6f99);
+  border-color: #17263d;
+}
+
+.dark .notification-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7c9fcd, #5b7ba5);
+}
+
 .cart-quantity-control {
   display: inline-flex;
   align-items: center;

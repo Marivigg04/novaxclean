@@ -4,13 +4,14 @@ import {
   Settings2,
   ShoppingCart,
 } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 import logoAumc from '../assets/Logo AUMC.png'
 import logoAumo from '../assets/Logo AUMO.png'
 
 const items = [
-  { key: 'ventas', label: 'Ventas', icon: ShoppingCart },
-  { key: 'inventario', label: 'Inventario', icon: Package },
-  { key: 'ajustes', label: 'Ajustes', icon: Settings2 },
+  { key: 'ventas', label: 'Ventas', icon: ShoppingCart, to: '/admin', end: true },
+  { key: 'inventario', label: 'Inventario', icon: Package, to: '/admin/inventory' },
+  { key: 'ajustes', label: 'Ajustes', icon: Settings2, to: '/admin/settings' },
   { key: 'cerrar-sesion', label: 'Cerrar sesión', icon: LogOut },
 ]
 
@@ -38,6 +39,38 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
         {items.map((item) => {
           const isActive = active === item.key
           const Icon = item.icon
+          // For navigation items with a `to` path use NavLink so routes are consistent.
+          if (item.to) {
+            return (
+              <NavLink
+                key={item.key}
+                to={item.to}
+                end={item.end}
+                onClick={() => onSelect(item.key)}
+                className={({ isActive: navIsActive }) =>
+                  `group relative mb-2 flex w-full items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-left transition-all duration-200 focus:outline-none ${
+                    navIsActive ? 'bg-[color-mix(in_srgb,var(--color-brand)_16%,transparent)] text-[var(--color-base-text)]' : ''
+                  }`
+                }
+              >
+                {({ isActive: navIsActive }) => (
+                  <>
+                    <span
+                      className={`absolute left-0 top-2 bottom-2 w-1 origin-center rounded-r-full bg-[var(--color-brand)] transition-all duration-200 ${
+                        navIsActive ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 group-hover:scale-y-100 group-hover:opacity-100'
+                      }`}
+                    />
+
+                    <span className="relative z-10 flex-none text-[18px] transition-transform duration-200 group-hover:translate-x-0.5">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="relative z-10 flex-1 text-sm font-medium">{item.label}</span>
+                  </>
+                )}
+              </NavLink>
+            )
+          }
+
           return (
             <button
               key={item.key}

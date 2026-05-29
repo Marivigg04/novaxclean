@@ -37,6 +37,32 @@ function Toggle({ checked, onChange, label, description }) {
   );
 }
 
+function PasswordField({ name, label, value, onChange, placeholder, showPasswords, onToggleVisibility }) {
+  return (
+    <Field label={label}>
+      <div className="relative">
+        <input
+          name={name}
+          type={showPasswords ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          className="w-full rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 pr-12 text-sm text-[var(--color-base-text)] outline-none transition-colors focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
+          placeholder={placeholder}
+        />
+
+        <button
+          type="button"
+          onClick={onToggleVisibility}
+          className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--color-base-text)]/55 transition-colors hover:bg-[var(--color-app-panel-hover)] hover:text-[var(--color-base-text)]"
+          aria-label={showPasswords ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        >
+          {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 export default function SecuritySettings({ initialSecurity, onSave = () => {} }) {
   const fallbackSecurity = useMemo(
     () => ({
@@ -67,56 +93,44 @@ export default function SecuritySettings({ initialSecurity, onSave = () => {} })
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-6 shadow-[0_12px_30px_-20px_rgba(16,32,58,0.35)] md:p-8">
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-[var(--color-base-text)]">Seguridad</h3>
-        <p className="mt-1 text-sm text-[var(--color-base-text)]/62">Protege tu cuenta y tus sesiones activas.</p>
+        <p className="mt-1 text-sm text-[var(--color-base-text)]/62">Protege tu cuenta.</p>
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Contraseña actual">
-            <input
-              name="currentPassword"
-              type={showPasswords ? 'text' : 'password'}
-              value={security.currentPassword}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm text-[var(--color-base-text)] outline-none transition-colors focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
-              placeholder="Ingresa tu contraseña actual"
-            />
-          </Field>
+          <PasswordField
+            name="currentPassword"
+            label="Contraseña actual"
+            value={security.currentPassword}
+            onChange={handleChange}
+            placeholder="Ingresa tu contraseña actual"
+            showPasswords={showPasswords}
+            onToggleVisibility={() => setShowPasswords((current) => !current)}
+          />
 
-          <div className="flex items-end">
-            <button
-              type="button"
-              onClick={() => setShowPasswords((current) => !current)}
-              className="mb-0.5 inline-flex items-center gap-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
-            >
-              {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {showPasswords ? 'Ocultar' : 'Mostrar'}
-            </button>
-          </div>
+          <div className="hidden md:block" />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Nueva contraseña">
-            <input
-              name="newPassword"
-              type={showPasswords ? 'text' : 'password'}
-              value={security.newPassword}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm text-[var(--color-base-text)] outline-none transition-colors focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
-              placeholder="Mínimo 8 caracteres"
-            />
-          </Field>
+          <PasswordField
+            name="newPassword"
+            label="Nueva contraseña"
+            value={security.newPassword}
+            onChange={handleChange}
+            placeholder="Mínimo 8 caracteres"
+            showPasswords={showPasswords}
+            onToggleVisibility={() => setShowPasswords((current) => !current)}
+          />
 
-          <Field label="Confirmar contraseña">
-            <input
-              name="confirmPassword"
-              type={showPasswords ? 'text' : 'password'}
-              value={security.confirmPassword}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm text-[var(--color-base-text)] outline-none transition-colors focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
-              placeholder="Repite la contraseña nueva"
-            />
-          </Field>
+          <PasswordField
+            name="confirmPassword"
+            label="Confirmar contraseña"
+            value={security.confirmPassword}
+            onChange={handleChange}
+            placeholder="Repite la contraseña nueva"
+            showPasswords={showPasswords}
+            onToggleVisibility={() => setShowPasswords((current) => !current)}
+          />
         </div>
 
         <div className="space-y-3">
@@ -126,25 +140,6 @@ export default function SecuritySettings({ initialSecurity, onSave = () => {} })
             label="Verificación en dos pasos"
             description="Solicita un código adicional al iniciar sesión."
           />
-
-          <Toggle
-            checked={security.sessionProtection}
-            onChange={(value) => setSecurity((current) => ({ ...current, sessionProtection: value }))}
-            label="Protección de sesión"
-            description="Cierra sesiones inactivas automáticamente."
-          />
-        </div>
-
-        <div className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4">
-          <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-[var(--color-app-panel-hover)] p-2 text-[var(--color-brand)]">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[var(--color-base-text)]">Sesiones activas</p>
-              <p className="mt-1 text-sm text-[var(--color-base-text)]/65">1 sesión en este dispositivo y 2 en móviles recientes.</p>
-            </div>
-          </div>
         </div>
 
         <div className="flex justify-end">
