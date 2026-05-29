@@ -51,7 +51,7 @@ function AuthRoute() {
 	return (
 		<AuthPage
 			onBackToLanding={() => navigate('/')}
-			onAuthSuccess={(role) => navigate(role === 'Admin' ? '/admin' : '/')}
+			onAuthSuccess={(role) => navigate(role === 'Admin' ? '/admin' : '/perfil')}
 		/>
 	);
 }

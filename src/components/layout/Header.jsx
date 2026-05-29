@@ -8,7 +8,16 @@ import { useAuth } from '../../context/AuthContext';
 import Notification from '../../shared/Notification';
 import { inventoryProducts } from '../../features/admin/inventory/data/mockup';
 
-export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, showSearch = true, className = '' }) {
+export default function Header({
+  onOpenCart,
+  onOpenAuth,
+  showCartButton = true,
+  showSearch = true,
+  showThemeToggle = true,
+  showBrand = true,
+  showNavigationLinks = true,
+  className = '',
+}) {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -48,7 +57,7 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 border-b border-outline-variant bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}>
       <nav className="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-4 md:px-16 md:py-5">
-        {(!isAuthenticated || user?.role !== 'Admin') && (
+        {showBrand && (
           <div className="shrink-0">
             <Link to="/" className="text-lg font-bold text-on-surface">NovaxClean</Link>
           </div>
@@ -68,7 +77,7 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
           </div>
         ) : null}
 
-        {(!isAuthenticated || user?.role !== 'Admin') && (
+        {showNavigationLinks && (!isAuthenticated || user?.role !== 'Admin') && (
           <div className="hidden flex-none items-center gap-6 xl:flex">
             {navigationLinks.map((link) => (
               <Link
@@ -83,7 +92,7 @@ export default function Header({ onOpenCart, onOpenAuth, showCartButton = true, 
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-3">
-          <ThemeToggle />
+          {showThemeToggle ? <ThemeToggle /> : null}
 
           {isAuthenticated ? (
             <div className="relative flex items-center gap-2">
