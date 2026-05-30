@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User, MapPin, Package, CreditCard, Settings, Moon, Sun } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, User, MapPin, Package, CreditCard, Settings, Moon, Sun, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import logoAumc from '@/assets/Logo AUMC.png';
 import logoAumo from '@/assets/Logo AUMO.png';
 
 const items = [
-  { key: 'perfil', label: 'Mi Perfil', icon: User },
-  { key: 'pedidos', label: 'Mis Pedidos', icon: Package },
-  { key: 'direcciones', label: 'Direcciones', icon: MapPin },
-  { key: 'pagos', label: 'Métodos de Pago', icon: CreditCard },
-  { key: 'preferencias', label: 'Preferencias', icon: Settings },
+  { key: 'perfil', label: 'Mi Perfil', icon: User, to: '/perfil' },
+  { key: 'pedidos', label: 'Mis Pedidos', icon: Package, to: '/perfil?tab=pedidos' },
+  { key: 'direcciones', label: 'Direcciones', icon: MapPin, to: '/perfil?tab=direcciones' },
+  { key: 'pagos', label: 'Métodos de Pago', icon: CreditCard, to: '/perfil?tab=pagos' },
+  { key: 'catalogo', label: 'Catálogo', icon: ShoppingCart, to: '/catalogo' },
+  { key: 'preferencias', label: 'Preferencias', icon: Settings, to: '/perfil?tab=preferencias' },
 ];
 
-export default function ProfileSidebar({ active = 'perfil', onSelect = () => {} }) {
+export default function ProfileSidebar({ active, onSelect = () => {} }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -56,14 +58,53 @@ export default function ProfileSidebar({ active = 'perfil', onSelect = () => {} 
 
       <nav className="px-3 py-4 pb-6">
         {items.map((item) => {
-          const isActive = active === item.key;
+          // determine active by current pathname and tab query
+          const isActive = (() => {
+            try {
+              const locPath = location.pathname;
+              const params = new URLSearchParams(location.search);
+              if (item.to) {
+                const toUrl = new URL(item.to, 'http://example');
+                if (toUrl.pathname === locPath) {
+                  // if `to` has a tab, compare with current tab
+                  const toTab = toUrl.searchParams.get('tab');
+                  const locTab = params.get('tab');
+                  if (toTab) {
+                    return toTab === locTab;
+                  }
+
+                  // `to` has no tab: only active when the current location also has no tab
+                  if (locTab) {
+                    return false;
+                  }
+
+                  return true;
+                }
+                }
+                } catch (e) {
+              // fallback
+            }
+                // only fallback to provided `active` prop when it's explicitly provided
+                return typeof active !== 'undefined' ? active === item.key : false;
+          })();
           const Icon = item.icon;
+
+          const handleClick = () => {
+            if (item.to) {
+              navigate(item.to);
+              return;
+            }
+
+            // fallback: if no `to`, navigate to perfil and select
+            navigate('/perfil');
+            onSelect(item.key);
+          };
 
           return (
             <button
               key={item.key}
               type="button"
-              onClick={() => onSelect(item.key)}
+              onClick={handleClick}
               className="group relative mb-2 flex w-full items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-left transition-all duration-200 focus:outline-none"
               style={{
                 backgroundColor: isActive ? 'color-mix(in srgb, var(--color-brand) 16%, transparent)' : 'transparent',

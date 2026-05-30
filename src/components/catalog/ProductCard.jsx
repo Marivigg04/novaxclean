@@ -18,7 +18,7 @@ export default function ProductCard({ product }) {
         ) : null}
       </div>
 
-      <div className="p-6">
+      <div className="p-8">
         <div className="mb-2 flex items-start justify-between gap-4">
           <h4 className="text-headline-md font-semibold text-primary">{product.name}</h4>
           <span className="text-headline-md font-bold text-primary">{product.price}</span>

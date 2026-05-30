@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CalendarCheck2, CreditCard, Package, UserRound } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -14,6 +15,17 @@ import PreferencesTab from '../components/PreferencesTab';
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('perfil');
+  const location = useLocation();
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const tab = params.get('tab');
+      if (tab) setActiveTab(tab);
+    } catch (e) {
+      // ignore
+    }
+  }, [location.search]);
 
   return (
     <div className="min-h-screen bg-[var(--color-base-bg)] text-[var(--color-base-text)] flex flex-col pt-[88px] md:pt-[104px] premium-mesh-bg">
@@ -25,6 +37,7 @@ export default function Profile() {
         showThemeToggle={false}
         showBrand={false}
         showNavigationLinks={false}
+        showUserName={false}
         className="md:left-72"
       />
       

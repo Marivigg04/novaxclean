@@ -1,8 +1,8 @@
 export default function CatalogHeader() {
   return (
     <header className="mb-8 flex flex-col items-end justify-between gap-6 md:flex-row md:items-end">
-      <div>
-        <h1 className="mb-2 text-headline-xl font-bold text-primary">Catálogo de Productos</h1>
+      <div className="mt-10">
+        <h1 className="mb-2 text-3xl font-bold text-primary">Catálogo de Productos</h1>
         <p className="max-w-2xl text-body-lg text-on-surface-variant">
           Soluciones químicas de alta precisión para limpieza industrial y residencial. Purity, reliability, efficiency.
         </p>

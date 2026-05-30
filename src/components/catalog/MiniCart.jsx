@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function MiniCart({ isOpen, onToggle, onClose, items }) {
+  const navigate = useNavigate();
   useEffect(() => {
     const handleOutsideClick = (event) => {
       const miniCart = document.getElementById('mini-cart');
@@ -55,7 +57,18 @@ export default function MiniCart({ isOpen, onToggle, onClose, items }) {
             <span className="text-label-md text-on-surface-variant">Total</span>
             <span className="text-headline-md font-bold text-primary">$49.99</span>
           </div>
-          <button className="w-full rounded-xl bg-primary py-3 font-bold text-on-primary transition-all hover:brightness-110" type="button">
+          <button
+            className="w-full rounded-xl bg-primary py-3 font-bold text-on-primary transition-all hover:brightness-110"
+            type="button"
+            onClick={() => {
+              try {
+                onClose();
+              } catch (e) {
+                // ignore
+              }
+              navigate('/carrito');
+            }}
+          >
             Finalizar Pedido
           </button>
         </div>

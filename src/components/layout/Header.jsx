@@ -16,6 +16,7 @@ export default function Header({
   showThemeToggle = true,
   showBrand = true,
   showNavigationLinks = true,
+  showUserName = true,
   className = '',
 }) {
   const { user, logout, isAuthenticated } = useAuth();
@@ -82,7 +83,7 @@ export default function Header({
             {navigationLinks.map((link) => (
               <Link
                 key={link.label}
-                className="text-label-md font-bold text-on-surface-variant transition-colors hover:text-secondary"
+                className="px-2 text-label-md font-bold text-on-surface-variant transition-colors hover:text-secondary"
                 to={link.href}
               >
                 {link.label}
@@ -119,7 +120,7 @@ export default function Header({
                   className="flex items-center gap-3 rounded-full px-3 py-1.5 text-sm font-medium hover:bg-surface-container transition-colors"
                 >
                   <UserAvatarIcon avatar={user?.avatar} name={user?.name} size="sm" />
-                  <span className="hidden sm:inline font-bold">{user?.name}</span>
+                  {showUserName ? <span className="hidden sm:inline font-bold">{user?.name}</span> : null}
                 </button>
 
                 {menuOpen ? (
