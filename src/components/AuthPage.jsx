@@ -31,7 +31,14 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
 
     if (creds?.email === ADMIN_EMAIL && creds?.password === ADMIN_PASSWORD) {
       try {
-        login({ name: 'Jade', role: 'Admin', avatar: 'J' });
+        login({
+          name: 'Jade',
+          email: ADMIN_EMAIL,
+          phone: '+58 412-000-0000',
+          role: 'Admin',
+          avatar: 'J',
+          address: 'Av. Principal 123, Torre Corporativa, Caracas, Distrito Capital',
+        });
       } catch {
         // ignore
       }
@@ -44,7 +51,14 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
 
     if (creds?.email === USER_EMAIL && creds?.password === USER_PASSWORD) {
       try {
-        login({ name: 'Usuario', role: 'User', avatar: 'U' });
+        login({
+          name: 'Usuario',
+          email: USER_EMAIL,
+          phone: '+58 414-000-0000',
+          role: 'User',
+          avatar: 'U',
+          address: 'Calle 8, Edificio Nova, Piso 2, Valencia, Carabobo',
+        });
       } catch {
         // ignore
       }

@@ -17,7 +17,14 @@ export function AuthProvider({ children }) {
       // fallback to legacy flag
       const isAdmin = window.localStorage.getItem('isAdmin');
       if (isAdmin) {
-        setUser({ name: 'Jade', role: 'Admin', avatar: 'J' });
+        setUser({
+          name: 'Jade',
+          email: 'admin@novaxclean.com',
+          phone: '+58 412-000-0000',
+          role: 'Admin',
+          avatar: 'J',
+          address: 'Av. Principal 123, Torre Corporativa, Caracas, Distrito Capital',
+        });
       }
     } catch (e) {
       // ignore
@@ -26,7 +33,14 @@ export function AuthProvider({ children }) {
 
   const login = (userData) => {
     // Si no se pasa data asumimos el Admin legado por compatibilidad
-    const newUser = userData || { name: 'Jade', role: 'Admin', avatar: 'J' };
+    const newUser = userData || {
+      name: 'Jade',
+      email: 'admin@novaxclean.com',
+      phone: '+58 412-000-0000',
+      role: 'Admin',
+      avatar: 'J',
+      address: 'Av. Principal 123, Torre Corporativa, Caracas, Distrito Capital',
+    };
 
     try {
       window.localStorage.setItem('user', JSON.stringify(newUser));

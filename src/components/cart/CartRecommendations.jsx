@@ -1,6 +1,6 @@
 export default function CartRecommendations({ items }) {
   return (
-    <section className="mt-10">
+    <section className="cart-subtle-float mt-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h2 className="text-headline-md font-semibold text-primary">Optimiza tu Stock (Recomendaciones B2B)</h2>
         <a className="text-label-md font-bold text-secondary hover:underline" href="#catalogo">

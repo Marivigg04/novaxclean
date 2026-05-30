@@ -43,7 +43,6 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
                         +
                       </button>
                     </div>
-                    {item.stockLabel ? <span className="max-w-[10rem] text-center text-[10px] font-bold leading-tight text-secondary">{item.stockLabel}</span> : null}
                   </div>
                 </td>
                 <td className="px-6 py-6 text-right text-body-md font-bold text-primary">
@@ -56,17 +55,13 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
       </div>
 
       <div className="flex flex-col items-stretch justify-between gap-4 bg-surface-container-low p-6 lg:flex-row lg:items-center">
-        <button className="flex items-center gap-2 text-label-md font-bold text-secondary hover:underline" type="button" onClick={onBackToCatalog}>
-          <span className="material-symbols-outlined">arrow_back</span>
+        <button className="rounded-lg border border-secondary px-4 py-2 text-label-md font-bold text-secondary transition-colors hover:bg-surface-container-lowest" type="button" onClick={onBackToCatalog}>
           Seguir Comprando
         </button>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button className="rounded-lg border border-secondary px-4 py-2 text-label-md font-bold text-secondary transition-colors hover:bg-surface-container-lowest" type="button">
             Vaciar Carrito
-          </button>
-          <button className="rounded-lg bg-secondary px-4 py-2 text-label-md font-bold text-on-secondary transition-colors hover:opacity-90" type="button">
-            Actualizar Stock
           </button>
         </div>
       </div>
