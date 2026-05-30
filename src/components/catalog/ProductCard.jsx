@@ -1,4 +1,4 @@
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onAddToCart }) {
   return (
     <article className="group overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow transition-all duration-300 hover:-translate-y-1">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-variant">
@@ -34,7 +34,7 @@ export default function ProductCard({ product }) {
             <span className="text-label-md font-semibold">{product.rating}</span>
           </div>
 
-          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-md transition-all hover:bg-secondary active:scale-90" type="button">
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-md transition-all hover:bg-secondary active:scale-90" type="button" onClick={() => onAddToCart?.(product)}>
             <span className="material-symbols-outlined">add_shopping_cart</span>
           </button>
         </div>

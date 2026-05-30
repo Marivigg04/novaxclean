@@ -10,7 +10,7 @@ import { footerLinks } from './content';
 export default function LandingPage({ onExploreCatalog, onOpenCart, onOpenAuth }) {
   return (
     <div className="bg-background text-on-surface">
-      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} />
       <main className="pt-16 lg:pt-20">
         <HeroSection onExploreCatalog={onExploreCatalog} onOpenAuth={onOpenAuth} />
         <BenefitsSection />

@@ -1,3 +1,4 @@
+import logoOf2 from '../../assets/Logo OF2.png';
 import { heroStats } from './content';
 
 export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
@@ -48,17 +49,20 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
         </div>
 
         <div className="relative flex items-center justify-center">
-          <div className="relative aspect-square w-full max-w-lg">
+          <div className="group relative aspect-square w-full max-w-lg" style={{ perspective: '1200px' }}>
             <div className="absolute inset-0 scale-110 rounded-full border border-white/20 bg-white/10 animate-pulse" />
             <div className="absolute inset-0 scale-125 rounded-full bg-white/5" />
 
-            <div className="glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-              <img
-                alt="Producto Estrella"
-                className="h-3/4 w-3/4 object-contain"
-                data-alt="A premium high-gloss cleaning product bottle standing on a reflective white surface. The background is a clean, bright medical-grade laboratory with soft blue ambient lighting. The scene evokes a sense of professional purity and clinical effectiveness with high-key lighting and minimalist composition."
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDggHlEKI9-BAayU1IMtm4itoyS8PkdZy58CXdhpwhZpYUs8D4fye14Dag42sn-5ZF1176u2sgE2UzoXiYtC2om9xsn3Pf7xKfUiS7ASFbiZNagl5drU2fbnjfFZ3W5Y4GfXC1XVZLFDL3RMt4_DOAoE6BThi4_c9gOEc8pnzNtK6dSbGZt2HmQO-ZgmVpKpQjAI3JBO5QAAHVhyAAGMPN-KyYgbH45nWjAl_oE7SXU1i9BRlN-swa35AqgJVPugC7VjPscdA4v9CM"
-              />
+            <div className="coin-shell glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+              <div className="hero-coin-flip absolute inset-0">
+                <div className="coin-face coin-face-front">
+                  <img alt="Logo OF2 frontal" className="h-[92%] w-[92%] object-contain" src={logoOf2} />
+                </div>
+
+                <div className="coin-face coin-face-back">
+                  <img alt="Logo OF2 reverso" className="h-[92%] w-[92%] object-contain" src={logoOf2} />
+                </div>
+              </div>
             </div>
 
             <div className="bubble-anim cloud-shadow absolute -right-10 -top-10 flex h-24 w-24 items-center justify-center rounded-full bg-secondary-container">
