@@ -1,9 +1,12 @@
+import { useState } from 'react';
+
 export default function OrdersTab() {
   const orders = [
     { id: '#NX-9032', date: '25 May 2026', total: '$145.00', status: 'Entregado', items: 3 },
     { id: '#NX-8941', date: '12 May 2026', total: '$32.50', status: 'En camino', items: 1 },
     { id: '#NX-8722', date: '04 May 2026', total: '$89.90', status: 'Entregado', items: 2 },
   ];
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   return (
     <div className="space-y-6">
@@ -25,21 +28,46 @@ export default function OrdersTab() {
           </thead>
           <tbody className="divide-y divide-[var(--color-app-panel-border)]">
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-[var(--color-base-bg)] transition-colors">
-                <td className="px-6 py-5 font-bold text-[var(--color-brand)]">{order.id}</td>
-                <td className="px-6 py-5">{order.date}</td>
-                <td className="px-6 py-5 font-semibold text-base">{order.total}</td>
-                <td className="px-6 py-5">
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
-                    order.status === 'Entregado' ? 'bg-[#0f2854]/10 text-[#0f2854] dark:bg-[#7b90c2]/20 dark:text-[#7b90c2]' : 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]'
-                  }`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-6 py-5 text-right">
-                  <button className="font-bold text-[var(--color-brand)] hover:underline">Ver detalle</button>
-                </td>
-              </tr>
+              <>
+                <tr key={order.id} className="hover:bg-[var(--color-base-bg)] transition-colors">
+                  <td className="px-6 py-5 font-bold text-[var(--color-brand)]">{order.id}</td>
+                  <td className="px-6 py-5">{order.date}</td>
+                  <td className="px-6 py-5 font-semibold text-base">{order.total}</td>
+                  <td className="px-6 py-5">
+                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
+                      order.status === 'Entregado' ? 'bg-white/90 text-[#0f2854] border border-[#0f2854]/12 shadow-sm dark:bg-white dark:text-[#0f2854] dark:border-[#0f2854]/10' : 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedOrderId((current) => (current === order.id ? null : order.id))}
+                      className="font-bold text-[var(--color-brand)] hover:underline"
+                    >
+                      Ver detalle
+                    </button>
+                  </td>
+                </tr>
+                {selectedOrderId === order.id ? (
+                  <tr>
+                    <td className="px-6 pb-5 pt-0" colSpan={5}>
+                      <div className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-5 py-4 text-sm text-[var(--color-base-text)]/80">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[var(--color-base-text)]">Pedido {order.id}</p>
+                            <p className="mt-1">Fecha: {order.date} · Total: {order.total} · Artículos: {order.items}</p>
+                          </div>
+                          <button type="button" onClick={() => setSelectedOrderId(null)} className="rounded-full border border-[var(--color-app-panel-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]">
+                            Cerrar
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+              </>
             ))}
           </tbody>
         </table>

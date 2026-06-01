@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
 
 function ToggleSwitch({ checked, onChange }) {
   return (
@@ -79,7 +80,17 @@ export default function PreferencesTab() {
         <button className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all">
           Descartar
         </button>
-        <button className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+        <button
+          type="button"
+          onClick={() => {
+            showInventoryToast({
+              type: 'success',
+              title: 'Cambios guardados',
+              message: 'Tus preferencias se actualizaron correctamente.',
+            });
+          }}
+          className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
           Guardar Cambios
         </button>
       </div>

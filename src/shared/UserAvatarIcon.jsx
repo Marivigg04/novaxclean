@@ -5,8 +5,19 @@ const SIZE_CLASSES = {
 };
 
 export default function UserAvatarIcon({ avatar, name, size = 'md', className = '' }) {
+  const isImageAvatar = typeof avatar === 'string' && /^(data:|https?:|blob:)/.test(avatar);
   const label = String(avatar ?? name?.[0] ?? 'U').slice(0, 2).toUpperCase();
   const resolvedSize = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
+
+  if (isImageAvatar) {
+    return (
+      <img
+        src={avatar}
+        alt={name || 'Avatar'}
+        className={`rounded-full object-cover ${resolvedSize} ${className}`}
+      />
+    );
+  }
 
   return (
     <div
