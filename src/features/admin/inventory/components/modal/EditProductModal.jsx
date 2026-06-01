@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
 import { X, Save } from 'lucide-react';
+import RoundedSelect from '@/features/admin/inventory/components/RoundedSelect';
 
-export default function EditProductModal({ isOpen = false, product = null, onClose = () => {}, onSubmit = () => {} }) {
-  const [form, setForm] = useState({ stock: '', price: '' });
+export default function EditProductModal({ isOpen = false, product = null, onClose = () => {}, onSubmit = () => {}, categories = [] }) {
+  const [form, setForm] = useState({ stock: '', price: '', category: '' });
 
   useEffect(() => {
     if (!isOpen || !product) {
-      setForm({ stock: '', price: '' });
+      setForm({ stock: '', price: '', category: '' });
       return;
     }
 
-    setForm({ stock: String(product.stock ?? ''), price: String(product.price ?? '') });
+    setForm({
+      stock: String(product.stock ?? ''),
+      price: String(product.price ?? ''),
+      category: product.category ?? '',
+    });
   }, [isOpen, product]);
 
   if (!isOpen || !product) return null;
@@ -24,11 +29,12 @@ export default function EditProductModal({ isOpen = false, product = null, onClo
     e.preventDefault();
     const stock = form.stock === '' ? product.stock : parseInt(form.stock, 10);
     const price = form.price === '' ? product.price : parseFloat(form.price);
+    const category = form.category || product.category;
 
     if (Number.isNaN(stock) || stock < 0) return alert('Stock inválido.');
     if (Number.isNaN(price) || price < 0) return alert('Precio inválido.');
 
-    onSubmit({ ...product, stock, price });
+    onSubmit({ ...product, stock, price, category });
     onClose();
   };
 
@@ -77,6 +83,17 @@ export default function EditProductModal({ isOpen = false, product = null, onClo
               />
             </label>
           </div>
+
+          <label className="mt-4 block">
+            <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Categoría</span>
+            <RoundedSelect
+              value={form.category}
+              onChange={(nextCategory) => setForm((current) => ({ ...current, category: nextCategory }))}
+              options={categories.map((category) => ({ value: category, label: category }))}
+              placeholder={product.category ?? 'Seleccionar'}
+              className="mt-2"
+            />
+          </label>
 
           <div className="mt-5 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/80 transition-colors hover:bg-[var(--color-app-panel-hover)]">Cancelar</button>

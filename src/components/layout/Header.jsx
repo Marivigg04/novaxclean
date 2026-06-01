@@ -20,6 +20,7 @@ export default function Header({
   className = '',
 }) {
   const { user, logout, isAuthenticated } = useAuth();
+  const isAdmin = isAuthenticated && user?.role === 'Admin';
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,9 +57,15 @@ export default function Header({
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 border-b border-outline-variant bg-surface/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}>
-      <nav className="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-4 md:px-16 md:py-5">
-        {showBrand && (
+    <header
+      style={{
+        left: isAdmin ? 'calc(var(--sidebar-width, 0px) - 1px)' : 0,
+        top: 0,
+      }}
+      className={`fixed right-0 z-30 border-b border-outline-variant bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}
+    >
+      <nav className={`mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 md:px-16 ${isAdmin ? 'h-20' : 'py-4 md:py-5'}`}>
+        {showBrand && (!isAuthenticated || user?.role !== 'Admin') && (
           <div className="shrink-0">
             <Link to="/" className="text-lg font-bold text-on-surface">NovaxClean</Link>
           </div>

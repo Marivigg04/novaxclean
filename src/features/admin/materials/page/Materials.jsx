@@ -7,7 +7,7 @@ import Sidebar from '@/shared/Sidebar';
 import PageHeader from '@/shared/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { footerLinks } from '@/components/landing/content';
-import InventoryAlerts from '@/features/admin/inventory/components/InventoryAlerts';
+import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
 
 import MaterialsHeader from '../components/MaterialsHeader';
 import MaterialsStats from '../components/MaterialsStats';
@@ -43,7 +43,6 @@ export default function Materials() {
   const [formulaSortOrder, setFormulaSortOrder] = useState('desc');
   const [materials, setMaterials] = useState(materialRows);
   const [formulas, setFormulas] = useState(productionFormulas);
-  const [alerts, setAlerts] = useState([]);
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
@@ -65,21 +64,6 @@ export default function Materials() {
   useEffect(() => {
     setPage(1);
   }, [search, materialCategory, materialStatus, materialSortOrder, formulaCategory, formulaStatus, formulaSortOrder]);
-
-  const dismissAlert = (alertId) => {
-    setAlerts((current) => current.filter((alert) => alert.id !== alertId));
-  };
-
-  useEffect(() => {
-    if (!alerts.length) return undefined;
-
-    const timers = alerts.map((alert, index) => {
-      const timeout = 4500 + index * 600;
-      return window.setTimeout(() => dismissAlert(alert.id), timeout);
-    });
-
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [alerts]);
 
   const filteredMaterials = useMemo(() => {
     const normalizedSearch = search.toLowerCase();
@@ -144,26 +128,29 @@ export default function Materials() {
 
   const handleAddMaterial = (newMaterial) => {
     setMaterials((current) => [newMaterial, ...current]);
-    setAlerts((current) => [
-      { id: `add-${newMaterial.sku}`, type: 'success', title: 'Insumo agregado', message: `${newMaterial.name} se agregó correctamente.` },
-      ...current,
-    ]);
+    showInventoryToast({
+      type: 'success',
+      title: 'Insumo agregado',
+      message: `${newMaterial.name} se agregó correctamente.`,
+    });
     setIsEntryModalOpen(false);
   };
 
   const handleUpdateEntry = (updatedEntry) => {
     if (editingEntry?.type === 'formula') {
       setFormulas((current) => current.map((item) => (item.sku === updatedEntry.sku ? updatedEntry : item)));
-      setAlerts((current) => [
-        { id: `edit-${updatedEntry.sku}`, type: 'edit', title: 'Fórmula actualizada', message: `${updatedEntry.product} se actualizó correctamente.` },
-        ...current,
-      ]);
+      showInventoryToast({
+        type: 'edit',
+        title: 'Fórmula actualizada',
+        message: `${updatedEntry.product} se actualizó correctamente.`,
+      });
     } else {
       setMaterials((current) => current.map((item) => (item.sku === updatedEntry.sku ? updatedEntry : item)));
-      setAlerts((current) => [
-        { id: `edit-${updatedEntry.sku}`, type: 'edit', title: 'Insumo actualizado', message: `${updatedEntry.name} se actualizó correctamente.` },
-        ...current,
-      ]);
+      showInventoryToast({
+        type: 'edit',
+        title: 'Insumo actualizado',
+        message: `${updatedEntry.name} se actualizó correctamente.`,
+      });
     }
 
     setEditingEntry(null);
@@ -172,16 +159,18 @@ export default function Materials() {
   const handleDeleteEntry = (entry) => {
     if (deletingEntry?.type === 'formula') {
       setFormulas((current) => current.filter((item) => item.sku !== entry.sku));
-      setAlerts((current) => [
-        { id: `delete-${entry.sku}`, type: 'delete', title: 'Fórmula eliminada', message: `${entry.product} fue eliminada correctamente.` },
-        ...current,
-      ]);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Fórmula eliminada',
+        message: `${entry.product} fue eliminada correctamente.`,
+      });
     } else {
       setMaterials((current) => current.filter((item) => item.sku !== entry.sku));
-      setAlerts((current) => [
-        { id: `delete-${entry.sku}`, type: 'delete', title: 'Insumo eliminado', message: `${entry.name} fue eliminado correctamente.` },
-        ...current,
-      ]);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Insumo eliminado',
+        message: `${entry.name} fue eliminado correctamente.`,
+      });
     }
 
     setDeletingEntry(null);
@@ -190,15 +179,11 @@ export default function Materials() {
   const handleReceiveMaterials = (updatedItems, lineItems) => {
     setMaterials(updatedItems);
     setIsReplenishmentOpen(false);
-    setAlerts((current) => [
-      {
-        id: `replenish-${Date.now()}`,
-        type: 'success',
-        title: 'Reabastecimiento completado',
-        message: `${lineItems.length} insumos se ingresaron a materia prima y el stock fue actualizado.`,
-      },
-      ...current,
-    ]);
+    showInventoryToast({
+      type: 'success',
+      title: 'Reabastecimiento completado',
+      message: `${lineItems.length} insumos se ingresaron a materia prima y el stock fue actualizado.`,
+    });
   };
 
   return (
@@ -267,8 +252,6 @@ export default function Materials() {
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px] space-y-6">
-            <InventoryAlerts alerts={alerts} onDismiss={dismissAlert} />
-
             <PageHeader title="Materia Prima" subtitle="Control de insumos, fórmulas y alertas de reorden." className="mb-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="md:hidden rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-base-text)]">
                 Menú

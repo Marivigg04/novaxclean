@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ArrowUpDown, Filter, PencilLine, Trash2 } from 'lucide-react';
 import RoundedSelect from './RoundedSelect';
 
@@ -32,11 +33,35 @@ export default function InventoryTable({
   setStatus,
   categories = [],
   statuses = [],
-  sortOrder,
-  setSortOrder,
+  sortField = 'stock',
+  sortDirection = 'desc',
+  onSortChange = () => {},
+  onSortDirectionChange = () => {},
   onDeleteRequest = () => {},
   onEditRequest = () => {},
 }) {
+  const sortableColumns = useMemo(
+    () => [
+      { value: 'name', label: 'Producto', align: 'left' },
+      { value: 'sku', label: 'SKU', align: 'left' },
+      { value: 'category', label: 'Categoría', align: 'left' },
+      { value: 'stock', label: 'Stock', align: 'center' },
+      { value: 'minimum', label: 'Mínimo', align: 'center' },
+      { value: 'price', label: 'Precio', align: 'left' },
+      { value: 'status', label: 'Estado', align: 'left' },
+    ],
+    [],
+  );
+
+  const handleHeaderSort = (field) => {
+    if (field === sortField) {
+      onSortDirectionChange((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      onSortChange(field);
+      onSortDirectionChange('asc');
+    }
+  };
+
   return (
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:p-6">
       <div className="flex flex-col gap-4 border-b border-[var(--color-app-panel-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
@@ -63,14 +88,10 @@ export default function InventoryTable({
           />
         </div>
 
-        <button
-          type="button"
-          onClick={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
-        >
+        <div className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]">
           <ArrowUpDown className="h-4 w-4" />
-          Stock {sortOrder === 'asc' ? 'ascendente' : 'descendente'}
-        </button>
+          Haz clic en un encabezado para ordenar
+        </div>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)]">
@@ -78,13 +99,28 @@ export default function InventoryTable({
           <table className="min-w-full divide-y divide-[var(--color-app-panel-border)] text-left">
             <thead className="bg-[var(--color-base-bg)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-base-text)]/60">
               <tr>
-                <th className="px-4 py-3">Producto</th>
-                <th className="px-4 py-3">SKU</th>
-                <th className="px-4 py-3">Categoría</th>
-                <th className="px-4 py-3 text-center">Stock</th>
-                <th className="px-4 py-3 text-center">Mínimo</th>
-                <th className="px-4 py-3">Precio</th>
-                <th className="px-4 py-3">Estado</th>
+                {sortableColumns.map((column) => {
+                  const isActive = sortField === column.value;
+
+                  return (
+                    <th
+                      key={column.value}
+                      className={`px-4 py-3 ${column.align === 'center' ? 'text-center' : 'text-left'}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleHeaderSort(column.value)}
+                        className={`inline-flex items-center gap-2 transition-colors hover:text-[var(--color-base-text)] ${column.align === 'center' ? 'justify-center' : 'justify-start'}`}
+                      >
+                        <span>{column.label}</span>
+                        <span className={`inline-flex items-center justify-center transition-transform ${isActive && sortDirection === 'desc' ? 'rotate-180' : ''}`}>
+                          <ArrowUpDown className={`h-3.5 w-3.5 ${isActive ? 'text-[var(--color-brand)]' : ''}`} />
+                        </span>
+                      </button>
+                    </th>
+                  );
+                })}
+
                 <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>

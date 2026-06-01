@@ -14,6 +14,7 @@ import { footerLinks } from '@/components/landing/content'
 import { useAuth } from '@/context/AuthContext'
 import PageHeader from '@/shared/PageHeader'
 import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal'
+import LeafletCaracasMap from '../components/LeafletCaracasMap'
 
 export default function Dashboard() {
   const [active, setActive] = useState('ventas')
@@ -143,16 +144,19 @@ export default function Dashboard() {
                 onSortChange={setSortOrder}
               />
 
-              <div className="grid items-stretch gap-4 xl:grid-cols-[1.25fr_0.75fr]">
-                <div className="min-w-0 h-full">
+             <div className="grid items-stretch gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+                {/* Columna Izquierda */}
+                <div className="min-w-0 flex flex-col">
                   <Graphic
                     data={chartData}
                     sortOrder={sortOrder}
+                    className="flex-1"
                   />
                 </div>
-
-                <div className="min-w-0 h-full">
-                  <Map />
+                
+                {/* Columna Derecha */}
+                <div className="min-w-0 flex flex-col">
+                  <LeafletCaracasMap className="flex-1 w-full rounded-2xl border border-[var(--color-app-panel-border)]" />
                 </div>
               </div>
             </div>
