@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { navigationLinks } from '../landing/content';
@@ -11,6 +11,9 @@ import { inventoryProducts } from '../../features/admin/inventory/data/mockup';
 export default function Header({
   onOpenCart,
   onOpenAuth,
+  searchValue = '',
+  onSearchChange,
+  onSearchSubmit,
   showCartButton = true,
   showSearch = true,
   showThemeToggle = true,
@@ -25,7 +28,7 @@ export default function Header({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const notifications = useMemo(() => {
+  const notifications = (() => {
     const lowStock = inventoryProducts
       .filter((product) => product.status === 'Stock bajo')
       .slice(0, 3)
@@ -49,7 +52,7 @@ export default function Header({
       }));
 
     return [...lowStock, ...outOfStock];
-  }, []);
+  })();
 
   const handleLogout = () => {
     logout();
@@ -64,7 +67,7 @@ export default function Header({
       }}
       className={`fixed right-0 z-30 border-b border-outline-variant bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}
     >
-      <nav className={`mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 md:px-16 ${isAdmin ? 'h-20' : 'py-4 md:py-5'}`}>
+      <nav className={`mx-auto flex w-full max-w-none items-center gap-3 px-4 md:px-16 ${isAdmin ? 'h-20' : 'py-4 md:py-5'}`}>
         {showBrand && (!isAuthenticated || user?.role !== 'Admin') && (
           <div className="shrink-0">
             <Link to="/" className="text-lg font-bold text-on-surface">NovaxClean</Link>
@@ -72,16 +75,33 @@ export default function Header({
         )}
 
         {showSearch ? (
-          <div className="hidden min-w-0 flex-[1_1_900px] items-center gap-3 rounded-full border border-outline-variant bg-surface-container px-4 py-1 lg:flex lg:max-w-none">
-          <span className="material-symbols-outlined shrink-0 text-outline">search</span>
-          <input
-            className="min-w-0 flex-[1_1_700px] border-none bg-transparent pr-3 text-xs placeholder:text-xs focus:ring-0"
-            placeholder="Busca productos..."
-            type="text"
-          />
-          <button className="shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-1 !text-xs !leading-none font-normal text-on-primary transition-all duration-200 ease-out hover:scale-110 hover:shadow-xl hover:shadow-primary/30 active:scale-95" type="button">
-            Buscar
-          </button>
+          <div className="relative hidden min-w-0 flex-[0_1_760px] lg:block lg:max-w-[760px]">
+            <form
+              className="flex items-center gap-3 rounded-full border border-outline-variant bg-surface-container px-4 py-1"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (typeof onSearchSubmit === 'function') {
+                  onSearchSubmit();
+                }
+              }}
+            >
+              <span className="material-symbols-outlined shrink-0 text-outline">search</span>
+              <input
+                className="site-search-input min-w-0 flex-1 border-none bg-transparent pr-3 text-xs placeholder:text-xs focus:ring-0"
+                placeholder="Busca productos..."
+                type="search"
+                maxLength={40}
+                value={searchValue}
+                onChange={(event) => {
+                  if (typeof onSearchChange === 'function') {
+                    onSearchChange(event.target.value);
+                  }
+                }}
+              />
+              <button className="shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-1 !text-xs !leading-none font-normal text-on-primary transition-all duration-200 ease-out hover:scale-110 hover:shadow-xl hover:shadow-primary/30 active:scale-95" type="submit">
+                Buscar
+              </button>
+            </form>
           </div>
         ) : null}
 
@@ -99,7 +119,7 @@ export default function Header({
           </div>
         )}
 
-        <div className="ml-auto flex shrink-0 items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-3 xl:ml-4">
           {showThemeToggle ? <ThemeToggle /> : null}
 
           {isAuthenticated ? (

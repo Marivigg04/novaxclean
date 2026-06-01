@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { filterChips, footerLinks, products } from './data';
 import Header from '../layout/Header';
 import CatalogHeader from './CatalogHeader';
@@ -11,20 +12,40 @@ export default function CatalogPage({ onOpenCart, onOpenAuth }) {
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
   const [guestPromptClosing, setGuestPromptClosing] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchQuery = searchParams.get('q') ?? '';
 
   const visibleProducts = useMemo(() => {
-    if (activeFilter === 'Todos') {
-      return products;
-    }
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
-    if (activeFilter === 'Ecológicos') {
-      return products.filter((product) => product.badge === 'Eco-Friendly');
-    }
+    return products.filter((product) => {
+      const matchesFilter =
+        activeFilter === 'Todos' ||
+        (activeFilter === 'Ecológicos' ? product.badge === 'Eco-Friendly' : true);
 
-    return products;
-  }, [activeFilter]);
+      if (!matchesFilter) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      const searchableText = [product.name, product.description, product.category, product.badge]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    });
+  }, [activeFilter, searchQuery]);
 
   const { isAuthenticated } = useAuth();
+  const searchSuggestions = useMemo(
+    () => Array.from(new Set(products.flatMap((product) => [product.name, product.category].filter(Boolean)))),
+    [],
+  );
 
   useEffect(() => {
     if (!guestPromptVisible) {
@@ -69,11 +90,31 @@ export default function CatalogPage({ onOpenCart, onOpenAuth }) {
     }
   };
 
+  const updateSearchQuery = (nextValue) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (nextValue.trim()) {
+      nextParams.set('q', nextValue.trim());
+    } else {
+      nextParams.delete('q');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton />
+      <Header
+        onOpenCart={onOpenCart}
+        onOpenAuth={onOpenAuth}
+        searchValue={searchQuery}
+        onSearchChange={updateSearchQuery}
+        onSearchSubmit={() => {}}
+        searchSuggestions={searchSuggestions}
+        showCartButton
+      />
       <main className="mx-auto w-full max-w-[1600px] px-4 pt-[88px] pb-10 md:px-16">
-        <CatalogHeader />
+        <CatalogHeader searchValue={searchQuery} onSearchChange={updateSearchQuery} onSearchSubmit={() => {}} />
         <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
         <ProductGrid products={visibleProducts} onAddToCart={handleAddToCart} />
       </main>

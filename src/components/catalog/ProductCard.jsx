@@ -1,6 +1,6 @@
 export default function ProductCard({ product, onAddToCart }) {
   return (
-    <article className="group overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow transition-all duration-300 hover:-translate-y-1">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow transition-all duration-300 hover:-translate-y-1">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-variant">
         <img
           alt={product.name}
@@ -18,15 +18,15 @@ export default function ProductCard({ product, onAddToCart }) {
         ) : null}
       </div>
 
-      <div className="p-8">
+      <div className="flex flex-1 flex-col p-8">
         <div className="mb-2 flex items-start justify-between gap-4">
           <h4 className="text-headline-md font-semibold text-primary">{product.name}</h4>
           <span className="text-headline-md font-bold text-primary">{product.price}</span>
         </div>
 
-        <p className="mb-6 text-body-md text-on-surface-variant">{product.description}</p>
+        <p className="mb-6 flex-1 text-body-md text-on-surface-variant">{product.description}</p>
 
-        <div className="flex items-center justify-between gap-4">
+        <div className="mt-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-1 text-secondary">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
               star

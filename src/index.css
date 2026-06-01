@@ -213,6 +213,35 @@ textarea {
   font: inherit;
 }
 
+.site-search-input {
+  appearance: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.site-search-input:focus,
+.site-search-input:focus-visible {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.site-search-input::-webkit-search-decoration,
+.site-search-input::-webkit-search-cancel-button,
+.site-search-input::-webkit-search-results-button,
+.site-search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+.site-search-input:-webkit-autofill,
+.site-search-input:-webkit-autofill:hover,
+.site-search-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: currentColor;
+  transition: background-color 9999s ease-out 0s;
+}
+
 .cloud-shadow {
   box-shadow: 0 10px 40px -10px rgba(15, 40, 84, 0.1);
 }
