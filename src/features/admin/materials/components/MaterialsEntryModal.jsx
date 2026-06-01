@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { PlusCircle, Save, X } from 'lucide-react';
+import { PlusCircle, Save, X, Trash2 } from 'lucide-react';
 
 function buildInitialForm(type, item) {
   if (type === 'formula') {
@@ -8,9 +8,16 @@ function buildInitialForm(type, item) {
       sku: item?.sku ?? `FP-${Date.now()}`,
       category: item?.category ?? '',
       yieldLabel: item?.yieldLabel ?? '',
-      estimatedCost: item?.estimatedCost ? String(item.estimatedCost) : '',
+      batchSize: item?.batchSize ? String(item.batchSize) : '',
       status: item?.status ?? 'Lista',
-      ingredientsText: item?.ingredients?.map((ingredient) => `${ingredient.name} | ${ingredient.qty}`).join('\n') ?? '',
+      ingredients: item?.ingredients?.length
+        ? item.ingredients.map((ingredient) => ({
+            id: `${ingredient.sku ?? ingredient.name}-${ingredient.qty}`,
+            materialSku: ingredient.sku ?? '',
+            qty: String(ingredient.qty ?? ''),
+          }))
+        : [{ id: 'ingredient-0', materialSku: '', qty: '' }],
+      notes: item?.notes ?? '',
     };
   }
 
@@ -34,11 +41,13 @@ export default function MaterialsEntryModal({
   item = null,
   categories = [],
   statuses = [],
+  materialOptions = [],
   onClose = () => {},
   onSubmit = () => {},
 }) {
   const [form, setForm] = useState(() => buildInitialForm(type, item));
   const [error, setError] = useState('');
+  const formulaIngredients = Array.isArray(form.ingredients) ? form.ingredients : [{ id: 'ingredient-0', materialSku: '', qty: '' }];
 
   const title = useMemo(() => {
     if (type === 'formula') {
@@ -67,6 +76,30 @@ export default function MaterialsEntryModal({
     setError('');
   };
 
+  const updateIngredient = (ingredientId, patch) => {
+    setForm((current) => ({
+      ...current,
+      ingredients: (Array.isArray(current.ingredients) ? current.ingredients : []).map((ingredient) => (ingredient.id === ingredientId ? { ...ingredient, ...patch } : ingredient)),
+    }));
+    setError('');
+  };
+
+  const addIngredient = () => {
+    setForm((current) => ({
+      ...current,
+      ingredients: [...(Array.isArray(current.ingredients) ? current.ingredients : []), { id: `ingredient-${Date.now()}`, materialSku: '', qty: '' }],
+    }));
+  };
+
+  const removeIngredient = (ingredientId) => {
+    setForm((current) => ({
+      ...current,
+      ingredients: (Array.isArray(current.ingredients) ? current.ingredients : []).length > 1
+        ? (Array.isArray(current.ingredients) ? current.ingredients : []).filter((ingredient) => ingredient.id !== ingredientId)
+        : (Array.isArray(current.ingredients) ? current.ingredients : []),
+    }));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -75,20 +108,32 @@ export default function MaterialsEntryModal({
       if (!form.sku.trim()) return setError('El SKU es requerido.');
       if (!form.category.trim()) return setError('La categoría es requerida.');
 
-      const estimatedCost = parseFloat(form.estimatedCost);
-      if (Number.isNaN(estimatedCost) || estimatedCost < 0) return setError('Costo estimado inválido.');
+      const ingredients = formulaIngredients
+        .map((ingredient) => {
+          const material = materialOptions.find((option) => option.sku === ingredient.materialSku);
+          const qty = parseFloat(ingredient.qty);
 
-      const ingredients = form.ingredientsText
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => {
-          const [name, qty] = line.split('|').map((part) => part.trim());
-          return { name: name ?? '', qty: qty ?? '' };
+          return {
+            sku: material?.sku ?? '',
+            name: material?.name ?? '',
+            qty,
+            unit: material?.unit ?? '',
+            unitCost: material?.unitCost ?? 0,
+          };
         })
-        .filter((ingredient) => ingredient.name && ingredient.qty);
+        .filter((ingredient) => ingredient.sku && !Number.isNaN(ingredient.qty) && ingredient.qty > 0);
 
-      if (!ingredients.length) return setError('Agrega al menos un insumo en el desglose BOM.');
+      if (!ingredients.length) return setError('Agrega al menos un insumo válido en el desglose BOM.');
+
+      const estimatedCost = ingredients.reduce((total, ingredient) => total + ingredient.qty * ingredient.unitCost, 0);
+      const formulaStatus =
+        form.status !== 'Lista'
+          ? form.status
+          : ingredients.some((ingredient) => materialOptions.find((option) => option.sku === ingredient.sku)?.status === 'Agotado')
+            ? 'En ajuste'
+            : ingredients.some((ingredient) => materialOptions.find((option) => option.sku === ingredient.sku)?.status === 'Stock bajo')
+              ? 'En revisión'
+              : 'Lista';
 
       onSubmit({
         ...(item ?? {}),
@@ -96,9 +141,11 @@ export default function MaterialsEntryModal({
         sku: form.sku.trim(),
         category: form.category,
         yieldLabel: form.yieldLabel.trim(),
+        batchSize: form.batchSize.trim(),
         estimatedCost,
-        status: form.status,
+        status: formulaStatus,
         ingredients,
+        notes: form.notes.trim(),
       });
       onClose();
       return;
@@ -137,7 +184,7 @@ export default function MaterialsEntryModal({
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
       <button type="button" className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm" aria-label="Cerrar modal" onClick={onClose} />
 
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-2xl overflow-visible rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)]">
+      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] max-h-[90vh]">
         <div className="flex items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">{title}</p>
@@ -149,7 +196,7 @@ export default function MaterialsEntryModal({
           </button>
         </div>
 
-        <div className="p-5">
+        <div className="max-h-[calc(90vh-78px)] overflow-y-auto p-5">
           {type === 'formula' ? (
             <div className="grid gap-3 md:grid-cols-2">
               <label className="block md:col-span-2">
@@ -158,7 +205,7 @@ export default function MaterialsEntryModal({
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU</span>
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU de fórmula</span>
                 <input name="sku" value={form.sku} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none whitespace-nowrap" placeholder="FP-001" />
               </label>
 
@@ -176,20 +223,76 @@ export default function MaterialsEntryModal({
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Costo estimado</span>
-                <input name="estimatedCost" value={form.estimatedCost} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="0.00" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Tamaño del lote</span>
+                <input name="batchSize" value={form.batchSize} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="100 unidades" />
               </label>
 
-              <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Estado</span>
+              <label className="block md:col-span-2">
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Estado inicial</span>
                 <select name="status" value={form.status} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none">
                   {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
                 </select>
               </label>
 
+              <div className="md:col-span-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Desglose BOM</span>
+                  <button type="button" onClick={addIngredient} className="rounded-lg border border-[var(--color-app-panel-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]">Agregar insumo</button>
+                </div>
+
+                <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                  {formulaIngredients.map((ingredient, index) => {
+                    const selectedMaterial = materialOptions.find((option) => option.sku === ingredient.materialSku);
+
+                    return (
+                      <div key={ingredient.id} className="grid gap-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-2 md:grid-cols-[1fr_120px_auto] md:items-end">
+                        <label className="block min-w-0">
+                          <span className="block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-base-text)]/55">Insumo #{index + 1}</span>
+                          <select
+                            value={ingredient.materialSku}
+                            onChange={(event) => updateIngredient(ingredient.id, { materialSku: event.target.value })}
+                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none"
+                          >
+                            <option value="">Seleccionar insumo</option>
+                            {materialOptions.map((material) => (
+                              <option key={material.sku} value={material.sku}>
+                                {material.name} · {material.sku}
+                              </option>
+                            ))}
+                          </select>
+                          {selectedMaterial ? <p className="mt-1 text-xs text-[var(--color-base-text)]/55">{selectedMaterial.unit} · {selectedMaterial.category}</p> : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-base-text)]/55">Cantidad</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={ingredient.qty}
+                            onChange={(event) => updateIngredient(ingredient.id, { qty: event.target.value })}
+                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none"
+                            placeholder="0"
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => removeIngredient(ingredient.id)}
+                          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--color-app-panel-border)] px-3 text-sm font-semibold text-[var(--color-base-text)]/70 transition-colors hover:bg-[var(--color-app-panel-hover)]"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Quitar
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <label className="block md:col-span-2">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Desglose BOM</span>
-                <textarea name="ingredientsText" value={form.ingredientsText} onChange={handleChange} className="mt-2 min-h-40 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm outline-none" placeholder={'Ingrediente | cantidad\nIngrediente | cantidad'} />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Notas de producción</span>
+                <textarea name="notes" value={form.notes} onChange={handleChange} className="mt-2 min-h-28 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm outline-none" placeholder="Observaciones, proceso o detalles técnicos" />
               </label>
             </div>
           ) : (

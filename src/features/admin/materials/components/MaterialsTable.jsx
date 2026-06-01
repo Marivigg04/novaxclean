@@ -1,4 +1,5 @@
-import { PencilLine, Trash2 } from 'lucide-react';
+import { useMemo } from 'react';
+import { ArrowUpDown, PencilLine, Trash2 } from 'lucide-react';
 
 const inventoryStatusStyles = {
   'En stock': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/15',
@@ -44,40 +45,88 @@ function ActionButtons({ label, onEdit, onDelete }) {
   );
 }
 
-export default function MaterialsTable({ activeView = 'insumos', filteredRows = [], page = 1, pageCount = 1, onPageChange = () => {}, onEditRequest = () => {}, onDeleteRequest = () => {} }) {
+export default function MaterialsTable({
+  activeView = 'insumos',
+  filteredRows = [],
+  page = 1,
+  pageCount = 1,
+  sortField = 'stock',
+  sortDirection = 'desc',
+  onSortChange = () => {},
+  onSortDirectionChange = () => {},
+  onPageChange = () => {},
+  onEditRequest = () => {},
+  onDeleteRequest = () => {},
+}) {
   const data = filteredRows;
+
+  const sortableColumns = useMemo(
+    () => (
+      activeView === 'insumos'
+        ? [
+            { value: 'name', label: 'Materia Prima', align: 'left' },
+            { value: 'sku', label: 'SKU', align: 'left' },
+            { value: 'category', label: 'Categoría', align: 'left' },
+            { value: 'stock', label: 'Stock', align: 'center' },
+            { value: 'minimum', label: 'Mínimo', align: 'center' },
+            { value: 'unit', label: 'Unidad', align: 'left' },
+            { value: 'unitCost', label: 'Costo Unitario', align: 'right' },
+            { value: 'supplier', label: 'Proveedor', align: 'left' },
+            { value: 'status', label: 'Estado', align: 'left' },
+          ]
+        : [
+            { value: 'product', label: 'Producto terminado', align: 'left' },
+            { value: 'sku', label: 'SKU', align: 'left' },
+            { value: 'category', label: 'Categoría', align: 'left' },
+            { value: 'yieldLabel', label: 'Rinde', align: 'left' },
+            { value: 'estimatedCost', label: 'Costo estimado', align: 'right' },
+            { value: 'status', label: 'Estado', align: 'left' },
+          ]
+    ),
+    [activeView],
+  );
+
+  const handleHeaderSort = (field) => {
+    if (field === sortField) {
+      onSortDirectionChange((current) => (current === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+
+    onSortChange(field);
+    onSortDirectionChange('asc');
+  };
 
   return (
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:p-6">
+      <div className="flex flex-col gap-4 border-b border-[var(--color-app-panel-border)] pb-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]">
+          <ArrowUpDown className="h-4 w-4" />
+          Haz clic en un encabezado para ordenar
+        </div>
+      </div>
+
       <div className="overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)]">
         <div className="overflow-x-auto">
-          <table className={`min-w-full divide-y divide-[var(--color-app-panel-border)] text-left ${activeView === 'insumos' ? 'min-w-[1320px]' : 'min-w-[1180px]'}`}>
+          <table className={`min-w-full divide-y divide-[var(--color-app-panel-border)] text-left ${activeView === 'insumos' ? 'min-w-[1320px]' : 'min-w-[1160px]'}`}>
             <thead className="bg-[var(--color-base-bg)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-base-text)]/60">
-              {activeView === 'insumos' ? (
-                <tr>
-                  <th className="whitespace-nowrap px-4 py-3">Materia Prima</th>
-                  <th className="whitespace-nowrap px-4 py-3">SKU</th>
-                  <th className="whitespace-nowrap px-4 py-3">Categoría</th>
-                  <th className="px-4 py-3 text-center">Stock Actual</th>
-                  <th className="px-4 py-3 text-center">Stock Mínimo</th>
-                  <th className="whitespace-nowrap px-4 py-3">Unidad</th>
-                  <th className="px-4 py-3 text-right">Costo Unitario</th>
-                  <th className="whitespace-nowrap px-4 py-3">Proveedor</th>
-                  <th className="whitespace-nowrap px-4 py-3">Estado</th>
-                  <th className="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              ) : (
-                <tr>
-                  <th className="whitespace-nowrap px-4 py-3">Producto terminado</th>
-                  <th className="whitespace-nowrap px-4 py-3">SKU</th>
-                  <th className="whitespace-nowrap px-4 py-3">Categoría</th>
-                  <th className="whitespace-nowrap px-4 py-3">Rinde</th>
-                  <th className="px-4 py-3">Desglose BOM</th>
-                  <th className="px-4 py-3 text-right">Costo estimado</th>
-                  <th className="whitespace-nowrap px-4 py-3">Estado</th>
-                  <th className="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              )}
+              <tr>
+                {sortableColumns.map((column) => (
+                  <th key={column.value} className={`px-4 py-3 ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'}`}>
+                    <button
+                      type="button"
+                      onClick={() => handleHeaderSort(column.value)}
+                      className={`inline-flex items-center gap-2 transition-colors hover:text-[var(--color-base-text)] ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <span>{column.label}</span>
+                      <span className={`inline-flex items-center justify-center transition-transform ${sortField === column.value && sortDirection === 'desc' ? 'rotate-180' : ''}`}>
+                        <ArrowUpDown className={`h-3.5 w-3.5 ${sortField === column.value ? 'text-[var(--color-brand)]' : ''}`} />
+                      </span>
+                    </button>
+                  </th>
+                ))}
+
+                <th className="px-4 py-3 text-right">Acciones</th>
+              </tr>
             </thead>
 
             <tbody className="divide-y divide-[var(--color-app-panel-border)] bg-[var(--color-base-surface)]">

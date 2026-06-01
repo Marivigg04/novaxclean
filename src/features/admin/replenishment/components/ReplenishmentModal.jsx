@@ -380,7 +380,7 @@ export default function ReplenishmentModal({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"
+                className="grid gap-6"
               >
                 <section className="min-w-0 rounded-2xl border border-outline-variant bg-surface-container-low p-5 shadow-sm md:p-6">
                   <div className="flex items-center justify-between gap-3">
@@ -477,11 +477,32 @@ export default function ReplenishmentModal({
                       </label>
                     </div>
                   </div>
-                </section>
 
-                <section className="min-w-0 rounded-2xl border border-outline-variant bg-surface-container-low p-5 shadow-md md:p-6">
-                  <h4 className="mb-4 text-headline-md font-semibold text-primary">Resumen del pedido</h4>
-                  <div className="space-y-3">
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <button type="button" onClick={handleClose} className="w-full rounded-xl border border-outline-variant px-4 py-3 text-body-md font-bold text-on-surface-variant transition-colors hover:bg-surface-container-lowest">Cancelar</button>
+                    <button type="button" onClick={() => setFlowStage('summary')} className="w-full rounded-xl bg-primary px-4 py-3 text-body-md font-bold text-on-primary shadow-lg transition-all hover:brightness-110 active:scale-95">Ver resumen del pedido</button>
+                  </div>
+                </section>
+              </motion.div>
+            ) : flowStage === 'summary' ? (
+              <motion.section
+                key="replenishment-summary"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.28 }}
+                className="grid gap-5"
+              >
+                <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-5 shadow-md md:p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">Resumen del pedido</p>
+                      <h4 className="mt-1 text-headline-md font-semibold text-primary">Confirma el contenido antes de enviar</h4>
+                    </div>
+                    <span className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{lineItems.length} referencias</span>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
                     {lineItems.map((lineItem) => (
                       <div key={lineItem.sku} className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -514,11 +535,11 @@ export default function ReplenishmentModal({
                   </div>
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                    <button type="button" onClick={handleClose} className="w-full rounded-xl border border-outline-variant px-4 py-3 text-body-md font-bold text-on-surface-variant transition-colors hover:bg-surface-container-lowest">Cancelar</button>
-                    <button type="button" onClick={handleSendOrder} className="w-full rounded-xl bg-primary px-4 py-3 text-body-md font-bold text-on-primary shadow-lg transition-all hover:brightness-110 active:scale-95">Enviar Pedido</button>
+                    <button type="button" onClick={() => setFlowStage('form')} className="w-full rounded-xl border border-outline-variant px-4 py-3 text-body-md font-bold text-on-surface-variant transition-colors hover:bg-surface-container-lowest">Volver al formulario</button>
+                    <button type="button" onClick={handleSendOrder} className="w-full rounded-xl bg-primary px-4 py-3 text-body-md font-bold text-on-primary shadow-lg transition-all hover:brightness-110 active:scale-95">Enviar pedido</button>
                   </div>
                 </section>
-              </motion.div>
+              </motion.section>
             ) : (
               <motion.section
                 key="replenishment-tracking"

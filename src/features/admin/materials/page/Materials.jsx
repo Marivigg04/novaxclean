@@ -34,13 +34,16 @@ export default function Materials() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [activeView, setActiveView] = useState('insumos');
+  const [entryType, setEntryType] = useState('material');
   const [page, setPage] = useState(1);
   const [materialCategory, setMaterialCategory] = useState('Todos');
   const [materialStatus, setMaterialStatus] = useState('Todos');
-  const [materialSortOrder, setMaterialSortOrder] = useState('desc');
+  const [materialSortField, setMaterialSortField] = useState('stock');
+  const [materialSortDirection, setMaterialSortDirection] = useState('desc');
   const [formulaCategory, setFormulaCategory] = useState('Todos');
   const [formulaStatus, setFormulaStatus] = useState('Todos');
-  const [formulaSortOrder, setFormulaSortOrder] = useState('desc');
+  const [formulaSortField, setFormulaSortField] = useState('estimatedCost');
+  const [formulaSortDirection, setFormulaSortDirection] = useState('desc');
   const [materials, setMaterials] = useState(materialRows);
   const [formulas, setFormulas] = useState(productionFormulas);
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
@@ -54,16 +57,18 @@ export default function Materials() {
   useEffect(() => {
     setMaterialCategory('Todos');
     setMaterialStatus('Todos');
-    setMaterialSortOrder('desc');
+    setMaterialSortField('stock');
+    setMaterialSortDirection('desc');
     setFormulaCategory('Todos');
     setFormulaStatus('Todos');
-    setFormulaSortOrder('desc');
+    setFormulaSortField('estimatedCost');
+    setFormulaSortDirection('desc');
     setPage(1);
   }, [activeView]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, materialCategory, materialStatus, materialSortOrder, formulaCategory, formulaStatus, formulaSortOrder]);
+  }, [search, materialCategory, materialStatus, materialSortField, materialSortDirection, formulaCategory, formulaStatus, formulaSortField, formulaSortDirection]);
 
   const filteredMaterials = useMemo(() => {
     const normalizedSearch = search.toLowerCase();
@@ -78,8 +83,19 @@ export default function Materials() {
   }, [materialCategory, materialStatus, materials, search]);
 
   const sortedMaterials = useMemo(() => {
-    return [...filteredMaterials].sort((a, b) => (materialSortOrder === 'asc' ? a.stock - b.stock : b.stock - a.stock));
-  }, [filteredMaterials, materialSortOrder]);
+    const direction = materialSortDirection === 'asc' ? 1 : -1;
+
+    return [...filteredMaterials].sort((a, b) => {
+      const left = a[materialSortField];
+      const right = b[materialSortField];
+
+      if (typeof left === 'number' && typeof right === 'number') {
+        return (left - right) * direction;
+      }
+
+      return String(left ?? '').localeCompare(String(right ?? ''), 'es', { sensitivity: 'base' }) * direction;
+    });
+  }, [filteredMaterials, materialSortDirection, materialSortField]);
 
   const visibleMaterials = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
@@ -101,8 +117,19 @@ export default function Materials() {
   }, [formulaCategory, formulaStatus, formulas, search]);
 
   const sortedFormulas = useMemo(() => {
-    return [...filteredFormulas].sort((a, b) => (formulaSortOrder === 'asc' ? a.estimatedCost - b.estimatedCost : b.estimatedCost - a.estimatedCost));
-  }, [filteredFormulas, formulaSortOrder]);
+    const direction = formulaSortDirection === 'asc' ? 1 : -1;
+
+    return [...filteredFormulas].sort((a, b) => {
+      const left = a[formulaSortField];
+      const right = b[formulaSortField];
+
+      if (typeof left === 'number' && typeof right === 'number') {
+        return (left - right) * direction;
+      }
+
+      return String(left ?? '').localeCompare(String(right ?? ''), 'es', { sensitivity: 'base' }) * direction;
+    });
+  }, [filteredFormulas, formulaSortDirection, formulaSortField]);
 
   const visibleFormulas = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
@@ -115,10 +142,11 @@ export default function Materials() {
   const currentStatuses = activeView === 'formulas' ? formulaStatuses : materialStatuses;
   const currentCategory = activeView === 'formulas' ? formulaCategory : materialCategory;
   const currentStatus = activeView === 'formulas' ? formulaStatus : materialStatus;
-  const currentSortOrder = activeView === 'formulas' ? formulaSortOrder : materialSortOrder;
-  const currentSortLabel = activeView === 'formulas' ? 'Costo' : 'Stock';
+  const currentSortField = activeView === 'formulas' ? formulaSortField : materialSortField;
+  const currentSortDirection = activeView === 'formulas' ? formulaSortDirection : materialSortDirection;
   const currentPageCount = activeView === 'formulas' ? formulaPageCount : materialPageCount;
   const currentRows = activeView === 'formulas' ? visibleFormulas : visibleMaterials;
+  const modalType = editingEntry?.type ?? entryType;
 
   useEffect(() => {
     if (page > currentPageCount) {
@@ -126,12 +154,23 @@ export default function Materials() {
     }
   }, [currentPageCount, page]);
 
-  const handleAddMaterial = (newMaterial) => {
-    setMaterials((current) => [newMaterial, ...current]);
+  const handleCreateEntry = (newEntry) => {
+    if (entryType === 'formula') {
+      setFormulas((current) => [newEntry, ...current]);
+      showInventoryToast({
+        type: 'success',
+        title: 'Fórmula agregada',
+        message: `${newEntry.product} se agregó correctamente.`,
+      });
+      setIsEntryModalOpen(false);
+      return;
+    }
+
+    setMaterials((current) => [newEntry, ...current]);
     showInventoryToast({
       type: 'success',
       title: 'Insumo agregado',
-      message: `${newMaterial.name} se agregó correctamente.`,
+      message: `${newEntry.name} se agregó correctamente.`,
     });
     setIsEntryModalOpen(false);
   };
@@ -262,7 +301,10 @@ export default function Materials() {
                 setSearch={setSearch}
                 activeView={activeView}
                 setActiveView={setActiveView}
-                onNew={() => setIsEntryModalOpen(true)}
+                onNew={() => {
+                  setEntryType(activeView === 'formulas' ? 'formula' : 'material');
+                  setIsEntryModalOpen(true);
+                }}
                 onReport={() => setIsReportModalOpen(true)}
                 onReplenish={() => setIsReplenishmentOpen(true)}
               />
@@ -275,11 +317,8 @@ export default function Materials() {
               setCategory={activeView === 'formulas' ? setFormulaCategory : setMaterialCategory}
               status={currentStatus}
               setStatus={activeView === 'formulas' ? setFormulaStatus : setMaterialStatus}
-              sortOrder={currentSortOrder}
-              setSortOrder={activeView === 'formulas' ? setFormulaSortOrder : setMaterialSortOrder}
               categories={currentCategories}
               statuses={currentStatuses}
-              sortLabel={currentSortLabel}
             />
 
             {activeView === 'formulas' ? (
@@ -294,6 +333,10 @@ export default function Materials() {
               page={page}
               pageCount={currentPageCount}
               onPageChange={setPage}
+              sortField={currentSortField}
+              sortDirection={currentSortDirection}
+              onSortChange={activeView === 'formulas' ? setFormulaSortField : setMaterialSortField}
+              onSortDirectionChange={activeView === 'formulas' ? setFormulaSortDirection : setMaterialSortDirection}
               onEditRequest={(item) => setEditingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
               onDeleteRequest={(item) => setDeletingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
             />
@@ -305,16 +348,17 @@ export default function Materials() {
 
       <MaterialsEntryModal
         isOpen={isEntryModalOpen || Boolean(editingEntry)}
-        type={editingEntry?.type ?? 'material'}
+        type={modalType}
         mode={editingEntry ? 'edit' : 'create'}
         item={editingEntry?.item ?? null}
-        categories={(editingEntry?.type === 'formula' ? formulaCategories : materialCategories).filter((item) => item !== 'Todos')}
-        statuses={(editingEntry?.type === 'formula' ? formulaStatuses : materialStatuses).filter((item) => item !== 'Todos')}
+        categories={(modalType === 'formula' ? formulaCategories : materialCategories).filter((item) => item !== 'Todos')}
+        statuses={(modalType === 'formula' ? formulaStatuses : materialStatuses).filter((item) => item !== 'Todos')}
+        materialOptions={materials}
         onClose={() => {
           setIsEntryModalOpen(false);
           setEditingEntry(null);
         }}
-        onSubmit={editingEntry ? handleUpdateEntry : handleAddMaterial}
+        onSubmit={editingEntry ? handleUpdateEntry : handleCreateEntry}
       />
 
       <MaterialsDeleteModal

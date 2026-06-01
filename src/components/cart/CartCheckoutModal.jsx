@@ -30,6 +30,12 @@ const originPoint = {
   label: 'Almacen Central Novaxclean',
 };
 
+const pickupPoint = {
+  lat: 10.4947,
+  lng: -66.8832,
+  label: 'Av. Principal 123, Torre Corporativa, Caracas, Distrito Capital',
+};
+
 function getTextSeed(value = '') {
   return value
     .split('')
@@ -275,6 +281,17 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
       L.divIcon({
         className: 'novax-point-icon',
         html: '<div style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:#143d70;color:#fff;font-weight:800;border-radius:999px;border:2px solid #fff;box-shadow:0 6px 14px rgba(20,61,112,.35);">A</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+      }),
+    [],
+  );
+
+  const pickupIcon = useMemo(
+    () =>
+      L.divIcon({
+        className: 'novax-point-icon',
+        html: '<div style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:#0f6ecf;color:#fff;font-weight:800;border-radius:999px;border:2px solid #fff;box-shadow:0 6px 14px rgba(15,110,207,.35);">P</div>',
         iconSize: [30, 30],
         iconAnchor: [15, 15],
       }),
@@ -602,6 +619,22 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Horario</p>
                             <p className="mt-1 text-body-md font-semibold text-primary">{storePickupInfo.weekdayHours}</p>
                             <p className="mt-1 text-body-md font-semibold text-primary">{storePickupInfo.saturdayHours}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
+                          <div className="border-b border-outline-variant px-3 py-2">
+                            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Mapa de retiro</p>
+                            <p className="mt-1 text-sm font-semibold text-primary">{pickupPoint.label}</p>
+                          </div>
+                          <div className="h-48 w-full">
+                            <MapContainer center={[pickupPoint.lat, pickupPoint.lng]} zoom={16} scrollWheelZoom={false} className="h-full w-full" preferCanvas>
+                              <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              />
+                              <Marker position={[pickupPoint.lat, pickupPoint.lng]} icon={pickupIcon} />
+                            </MapContainer>
                           </div>
                         </div>
                       </div>

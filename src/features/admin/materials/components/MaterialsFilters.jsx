@@ -1,4 +1,4 @@
-import { ArrowUpDown, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import RoundedSelect from '@/features/admin/inventory/components/RoundedSelect';
 
 export default function MaterialsFilters({
@@ -6,18 +6,15 @@ export default function MaterialsFilters({
   setCategory,
   status,
   setStatus,
-  sortOrder,
-  setSortOrder,
   categories = [],
   statuses = [],
-  sortLabel = 'Stock',
 }) {
   return (
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-brand)]">Filtros</p>
-          <h3 className="text-base font-bold text-[var(--color-base-text)]">Categoría, estado y orden</h3>
+          <h3 className="text-base font-bold text-[var(--color-base-text)]">Categoría y estado</h3>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -44,14 +41,9 @@ export default function MaterialsFilters({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
-          >
-            <ArrowUpDown className="h-4 w-4" />
-            {sortLabel} {sortOrder === 'asc' ? 'ascendente' : 'descendente'}
-          </button>
+          <div className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]">
+            <span>Ordena desde los encabezados de la tabla</span>
+          </div>
         </div>
       </div>
     </section>

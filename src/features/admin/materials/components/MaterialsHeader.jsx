@@ -7,6 +7,7 @@ const views = [
 
 export default function MaterialsHeader({ search, setSearch, activeView, setActiveView, onNew = () => {}, onReport = () => {}, onReplenish = () => {} }) {
   const placeholder = activeView === 'formulas' ? 'Buscar fórmula o SKU...' : 'Buscar por nombre o SKU...';
+  const newButtonLabel = activeView === 'formulas' ? 'Nueva Fórmula' : 'Nuevo Insumo';
 
   return (
     <div className="flex w-full flex-col gap-3 xl:w-auto">
@@ -68,7 +69,7 @@ export default function MaterialsHeader({ search, setSearch, activeView, setActi
           className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[var(--color-brand)] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.5)] transition-transform hover:scale-[0.99] active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" />
-          Nuevo Insumo
+          {newButtonLabel}
         </button>
       </div>
     </div>
