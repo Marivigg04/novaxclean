@@ -11,7 +11,7 @@ export default function CartSummary({ subtotal, shipping, taxes, total, onOpenCh
           <span>{formatMoney(subtotal)}</span>
         </div>
         <div className="flex min-w-0 justify-between gap-4 text-body-md text-on-surface-variant">
-          <span className="min-w-0 break-words">Envío Industrial (Logística Propia)</span>
+          <span className="min-w-0 break-words">Envío</span>
           <span className="font-bold text-secondary">{shipping === 0 ? 'Gratis' : formatMoney(shipping)}</span>
         </div>
         <div className="flex min-w-0 justify-between gap-4 text-body-md text-on-surface-variant">
@@ -27,9 +27,9 @@ export default function CartSummary({ subtotal, shipping, taxes, total, onOpenCh
       <div className="mb-6 rounded-lg border-l-4 border-secondary bg-surface-container p-4">
         <p className="mb-1 flex items-center gap-2 text-label-md font-bold text-secondary">
           <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-          Envío B2B Express
+          Envío gratis desde $25
         </p>
-        <p className="break-words text-xs text-on-surface-variant">Entrega programada para el próximo martes en tu almacén central.</p>
+        <p className="break-words text-xs text-on-surface-variant">Agrega un poco más a tu carrito y obtén envío gratis en tu pedido.</p>
       </div>
 
       <button className="mb-4 w-full rounded-xl bg-primary py-4 text-body-lg font-bold text-on-primary shadow-lg transition-all hover:brightness-110 active:scale-95" type="button" onClick={onOpenCheckout}>

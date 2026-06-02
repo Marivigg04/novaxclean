@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { cartItems, filterChips, footerLinks, products } from './data';
+import { filterChips, footerLinks, products } from './data';
 import Header from '../layout/Header';
 import CatalogHeader from './CatalogHeader';
 import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
-import MiniCart from './MiniCart';
 import Footer from '../layout/Footer';
 import { useAuth } from '@/context/AuthContext';
-import ProfileSidebar from '@/features/user/profile/components/ProfileSidebar';
 
 export default function CatalogPage({ onOpenCart, onOpenAuth }) {
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
   const [guestPromptClosing, setGuestPromptClosing] = useState(false);
@@ -67,47 +64,20 @@ export default function CatalogPage({ onOpenCart, onOpenAuth }) {
       return;
     }
 
-    setIsCartOpen(true);
+    if (typeof onOpenCart === 'function') {
+      onOpenCart();
+    }
   };
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      {isAuthenticated ? (
-        <>
-          <ProfileSidebar />
-          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} showSearch={false} showThemeToggle={false} showBrand={false} showNavigationLinks={false} showUserName={false} className="md:left-72" />
-          <main className="mx-auto w-full max-w-[1600px] px-4 pt-[88px] pb-10 md:px-16 md:pl-80">
-            <CatalogHeader />
-            <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            <ProductGrid products={visibleProducts} onAddToCart={handleAddToCart} />
-          </main>
-        </>
-      ) : (
-        <>
-          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} />
-          <main className="mx-auto w-full max-w-[1600px] px-4 pt-[88px] pb-10 md:px-16">
-            <CatalogHeader />
-            <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            <ProductGrid products={visibleProducts} onAddToCart={handleAddToCart} />
-          </main>
-        </>
-      )}
-
-      {isAuthenticated ? (
-        <MiniCart
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          onToggle={() => setIsCartOpen((value) => !value)}
-          items={cartItems}
-        />
-      ) : null}
-      {isAuthenticated ? (
-        <div className="md:pl-72">
-          <Footer links={footerLinks} />
-        </div>
-      ) : (
-        <Footer links={footerLinks} />
-      )}
+      <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton />
+      <main className="mx-auto w-full max-w-[1600px] px-4 pt-[88px] pb-10 md:px-16">
+        <CatalogHeader />
+        <FilterBar filters={filterChips} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+        <ProductGrid products={visibleProducts} onAddToCart={handleAddToCart} />
+      </main>
+      <Footer links={footerLinks} />
 
       {guestPromptVisible ? (
         <div className={`fixed inset-x-0 top-6 z-[60] mx-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-outline-variant bg-surface-container-lowest px-5 py-4 shadow-2xl shadow-black/20 backdrop-blur ${guestPromptClosing ? 'guest-prompt-exit' : 'guest-prompt-entrance'}`}>

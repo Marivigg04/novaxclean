@@ -7,7 +7,6 @@ import CartRecommendations from './CartRecommendations';
 import Footer from '../layout/Footer';
 import CartCheckoutModal from './CartCheckoutModal';
 import { useAuth } from '@/context/AuthContext';
-import ProfileSidebar from '@/features/user/profile/components/ProfileSidebar';
 
 const initialCartItems = cartItems.map((item) => ({ ...item }));
 
@@ -55,9 +54,8 @@ export default function CartPage({ onBackToCatalog, onOpenCart, onOpenAuth }) {
     <div className="min-h-screen bg-background text-on-surface">
       {isAuthenticated ? (
         <>
-          <ProfileSidebar />
-          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} showSearch={false} showThemeToggle={false} showBrand={false} showNavigationLinks={false} showUserName={false} className="md:left-72" />
-          <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-10 pt-[104px] md:px-16 md:pt-[112px] md:pl-80">
+          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
+          <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-10 pt-[104px] md:px-16 md:pt-[112px]">
             <div className="cart-entrance mb-10">
               <h1 className="mb-2 text-headline-xl font-bold text-primary">Tu Carrito de Compras</h1>
               <p className="text-body-md text-on-surface-variant">Revisa tus productos y optimiza tu inventario para este periodo.</p>
@@ -78,15 +76,13 @@ export default function CartPage({ onBackToCatalog, onOpenCart, onOpenAuth }) {
             </div>
           </main>
 
-          <div className="md:pl-72">
-            <Footer links={footerLinks} />
-          </div>
+          <Footer links={footerLinks} />
 
           <CartCheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} onGoToCatalog={onBackToCatalog} />
         </>
       ) : (
         <>
-          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} showCartButton={false} />
+          <Header onOpenCart={onOpenCart} onOpenAuth={onOpenAuth} />
           <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-10 pt-[104px] md:px-16 md:pt-[112px]">
             <div className="cart-entrance mb-10">
               <h1 className="mb-2 text-headline-xl font-bold text-primary">Tu Carrito de Compras</h1>

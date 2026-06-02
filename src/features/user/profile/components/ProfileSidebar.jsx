@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, MapPin, Package, CreditCard, Settings, Moon, Sun, ShoppingCart } from 'lucide-react';
+import { LogOut, User, MapPin, Package, Settings, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import logoAumc from '@/assets/Logo AUMC.png';
 import logoAumo from '@/assets/Logo AUMO.png';
@@ -9,22 +9,20 @@ const items = [
   { key: 'perfil', label: 'Mi Perfil', icon: User, to: '/perfil' },
   { key: 'pedidos', label: 'Mis Pedidos', icon: Package, to: '/perfil?tab=pedidos' },
   { key: 'direcciones', label: 'Direcciones', icon: MapPin, to: '/perfil?tab=direcciones' },
-  { key: 'pagos', label: 'Métodos de Pago', icon: CreditCard, to: '/perfil?tab=pagos' },
-  { key: 'catalogo', label: 'Catálogo', icon: ShoppingCart, to: '/catalogo' },
   { key: 'preferencias', label: 'Preferencias', icon: Settings, to: '/perfil?tab=preferencias' },
 ];
 
-export default function ProfileSidebar({ active, onSelect = () => {} }) {
+export default function ProfileSidebar({ active }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 'light';
     }
-  }, []);
+
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  });
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -44,7 +42,7 @@ export default function ProfileSidebar({ active, onSelect = () => {} }) {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex h-screen w-72 shrink-0 flex-col overflow-hidden border-r border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] text-[var(--color-base-text)] shadow-2xl" style={{ fontFamily: 'Inter, sans-serif' }} aria-label="Sidebar de usuario">
+    <aside className="fixed left-0 top-[72px] z-40 flex h-[calc(100vh-72px)] w-72 shrink-0 flex-col overflow-auto border-r border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] text-[var(--color-base-text)] shadow-2xl md:top-[88px] md:h-[calc(100vh-88px)]" style={{ fontFamily: 'Inter, sans-serif' }} aria-label="Sidebar de usuario">
       <div className="flex h-20 items-center border-b border-[var(--color-app-panel-border)] px-5">
         <div className="flex items-center gap-3">
           <img alt="Logo AUMC" src={logoAumc} className="sidebar-logo-light h-20 w-20 rounded-xl object-cover" />
@@ -56,7 +54,7 @@ export default function ProfileSidebar({ active, onSelect = () => {} }) {
         </div>
       </div>
 
-      <nav className="px-3 py-4 pb-6">
+      <nav className="px-3 py-4 pb-28">
         {items.map((item) => {
           // determine active by current pathname and tab query
           const isActive = (() => {
@@ -81,11 +79,11 @@ export default function ProfileSidebar({ active, onSelect = () => {} }) {
                   return true;
                 }
                 }
-                } catch (e) {
+              } catch {
               // fallback
             }
-                // only fallback to provided `active` prop when it's explicitly provided
-                return typeof active !== 'undefined' ? active === item.key : false;
+              // only fallback to provided `active` prop when it's explicitly provided
+              return typeof active !== 'undefined' ? active === item.key : false;
           })();
           const Icon = item.icon;
 
@@ -95,9 +93,8 @@ export default function ProfileSidebar({ active, onSelect = () => {} }) {
               return;
             }
 
-            // fallback: if no `to`, navigate to perfil and select
+            // fallback: if no `to`, navigate to perfil
             navigate('/perfil');
-            onSelect(item.key);
           };
 
           return (
@@ -121,7 +118,7 @@ export default function ProfileSidebar({ active, onSelect = () => {} }) {
         })}
       </nav>
 
-      <div className="mt-auto space-y-2 border-t border-[var(--color-app-panel-border)] px-3 py-4 pb-6">
+      <div className="absolute bottom-0 left-0 w-full space-y-2 border-t border-[var(--color-app-panel-border)] px-3 py-4 pb-6">
         <button
           onClick={toggleTheme}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-[var(--color-base-text)]/70 transition-all hover:bg-[var(--color-app-panel-hover)] hover:text-[var(--color-base-text)]"
