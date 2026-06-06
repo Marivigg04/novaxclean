@@ -3,9 +3,20 @@ import { showInventoryToast } from '@/features/admin/inventory/components/toastS
 
 function ToggleSwitch({ checked, onChange }) {
   return (
-    <button type="button" onClick={() => onChange(!checked)} className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors" aria-pressed={checked}>
-      <span className={`absolute inset-0 rounded-full ${checked ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-base-text)]/20'}`} />
-      <span className={`relative inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+        checked ? 'bg-[var(--color-brand)]' : 'bg-surface-container-high'
+      }`}
+    >
+      <span
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
     </button>
   );
 }
@@ -17,7 +28,7 @@ export default function PreferencesTab() {
   const [currency, setCurrency] = useState('USD ($) - Dólar');
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="space-y-8">
       <div>
         <h3 className="mb-5 text-xl font-bold">Comunicaciones</h3>
         <div className="space-y-4 rounded-2xl border border-[var(--color-app-panel-border)] p-6 bg-[var(--color-base-surface)]">

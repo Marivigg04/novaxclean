@@ -110,9 +110,23 @@ export default function AddressesTab() {
                 <label className="mb-1 block text-sm font-semibold">Dirección</label>
                 <textarea className="w-full rounded-lg border px-3 py-2" rows={3} value={newAddress.location} onChange={(e) => setNewAddress((c) => ({ ...c, location: e.target.value }))} required />
               </div>
-              <div className="flex items-center gap-3">
-                <input id="isDefault" type="checkbox" checked={newAddress.isDefault} onChange={(e) => setNewAddress((c) => ({ ...c, isDefault: e.target.checked }))} />
-                <label htmlFor="isDefault" className="text-sm">Marcar como dirección principal</label>
+              <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                <span className="text-sm font-semibold">Marcar como dirección principal</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={newAddress.isDefault}
+                  onClick={() => setNewAddress((c) => ({ ...c, isDefault: !c.isDefault }))}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    newAddress.isDefault ? 'bg-[var(--color-brand)]' : 'bg-surface-container-high'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                      newAddress.isDefault ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
 
               <div className="mt-4 flex justify-end gap-3">

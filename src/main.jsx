@@ -11,7 +11,16 @@ import './index.css'; // Asegúrate de que aquí importes tus estilos de Tailwin
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ReactLenis root>
+    <ReactLenis
+      root
+      options={{
+        duration: 1.2,
+        lerp: 0.08,
+        smoothWheel: true,
+        smoothTouch: false, // Desactivar en móviles para usar scroll inercial nativo súper fluido
+        syncTouch: false,
+      }}
+    >
       <BrowserRouter>
         <AuthProvider>
           <ThemeProvider>

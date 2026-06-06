@@ -34,7 +34,7 @@ export default function InventoryToast({ t, alert }) {
   const Icon = theme.icon;
   const prefersReducedMotion = useReducedMotion();
 
-  const wrapperMotion = prefersReducedMotion
+  const wrapperVariants = prefersReducedMotion
     ? {
         initial: { opacity: 0, y: -10, scale: 0.98 },
         animate: { opacity: 1, y: 0, scale: 1 },
@@ -43,12 +43,14 @@ export default function InventoryToast({ t, alert }) {
     : {
         initial: { opacity: 0, y: -24, scale: 0.9, rotateX: 10 },
         animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
-        exit: { opacity: 0, y: -16, scale: 0.96, rotateX: 0 },
+        exit: { opacity: 0, y: -36, scale: 0.88, rotateX: -8 },
       };
 
   return (
     <motion.div
-      {...wrapperMotion}
+      initial="initial"
+      animate={t.visible ? "animate" : "exit"}
+      variants={wrapperVariants}
       transition={{ type: 'spring', stiffness: 320, damping: 24, mass: 0.85 }}
       className={`relative overflow-hidden rounded-[1.4rem] border shadow-[0_24px_60px_-26px_rgba(16,32,58,0.55)] backdrop-blur-xl ${theme.wrapper}`}
     >

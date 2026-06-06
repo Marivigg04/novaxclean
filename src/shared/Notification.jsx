@@ -1,4 +1,8 @@
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { AlertTriangle, ArchiveX, Bell, ChevronRight, Clock3 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import ScrollArea from '@/shared/ScrollArea';
 
 const severityStyles = {
@@ -26,8 +30,53 @@ function getIcon(type) {
 }
 
 export default function Notification({ notifications = [], onClose = () => {} }) {
+	const modalRef = useRef(null);
+	const navigate = useNavigate();
+	const { user } = useAuth();
+
+	const handleItemClick = () => {
+		onClose();
+		if (user?.role === 'Admin') {
+			navigate('/admin/inventory');
+		} else {
+			navigate('/perfil?tab=pedidos');
+		}
+	};
+
+	useEffect(() => {
+		document.body.style.overflow = 'hidden';
+		document.documentElement.style.overflow = 'hidden';
+
+		function handleClickOutside(event) {
+			if (modalRef.current && !modalRef.current.contains(event.target)) {
+				// Evitar que se active si se clickea el botón de campana (se maneja por su propio onClick)
+				const isTrigger = event.target.closest('[aria-label="Notificaciones"]');
+				if (!isTrigger) {
+					onClose();
+				}
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside);
+		document.addEventListener('touchstart', handleClickOutside);
+		return () => {
+			document.body.style.overflow = '';
+			document.documentElement.style.overflow = '';
+			document.removeEventListener('mousedown', handleClickOutside);
+			document.removeEventListener('touchstart', handleClickOutside);
+		};
+	}, [onClose]);
+
 	return (
-		<div className="absolute right-0 top-12 z-50 w-[min(92vw,24rem)] overflow-hidden rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_24px_60px_-28px_rgba(16,32,58,0.55)]">
+		<motion.div
+			ref={modalRef}
+			data-lenis-prevent
+			initial={{ opacity: 0, y: 15, scale: 0.95 }}
+			animate={{ opacity: 1, y: 0, scale: 1 }}
+			exit={{ opacity: 0, y: 10, scale: 0.95 }}
+			transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+			className="fixed top-20 left-4 right-4 z-50 mx-auto w-auto max-w-sm overflow-hidden rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_24px_60px_-28px_rgba(16,32,58,0.55)] backdrop-blur-md md:absolute md:top-12 md:right-0 md:left-auto md:mx-0 md:w-96 md:max-w-none"
+			style={{ transformOrigin: 'top center' }}
+		>
 			<div className="flex items-center justify-between border-b border-[var(--color-app-panel-border)] px-4 py-3">
 				<div>
 					<p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">Notificaciones</p>
@@ -54,9 +103,10 @@ export default function Notification({ notifications = [], onClose = () => {} })
 							return (
 								<div
 									key={item.id}
-									className="group flex gap-3 rounded-2xl border border-transparent px-3 py-3 transition-colors hover:border-[var(--color-app-panel-border)] hover:bg-[var(--color-app-panel-hover)]"
+									onClick={handleItemClick}
+									className="group flex cursor-pointer gap-3 rounded-2xl border border-transparent px-3 py-3 transition-colors hover:border-[var(--color-app-panel-border)] hover:bg-[var(--color-app-panel-hover)]"
 								>
-									<div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${styles.badge}`}>
+									<div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${styles.badge} group-hover:scale-105 transition-transform duration-200`}>
 										<Icon className={`h-4 w-4 ${styles.icon}`} />
 									</div>
 
@@ -89,7 +139,7 @@ export default function Notification({ notifications = [], onClose = () => {} })
 					</div>
 				)}
 			</ScrollArea>
-		</div>
+		</motion.div>
 	);
 }
 

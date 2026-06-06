@@ -22,7 +22,7 @@ export default function Profile() {
     <div className="min-h-screen bg-[var(--color-base-bg)] text-[var(--color-base-text)] flex flex-col pt-[88px] md:pt-[104px] premium-mesh-bg">
       <Header onOpenAuth={() => {}} onOpenCart={() => navigate('/carrito')} />
       
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-5 md:px-8 md:py-6">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-5 md:px-8 md:py-6">
         <PageHeader title="Panel de usuario" subtitle="Administra tu cuenta, pedidos y preferencias personales." />
 
         {activeTab === 'perfil' ? (

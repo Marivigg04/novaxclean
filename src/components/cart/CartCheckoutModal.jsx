@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ReactLenis } from 'lenis/react';
 import { Check, CheckCircle2, Circle, LoaderCircle, MessageCircle, Phone } from 'lucide-react';
 import L from 'leaflet';
 import { MapContainer, Marker, Polyline, TileLayer, useMapEvent } from 'react-leaflet';
@@ -351,6 +352,20 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
   }, [isOpen]);
 
   useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         onClose();
@@ -532,6 +547,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
       aria-modal="true"
       aria-labelledby="checkout-title"
       onClick={handleClose}
+      data-lenis-prevent
     >
       <div
         className={`cart-scrollbar my-auto max-h-[calc(100dvh-3rem)] w-full max-w-6xl overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
@@ -553,8 +569,9 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
           </button>
         </div>
 
-        <div className="cart-scrollbar relative max-h-[calc(100dvh-11rem)] overflow-y-auto px-6 py-6 md:px-8">
-          <AnimatePresence mode="wait">
+        <ReactLenis asChild>
+          <div className="cart-scrollbar relative max-h-[calc(100dvh-11rem)] overflow-y-auto px-6 py-6 md:px-8" data-lenis-prevent>
+            <AnimatePresence mode="wait">
             {flowStage === 'checkout' ? (
               <motion.form
                 key="checkout-panel"
@@ -1008,6 +1025,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
             ) : null}
           </AnimatePresence>
         </div>
+        </ReactLenis>
       </div>
     </div>
   );

@@ -15,7 +15,70 @@ export default function OrdersTab() {
         <button className="text-sm font-bold text-[var(--color-brand)] hover:opacity-80 transition-opacity">Ver todos</button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[var(--color-app-panel-border)] cart-scrollbar">
+      {/* Vista de Tarjetas para Móviles */}
+      <div className="space-y-4 md:hidden">
+        {orders.map((order) => {
+          const isExpanded = selectedOrderId === order.id;
+          return (
+            <div
+              key={order.id}
+              className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-5 shadow-sm transition-all duration-200"
+            >
+              <div className="flex items-center justify-between border-b border-[var(--color-app-panel-border)]/50 pb-3">
+                <span className="font-extrabold text-sm text-[var(--color-brand)]">{order.id}</span>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                  order.status === 'Entregado' ? 'bg-white/90 text-[#0f2854] border border-[#0f2854]/12 shadow-sm dark:bg-white dark:text-[#0f2854]' : 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]'
+                }`}>
+                  {order.status}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-3 py-4 text-xs">
+                <div>
+                  <p className="text-outline uppercase tracking-wider text-[10px] font-semibold">Fecha</p>
+                  <p className="font-semibold text-[var(--color-base-text)] mt-0.5">{order.date}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-outline uppercase tracking-wider text-[10px] font-semibold">Total</p>
+                  <p className="font-bold text-sm text-[var(--color-base-text)] mt-0.5">{order.total}</p>
+                </div>
+                <div>
+                  <p className="text-outline uppercase tracking-wider text-[10px] font-semibold">Artículos</p>
+                  <p className="font-semibold text-[var(--color-base-text)] mt-0.5">{order.items} {order.items === 1 ? 'artículo' : 'artículos'}</p>
+                </div>
+                <div className="flex items-end justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOrderId((current) => (current === order.id ? null : order.id))}
+                    className="font-bold text-xs text-[var(--color-brand)] hover:underline"
+                  >
+                    {isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
+                  </button>
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div className="mt-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4 text-xs text-[var(--color-base-text)]/80">
+                  <p className="font-bold text-[var(--color-base-text)]">Detalles del pedido</p>
+                  <p className="mt-1">Aquí verás los artículos comprados, dirección de envío y método de pago asociados al pedido {order.id}.</p>
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedOrderId(null)}
+                      className="rounded-full border border-[var(--color-app-panel-border)] px-3 py-1.5 text-[10px] font-bold text-[var(--color-base-text)] transition-colors bg-[var(--color-base-surface)] hover:bg-[var(--color-app-panel-hover)]"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tabla para Desktop */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[var(--color-app-panel-border)] cart-scrollbar">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)]">
             <tr>
@@ -51,7 +114,7 @@ export default function OrdersTab() {
                   </td>
                 </tr>
                 {selectedOrderId === order.id ? (
-                  <tr>
+                  <tr key={`${order.id}-detail`}>
                     <td className="px-6 pb-5 pt-0" colSpan={5}>
                       <div className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-5 py-4 text-sm text-[var(--color-base-text)]/80">
                         <div className="flex flex-wrap items-center justify-between gap-3">
