@@ -164,21 +164,26 @@
   background: linear-gradient(180deg, #7c9fcd, #5b7ba5);
 }
 
-/* Sidebar logo switching by theme */
+/* Logo switching by theme */
 .sidebar-logo-light,
-.sidebar-logo-dark {
+.sidebar-logo-dark,
+.logo-light,
+.logo-dark {
   display: none;
 }
 
-.sidebar-logo-light {
+.sidebar-logo-light,
+.logo-light {
   display: inline-block;
 }
 
-.dark .sidebar-logo-light {
+.dark .sidebar-logo-light,
+.dark .logo-light {
   display: none;
 }
 
-.dark .sidebar-logo-dark {
+.dark .sidebar-logo-dark,
+.dark .logo-dark {
   display: inline-block;
 }
 

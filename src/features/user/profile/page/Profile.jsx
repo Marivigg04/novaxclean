@@ -5,7 +5,6 @@ import Footer from '@/components/layout/Footer';
 import { footerLinks } from '@/components/landing/content';
 import PageHeader from '@/shared/PageHeader';
 import Card from '@/features/admin/dashboard/components/Card';
-import ProfileSidebar from '../components/ProfileSidebar';
 import UserInfoTab from '../components/UserInfoTab';
 import OrdersTab from '../components/OrdersTab';
 import AddressesTab from '../components/AddressesTab';
@@ -23,7 +22,7 @@ export default function Profile() {
     <div className="min-h-screen bg-[var(--color-base-bg)] text-[var(--color-base-text)] flex flex-col pt-[88px] md:pt-[104px] premium-mesh-bg">
       <Header onOpenAuth={() => {}} onOpenCart={() => navigate('/carrito')} />
       
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-5 md:px-8 md:py-6 md:pl-80">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-5 md:px-8 md:py-6">
         <PageHeader title="Panel de usuario" subtitle="Administra tu cuenta, pedidos y preferencias personales." />
 
         {activeTab === 'perfil' ? (
@@ -34,19 +33,15 @@ export default function Profile() {
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-start">
-          <ProfileSidebar active={activeTab} />
-          
-          <div className="min-w-0 flex-1">
-            {activeTab === 'perfil' && <UserInfoTab />}
-            {activeTab === 'pedidos' && <OrdersTab />}
-            {activeTab === 'direcciones' && <AddressesTab />}
-            {activeTab === 'preferencias' && <PreferencesTab />}
-          </div>
+        <div className="mt-8 max-w-5xl mx-auto">
+          {activeTab === 'perfil' && <UserInfoTab />}
+          {activeTab === 'pedidos' && <OrdersTab />}
+          {activeTab === 'direcciones' && <AddressesTab />}
+          {activeTab === 'preferencias' && <PreferencesTab />}
         </div>
       </main>
 
-      <div className="md:pl-72">
+      <div>
         <Footer links={footerLinks} />
       </div>
     </div>

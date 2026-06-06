@@ -1,4 +1,6 @@
-import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { PageTransitionProvider, usePageTransition } from '../context/PageTransitionContext';
 import LandingPage from '../components/landing/LandingPage';
 import CatalogPage from '../components/catalog/CatalogPage';
 import CartPage from '../components/cart/CartPage';
@@ -10,14 +12,14 @@ import Settings from '@/features/admin/settings/page/Settings';
 import Profile from '@/features/user/profile/page/Profile';
 
 function LandingRoute({ initialSection }) {
-	const navigate = useNavigate();
+	const { navigateTo } = usePageTransition();
 
 	return (
 		<LandingPage
 			initialSection={initialSection}
-			onExploreCatalog={() => navigate('/catalogo')}
-			onOpenCart={() => navigate('/carrito')}
-			onOpenAuth={() => navigate('/auth')}
+			onExploreCatalog={() => navigateTo('/catalogo')}
+			onOpenCart={() => navigateTo('/carrito')}
+			onOpenAuth={() => navigateTo('/auth')}
 		/>
 	);
 }
@@ -39,37 +41,37 @@ function ContactRoute() {
 }
 
 function CatalogRoute() {
-	const navigate = useNavigate();
+	const { navigateTo } = usePageTransition();
 
 	return (
 		<CatalogPage
-			onBackToLanding={() => navigate('/')}
-			onOpenCart={() => navigate('/carrito')}
-			onOpenAuth={() => navigate('/auth')}
+			onBackToLanding={() => navigateTo('/')}
+			onOpenCart={() => navigateTo('/carrito')}
+			onOpenAuth={() => navigateTo('/auth')}
 		/>
 	);
 }
 
 function CartRoute() {
-	const navigate = useNavigate();
+	const { navigateTo } = usePageTransition();
 
 	return (
 		<CartPage
-			onBackToLanding={() => navigate('/')}
-			onBackToCatalog={() => navigate('/catalogo')}
-			onOpenCart={() => navigate('/carrito')}
-			onOpenAuth={() => navigate('/auth')}
+			onBackToLanding={() => navigateTo('/')}
+			onBackToCatalog={() => navigateTo('/catalogo')}
+			onOpenCart={() => navigateTo('/carrito')}
+			onOpenAuth={() => navigateTo('/auth')}
 		/>
 	);
 }
 
 function AuthRoute() {
-	const navigate = useNavigate();
+	const { navigateTo } = usePageTransition();
 
 	return (
 		<AuthPage
-			onBackToLanding={() => navigate('/')}
-			onAuthSuccess={(role) => navigate(role === 'Admin' ? '/admin' : '/perfil')}
+			onBackToLanding={() => navigateTo('/')}
+			onAuthSuccess={(role) => navigateTo(role === 'Admin' ? '/admin' : '/perfil')}
 		/>
 	);
 }
@@ -84,7 +86,22 @@ function UserRoute() {
 	return hasUser ? <Outlet /> : <Navigate to="/auth" replace />;
 }
 
-function AppRoutes() {
+function AppRoutesInner() {
+	const { pathname } = useLocation();
+	const prevPathnameRef = useRef(pathname);
+
+	useEffect(() => {
+		const landingPaths = ['/', '/informacion', '/empresa', '/contacto'];
+		const wasLanding = landingPaths.includes(prevPathnameRef.current);
+		const isLanding = landingPaths.includes(pathname);
+
+		if (!(wasLanding && isLanding)) {
+			window.scrollTo(0, 0);
+		}
+
+		prevPathnameRef.current = pathname;
+	}, [pathname]);
+
 	return (
 		<Routes>
 			{/* Rutas publicas */}
@@ -111,6 +128,14 @@ function AppRoutes() {
 
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
+	);
+}
+
+function AppRoutes() {
+	return (
+		<PageTransitionProvider>
+			<AppRoutesInner />
+		</PageTransitionProvider>
 	);
 }
 

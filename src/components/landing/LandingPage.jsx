@@ -18,8 +18,16 @@ export default function LandingPage({ onExploreCatalog, onOpenCart, onOpenAuth, 
   );
 
   useEffect(() => {
-    if (!initialSection || typeof document === 'undefined') {
+    if (typeof window === 'undefined') {
       return undefined;
+    }
+
+    if (!initialSection) {
+      // Si no hay sección inicial (como al volver a Inicio), desplaza suavemente arriba
+      const frame = window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
 
     const target = document.getElementById(initialSection);
