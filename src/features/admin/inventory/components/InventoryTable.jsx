@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowUpDown, Filter, PencilLine, Trash2 } from 'lucide-react';
 import RoundedSelect from './RoundedSelect';
 
@@ -147,8 +148,14 @@ export default function InventoryTable({
             </thead>
 
             <tbody className="divide-y divide-[var(--color-app-panel-border)] bg-[var(--color-base-surface)]">
-              {filteredProducts.map((product) => (
-                <tr key={product.sku} className="transition-colors hover:bg-[var(--color-app-panel-hover)]/50">
+              {filteredProducts.map((product, index) => (
+                <motion.tr
+                  key={product.sku}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22, ease: 'easeOut', delay: index * 0.025 }}
+                  className="transition-colors hover:bg-[var(--color-app-panel-hover)]/50"
+                >
                   <td className="px-4 py-4">
                     <div className="font-semibold text-[var(--color-base-text)]">{product.name}</div>
                   </td>
@@ -178,18 +185,20 @@ export default function InventoryTable({
                       </button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Mobile Card List View */}
       <div className="mt-4 space-y-3 md:hidden">
-        {filteredProducts.map((product) => (
-          <div 
+        {filteredProducts.map((product, index) => (
+          <motion.div 
             key={product.sku} 
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut', delay: index * 0.03 }}
             className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
@@ -239,7 +248,7 @@ export default function InventoryTable({
                 Eliminar
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
 
         {filteredProducts.length === 0 && (

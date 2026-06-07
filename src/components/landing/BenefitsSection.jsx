@@ -9,7 +9,9 @@ export default function BenefitsSection() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
       // Animación del header
       gsap.from('.benefits-header > *', {
         scrollTrigger: {
@@ -37,9 +39,9 @@ export default function BenefitsSection() {
         stagger: 0.15,
         ease: 'back.out(1.2)',
       });
-    }, containerRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (

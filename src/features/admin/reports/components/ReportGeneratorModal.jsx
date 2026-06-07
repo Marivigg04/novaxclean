@@ -611,7 +611,7 @@ function FullPreviewModal({ isOpen = false, onClose = () => {}, config, visibleP
 
         <ScrollArea className="flex-1 px-4 py-5 sm:px-6">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-            {visiblePages.map((page, index) => (
+            {visiblePages.map((page) => (
               <PageCard
                 key={page.id}
                 number={`${page.number} de ${visiblePages.length}`}
@@ -641,25 +641,60 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [activeTab, setActiveTab] = useState('config'); // 'config' or 'preview'
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    let timeoutId;
+    let closingTimeoutId;
+
+    if (isOpen) {
+      const renderTimeout = setTimeout(() => {
+        setIsRendered(true);
+        setIsClosing(false);
+      }, 0);
+      return () => clearTimeout(renderTimeout);
+    }
+
+    if (isRendered) {
+      closingTimeoutId = setTimeout(() => {
+        setIsClosing(true);
+      }, 0);
+      timeoutId = window.setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 240);
+    }
+
+    return () => {
+      if (closingTimeoutId) clearTimeout(closingTimeoutId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, isRendered]);
 
   useEffect(() => {
     if (!isOpen) {
-      setConfig(createReportConfig(preset));
-      setOpenSections({
-        general: true,
-        pages: true,
-        sales: true,
-        inventory: true,
-      });
-      setIsFullPreviewOpen(false);
-      setIsGenerating(false);
-      setStatusMessage('');
-      setActiveTab('config');
-      return;
+      const resetTimeout = setTimeout(() => {
+        setConfig(createReportConfig(preset));
+        setOpenSections({
+          general: true,
+          pages: true,
+          sales: true,
+          inventory: true,
+        });
+        setIsFullPreviewOpen(false);
+        setIsGenerating(false);
+        setStatusMessage('');
+        setActiveTab('config');
+      }, 0);
+      return () => clearTimeout(resetTimeout);
     }
 
-    setConfig(createReportConfig(preset));
-    setActiveTab('config');
+    const initTimeout = setTimeout(() => {
+      setConfig(createReportConfig(preset));
+      setActiveTab('config');
+    }, 0);
+    return () => clearTimeout(initTimeout);
   }, [isOpen, preset]);
 
   const visiblePages = useMemo(() => reportPages.filter((page) => config.pages[page.id]), [config.pages]);
@@ -852,19 +887,18 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
         setStatusMessage('Vista lista para imprimir o guardar como PDF.');
       }
     } catch (error) {
+      console.error(error);
       setStatusMessage('No se pudo generar el reporte. Intenta nuevamente.');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-0 backdrop-blur-sm sm:p-4">
-      <button type="button" className="fixed inset-0 h-full w-full" aria-label="Cerrar modal de reportes" onClick={onClose} />
-
-      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[94vh] sm:max-w-[1660px] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)]">
+    <div className={`fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-0 backdrop-blur-sm sm:p-4 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`} role="dialog" aria-modal="true" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className={`relative z-10 flex h-full w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[94vh] sm:max-w-[1660px] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
         <div className="flex items-center justify-between gap-4 border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-base-text)]/50">Generación de reportes</p>
@@ -1152,7 +1186,7 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {reportPages.map((page, index) => {
+                  {reportPages.map((page) => {
                     const isVisible = config.pages[page.id];
                     const hiddenClass = isVisible ? 'max-h-[2000px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-3 pointer-events-none';
 

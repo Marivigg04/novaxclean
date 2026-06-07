@@ -11,23 +11,29 @@ export default function MaterialsHeader({ search, setSearch, activeView, setActi
 
   return (
     <div className="flex w-full flex-col gap-3 xl:w-auto">
-      <div className="flex items-center gap-3 self-end">
+      <div className="flex items-center gap-2.5 self-end justify-end w-full sm:w-auto">
         <button
           type="button"
           onClick={onReport}
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+          title="Generar Reporte"
+          className="group inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:pl-2 sm:pr-4 text-sm font-semibold text-[var(--color-base-text)] transition-all duration-300 hover:bg-[var(--color-app-panel-hover)] hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 active:scale-95 shadow-sm"
         >
-          <FileDown className="h-4 w-4" />
-          Generar Reporte
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500/8 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-500 group-hover:scale-105 shadow-sm">
+            <FileDown className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" />
+          </div>
+          <span className="hidden sm:inline pr-1 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Generar Reporte</span>
         </button>
 
         <button
           type="button"
           onClick={onReplenish}
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+          title="Reabastecer"
+          className="group inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:pl-2 sm:pr-4 text-sm font-semibold text-[var(--color-base-text)] transition-all duration-300 hover:bg-[var(--color-app-panel-hover)] hover:border-emerald-500/40 hover:shadow-md hover:shadow-emerald-500/5 active:scale-95 shadow-sm"
         >
-          <Truck className="h-4 w-4" />
-          Reabastecer
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/8 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400 transition-all duration-300 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 group-hover:scale-105 shadow-sm">
+            <Truck className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </div>
+          <span className="hidden sm:inline pr-1 transition-colors duration-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Reabastecer</span>
         </button>
       </div>
 

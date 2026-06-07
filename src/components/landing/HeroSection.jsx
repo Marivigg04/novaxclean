@@ -26,86 +26,10 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
     gsap.set(particlesRef.current, { scale: 0, opacity: 0, xPercent: -50, yPercent: -50 });
 
     const tl = gsap.timeline({ delay: 0.4 });
-
-    // 1. Entrada de anillos de fondo
-    tl.to(
-      [ring1Ref.current, ring2Ref.current],
-      {
-        scale: (index) => (index === 0 ? 1.15 : 1.3),
-        opacity: (index) => (index === 0 ? 0.8 : 0.25),
-        duration: 0.9,
-        ease: 'power3.out',
-        stagger: 0.1,
-      }
-    );
-
-    // 2. Entrada del logo con rotación 3D e impacto elástico
-    tl.to(
-      logoRef.current,
-      {
-        scale: 1,
-        rotationY: 0,
-        rotationX: 0,
-        z: 0,
-        opacity: 1,
-        duration: 1.5,
-        ease: 'elastic.out(1, 0.75)',
-      },
-      '-=0.7'
-    );
-
-    // 3. Disparo del spray limpio al "impactar" el logo
-    tl.add(() => {
-      const totalParticles = particlesRef.current.length;
-      particlesRef.current.forEach((particle, index) => {
-        if (!particle) return;
-
-        const baseAngle = (index / totalParticles) * 2 * Math.PI;
-        const angle = baseAngle + (Math.random() - 0.5) * 0.5;
-        const distance = 110 + Math.random() * 110;
-        const targetX = Math.cos(angle) * distance;
-        const targetY = Math.sin(angle) * distance;
-        const gravity = 30 + Math.random() * 40;
-
-        gsap.fromTo(
-          particle,
-          { x: 0, y: 0, scale: 0.3, opacity: 0.9, xPercent: -50, yPercent: -50 },
-          {
-            x: targetX,
-            y: targetY + gravity,
-            scale: 1.2 + Math.random() * 0.5,
-            opacity: 0,
-            duration: 1.0 + Math.random() * 0.5,
-            delay: Math.random() * 0.1,
-            ease: 'power3.out',
-          }
-        );
-      });
-    }, '-=0.9');
-
-    // 4. Entrada de los iconos flotantes
-    tl.to(
-      [bubble1Ref.current, bubble2Ref.current],
-      {
-        scale: 1,
-        opacity: 1,
-        duration: 0.9,
-        stagger: 0.2,
-        ease: 'back.out(1.8)',
-      },
-      '-=0.7'
-    );
-
-    // 5. Animaciones continuas
-    tl.add(() => {
-      gsap.to(bubble1Ref.current, { y: -18, x: 8, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-      gsap.to(bubble2Ref.current, { y: 18, x: -8, duration: 6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.5 });
-      gsap.to(ring1Ref.current, { scale: 1.22, opacity: 0.9, duration: 2.5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-      gsap.to(ring2Ref.current, { scale: 1.38, opacity: 0.35, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.4 });
-    });
-
-    // Inclinación 3D interactiva en Hover
+    const mm = gsap.matchMedia();
     const logoEl = logoRef.current;
+
+    // Inclinación 3D interactiva en Hover (Escritorio)
     const handleMouseMove = (e) => {
       if (!logoEl) return;
       const rect = logoEl.getBoundingClientRect();
@@ -135,13 +59,131 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
       });
     };
 
-    if (logoEl) {
-      logoEl.addEventListener('mousemove', handleMouseMove);
-      logoEl.addEventListener('mouseleave', handleMouseLeave);
-    }
+    mm.add("(min-width: 768px)", () => {
+      // 1. Entrada de anillos de fondo
+      tl.to(
+        [ring1Ref.current, ring2Ref.current],
+        {
+          scale: (index) => (index === 0 ? 1.15 : 1.3),
+          opacity: (index) => (index === 0 ? 0.8 : 0.25),
+          duration: 0.9,
+          ease: 'power3.out',
+          stagger: 0.1,
+        }
+      );
+
+      // 2. Entrada del logo con rotación 3D e impacto elástico
+      tl.to(
+        logoRef.current,
+        {
+          scale: 1,
+          rotationY: 0,
+          rotationX: 0,
+          z: 0,
+          opacity: 1,
+          duration: 1.5,
+          ease: 'elastic.out(1, 0.75)',
+        },
+        '-=0.7'
+      );
+
+      // 3. Disparo del spray limpio al "impactar" el logo
+      tl.add(() => {
+        const totalParticles = particlesRef.current.length;
+        particlesRef.current.forEach((particle, index) => {
+          if (!particle) return;
+
+          const baseAngle = (index / totalParticles) * 2 * Math.PI;
+          const angle = baseAngle + (Math.random() - 0.5) * 0.5;
+          const distance = 110 + Math.random() * 110;
+          const targetX = Math.cos(angle) * distance;
+          const targetY = Math.sin(angle) * distance;
+          const gravity = 30 + Math.random() * 40;
+
+          gsap.fromTo(
+            particle,
+            { x: 0, y: 0, scale: 0.3, opacity: 0.9, xPercent: -50, yPercent: -50 },
+            {
+              x: targetX,
+              y: targetY + gravity,
+              scale: 1.2 + Math.random() * 0.5,
+              opacity: 0,
+              duration: 1.0 + Math.random() * 0.5,
+              delay: Math.random() * 0.1,
+              ease: 'power3.out',
+            }
+          );
+        });
+      }, '-=0.9');
+
+      // 4. Entrada de los iconos flotantes
+      tl.to(
+        [bubble1Ref.current, bubble2Ref.current],
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.9,
+          stagger: 0.2,
+          ease: 'back.out(1.8)',
+        },
+        '-=0.7'
+      );
+
+      // 5. Animaciones continuas
+      tl.add(() => {
+        gsap.to(bubble1Ref.current, { y: -18, x: 8, duration: 5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+        gsap.to(bubble2Ref.current, { y: 18, x: -8, duration: 6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.5 });
+        gsap.to(ring1Ref.current, { scale: 1.22, opacity: 0.9, duration: 2.5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+        gsap.to(ring2Ref.current, { scale: 1.38, opacity: 0.35, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.4 });
+      });
+
+      if (logoEl) {
+        logoEl.addEventListener('mousemove', handleMouseMove);
+        logoEl.addEventListener('mouseleave', handleMouseLeave);
+      }
+    });
+
+    mm.add("(max-width: 767px)", () => {
+      // Animación súper liviana para móviles
+      tl.to(
+        [ring1Ref.current, ring2Ref.current],
+        {
+          scale: (index) => (index === 0 ? 1.15 : 1.3),
+          opacity: (index) => (index === 0 ? 0.8 : 0.25),
+          duration: 0.5,
+          ease: 'power2.out',
+        }
+      );
+
+      tl.to(
+        logoRef.current,
+        {
+          scale: 1,
+          rotationY: 0,
+          rotationX: 0,
+          z: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: 'power2.out',
+        },
+        '-=0.3'
+      );
+
+      tl.to(
+        [bubble1Ref.current, bubble2Ref.current],
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+        },
+        '-=0.3'
+      );
+    });
 
     return () => {
       tl.kill();
+      mm.revert();
       if (logoEl) {
         logoEl.removeEventListener('mousemove', handleMouseMove);
         logoEl.removeEventListener('mouseleave', handleMouseLeave);

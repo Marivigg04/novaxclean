@@ -9,7 +9,9 @@ export default function ContactSection() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
       // Animación de la tarjeta de contacto completa (fade y slide-up)
       gsap.from('.contact-card', {
         scrollTrigger: {
@@ -22,9 +24,9 @@ export default function ContactSection() {
         duration: 0.8,
         ease: 'power3.out',
       });
-    }, containerRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (

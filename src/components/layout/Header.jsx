@@ -233,7 +233,7 @@ export default function Header({
           )}
 
           {showBrand && (!isAuthenticated || user?.role !== 'Admin' || isMobile) && (
-            <motion.div layoutId="header-brand" className="shrink-0 flex items-center gap-2">
+            <motion.div layoutId={isAdmin || isMobile ? undefined : "header-brand"} className="shrink-0 flex items-center gap-2">
                 <div className="hidden sm:block shrink-0">
                   <img alt="Logo NovaxClean" src={logoAumc} className="logo-light h-13 w-13 object-contain" />
                   <img alt="Logo NovaxClean" src={logoAumo} className="logo-dark h-13 w-13 object-contain" />
@@ -245,10 +245,10 @@ export default function Header({
           {showSearch ? (
             <motion.div
               ref={searchRef}
-              layout
-              layoutId="header-search-bar"
+              layout={isMobile ? false : "position"}
+              layoutId={isMobile ? undefined : "header-search-bar"}
               className="relative hidden min-w-0 lg:block z-40"
-              animate={{
+              animate={isMobile ? {} : {
                 flexBasis: isFocused ? '520px' : '280px',
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -412,11 +412,11 @@ export default function Header({
           ) : null}
 
           {showNavigationLinks && (!isAuthenticated || user?.role !== 'Admin') && (
-            <motion.div layoutId="header-nav-container" className="hidden flex-none items-center gap-3 xl:flex">
+            <motion.div layoutId={isMobile ? undefined : "header-nav-container"} className="hidden flex-none items-center gap-3 xl:flex">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <motion.div layoutId={`header-nav-item-${item.label}`} key={item.label} className="flex">
+                  <motion.div layoutId={isMobile ? undefined : `header-nav-item-${item.label}`} key={item.label} className="flex">
                     <button
                       type="button"
                       onClick={() => navigate(item.href)}
@@ -437,7 +437,7 @@ export default function Header({
             </motion.div>
           )}
 
-          <motion.div layoutId="header-actions-container" className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-3">
+          <motion.div layoutId={isAdmin || isMobile ? undefined : "header-actions-container"} className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-3">
             {showThemeToggle ? (
               <div className="hidden md:block">
                 <ThemeToggle />

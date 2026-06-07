@@ -9,7 +9,9 @@ export default function InfoSection() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
       // Animación de tarjetas de la izquierda (deslizan desde la izquierda)
       gsap.from('.info-highlight-card', {
         scrollTrigger: {
@@ -38,9 +40,9 @@ export default function InfoSection() {
         stagger: 0.1,
         ease: 'power3.out',
       });
-    }, containerRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (

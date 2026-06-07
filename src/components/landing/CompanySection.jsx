@@ -9,7 +9,9 @@ export default function CompanySection() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
       // Animación de textos del lado izquierdo (deslizan hacia arriba)
       gsap.from('.company-info > *', {
         scrollTrigger: {
@@ -38,9 +40,9 @@ export default function CompanySection() {
         stagger: 0.1,
         ease: 'back.out(1.4)',
       });
-    }, containerRef);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (

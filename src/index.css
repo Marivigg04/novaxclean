@@ -261,6 +261,12 @@ textarea {
   animation: float 6s ease-in-out infinite;
 }
 
+@media (max-width: 767px) {
+  .bubble-anim {
+    animation: none;
+  }
+}
+
 .cart-entrance {
   animation: cart-entrance 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity;
@@ -604,4 +610,41 @@ path.leaflet-interactive:active,
 /* Fix Leaflet map z-index to prevent overlapping the header */
 .leaflet-container {
   z-index: 10 !important;
+}
+
+/* GPS Radar Pulse for tracking simulation */
+@keyframes gps-radar-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.gps-pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 54px;
+  height: 54px;
+  margin-top: -27px;
+  margin-left: -27px;
+  border-radius: 999px;
+  border: 2px solid var(--color-secondary, #2f5ea2);
+  background-color: color-mix(in srgb, var(--color-secondary, #2f5ea2) 20%, transparent);
+  animation: gps-radar-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Leaflet dark mode map integration styling */
+.dark .map-premium-theme .leaflet-tile {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.dark .map-premium-theme .leaflet-container {
+  background: var(--color-surface-container) !important;
 }

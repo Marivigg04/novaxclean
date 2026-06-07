@@ -5,6 +5,36 @@ import RoundedSelect from '@/features/admin/inventory/components/RoundedSelect';
 export default function NewProductModal({ isOpen = false, onClose = () => {}, onSubmit = () => {}, categories = [] }) {
   const [form, setForm] = useState({ name: '', stock: '', category: '', price: '' });
   const [error, setError] = useState('');
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    let timeoutId;
+    let closingTimeoutId;
+
+    if (isOpen) {
+      const renderTimeout = setTimeout(() => {
+        setIsRendered(true);
+        setIsClosing(false);
+      }, 0);
+      return () => clearTimeout(renderTimeout);
+    }
+
+    if (isRendered) {
+      closingTimeoutId = setTimeout(() => {
+        setIsClosing(true);
+      }, 0);
+      timeoutId = window.setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 240);
+    }
+
+    return () => {
+      if (closingTimeoutId) clearTimeout(closingTimeoutId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, isRendered]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -13,7 +43,7 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,15 +64,8 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm"
-        aria-label="Cerrar modal"
-        onClick={onClose}
-      />
-
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-md overflow-visible rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)]">
+    <div className={`fixed inset-0 z-[120] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`} role="dialog" aria-modal="true" onClick={onClose}>
+      <form onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()} className={`relative z-10 w-full max-w-md overflow-visible rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
         <div className="flex items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">Nuevo producto</p>
