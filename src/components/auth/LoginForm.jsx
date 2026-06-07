@@ -1,6 +1,10 @@
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 
 export default function LoginForm({ onToggle, onLogin }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -40,12 +44,22 @@ export default function LoginForm({ onToggle, onLogin }) {
         {/* Contraseña */}
         <div>
           <label className="mb-1 block text-sm font-semibold text-primary">Contraseña</label>
-          <input
-            name="password"
-            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
-            placeholder="••••••••"
-            type="password"
-          />
+          <div className="relative">
+            <input
+              name="password"
+              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest pl-4 pr-12 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
+              placeholder="••••••••"
+              type={showPassword ? "text" : "password"}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface cursor-pointer flex items-center justify-center"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
         <button className="mt-2 w-full rounded-lg bg-primary py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container cursor-pointer">Iniciar Sesión</button>

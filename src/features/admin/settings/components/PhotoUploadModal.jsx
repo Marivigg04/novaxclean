@@ -4,12 +4,44 @@ import { ImagePlus, Upload, X, FileImage } from 'lucide-react';
 export default function PhotoUploadModal({ isOpen = false, onClose = () => {}, onSubmit = () => {} }) {
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  useEffect(() => {
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setFiles([]);
     }
-  }, [isOpen]);
+  }
+
+  useEffect(() => {
+    let timeoutId;
+    let closingTimeoutId;
+
+    if (isOpen) {
+      const renderTimeout = setTimeout(() => {
+        setIsRendered(true);
+        setIsClosing(false);
+      }, 0);
+      return () => clearTimeout(renderTimeout);
+    }
+
+    if (isRendered) {
+      closingTimeoutId = setTimeout(() => {
+        setIsClosing(true);
+      }, 0);
+      timeoutId = window.setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 240);
+    }
+
+    return () => {
+      if (closingTimeoutId) clearTimeout(closingTimeoutId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, isRendered]);
 
   const fileSummary = useMemo(() => {
     if (!files.length) return 'No se han seleccionado archivos.';
@@ -27,11 +59,11 @@ export default function PhotoUploadModal({ isOpen = false, onClose = () => {}, o
     fileInputRef.current?.click();
   };
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   return (
     // Contenedor principal: z-index alto, posición fija que ocupa toda la pantalla y centra el contenido
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}>
       
       {/* Overlay: Fondo oscuro semi-transparente */}
       <button
@@ -42,7 +74,7 @@ export default function PhotoUploadModal({ isOpen = false, onClose = () => {}, o
       />
 
       {/* Tarjeta del Modal: Se usa max-w-md para evitar que se estire y mantener un tamaño compacto */}
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_18px_45px_-28px_rgba(16,32,58,0.65)]">
+      <div className={`relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_18px_45px_-28px_rgba(16,32,58,0.65)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-6 py-4">

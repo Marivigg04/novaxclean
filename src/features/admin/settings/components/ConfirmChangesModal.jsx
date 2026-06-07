@@ -5,14 +5,46 @@ export default function ConfirmChangesModal({ isOpen = false, onClose = () => {}
   const [step, setStep] = useState('confirm');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  useEffect(() => {
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (!isOpen) {
       setStep('confirm');
       setPassword('');
       setError('');
     }
-  }, [isOpen]);
+  }
+
+  useEffect(() => {
+    let timeoutId;
+    let closingTimeoutId;
+
+    if (isOpen) {
+      const renderTimeout = setTimeout(() => {
+        setIsRendered(true);
+        setIsClosing(false);
+      }, 0);
+      return () => clearTimeout(renderTimeout);
+    }
+
+    if (isRendered) {
+      closingTimeoutId = setTimeout(() => {
+        setIsClosing(true);
+      }, 0);
+      timeoutId = window.setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 240);
+    }
+
+    return () => {
+      if (closingTimeoutId) clearTimeout(closingTimeoutId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, isRendered]);
 
   const handleConfirmPassword = (event) => {
     event.preventDefault();
@@ -26,10 +58,10 @@ export default function ConfirmChangesModal({ isOpen = false, onClose = () => {}
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <div className={`fixed inset-0 z-[110] flex items-center justify-center p-4 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}>
       <button
         type="button"
         className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm"
@@ -37,7 +69,7 @@ export default function ConfirmChangesModal({ isOpen = false, onClose = () => {}
         onClick={onClose}
       />
 
-      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)]">
+      <div className={`relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
         <div className="flex items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">Confirmación</p>

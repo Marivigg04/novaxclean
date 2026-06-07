@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Bell, Search, X, Sparkles, ArrowRight, ShoppingCart, Home, BookOpen, User, Package, MapPin, Settings, Menu } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Bell, Search, X, Sparkles, ArrowRight, ShoppingCart, Home, BookOpen, Package, MapPin, Settings, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { navigationLinks } from '../landing/content';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 import UserAvatarIcon from '../../shared/UserAvatarIcon';
 import { useAuth } from '../../context/AuthContext';
@@ -238,7 +237,7 @@ export default function Header({
                   <img alt="Logo NovaxClean" src={logoAumc} className="logo-light h-13 w-13 object-contain" />
                   <img alt="Logo NovaxClean" src={logoAumo} className="logo-dark h-13 w-13 object-contain" />
                 </div>
-                <span className="font-bold text-primary dark:text-white">NovaxClean</span>
+                <span className="font-bold text-secondary dark:text-white">NovaxClean</span>
             </motion.div>
           )}
 
