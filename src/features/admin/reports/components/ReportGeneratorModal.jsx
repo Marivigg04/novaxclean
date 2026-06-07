@@ -280,21 +280,21 @@ function MiniSparkline({ values = [] }) {
 }
 
 function PageCard({ number, title, description, children, variant = 'compact' }) {
-  const spacing = variant === 'full' ? 'p-6' : 'p-4';
-  const titleSize = variant === 'full' ? 'text-xl' : 'text-lg';
+  const spacing = variant === 'full' ? 'p-4 sm:p-6' : 'p-3 sm:p-4';
+  const titleSize = variant === 'full' ? 'text-lg sm:text-xl' : 'text-base sm:text-lg';
 
   return (
     <article className={`rounded-[28px] border border-[var(--color-app-panel-border)] bg-[linear-gradient(180deg,var(--color-base-surface)_0%,rgba(255,255,255,0.75)_100%)] shadow-[0_20px_55px_-38px_rgba(16,32,58,0.8)] ${spacing}`}>
-      <div className="flex items-start justify-between gap-4 border-b border-[var(--color-app-panel-border)] pb-4">
+      <div className="flex flex-col gap-3 pb-4 border-b border-[var(--color-app-panel-border)] sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-base-text)]/50">Novaxclean</p>
           <h3 className={`mt-1 font-semibold text-[var(--color-base-text)] ${titleSize}`}>{title}</h3>
-          <p className="mt-1 text-sm text-[var(--color-base-text)]/60">{description}</p>
+          <p className="mt-1 text-xs sm:text-sm text-[var(--color-base-text)]/60">{description}</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-2 text-right">
+        <div className="self-start rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-1.5 text-left shrink-0 sm:self-auto sm:py-2 sm:text-right">
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-base-text)]/45">{number}</p>
-          <p className="mt-1 text-xs text-[var(--color-base-text)]/62">Reporte corporativo</p>
+          <p className="mt-0.5 text-[10px] sm:text-xs text-[var(--color-base-text)]/62">Reporte corporativo</p>
         </div>
       </div>
 
@@ -366,7 +366,7 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
   if (pageId === 'summary') {
     return (
       <div className={`grid ${pagePadding}`}>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
           <SummaryPill label="Ingresos" value={formatCurrency(insights.sales.totalRevenue)} tone="success" />
           <SummaryPill label="Unidades vendidas" value={insights.sales.totalUnits.toLocaleString('es-ES')} />
           <SummaryPill label="Productos activos" value={`${insights.inventory.totalProducts}`} />
@@ -385,7 +385,7 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
               </span>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
               <div className="rounded-2xl bg-[var(--color-base-surface)] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-base-text)]/50">Ventas</p>
                 <p className="mt-2 text-2xl font-semibold text-[var(--color-base-text)]">{formatPercentage(insights.sales.growth)}</p>
@@ -507,7 +507,7 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
 
     return (
       <div className={`grid ${pagePadding}`}>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
           <SummaryPill label="Productos" value={`${insights.inventory.totalProducts}`} />
           <SummaryPill label="En stock" value={`${insights.inventory.inStock}`} tone="success" />
           <SummaryPill label="Stock bajo" value={`${insights.inventory.lowStock}`} tone="warning" />
@@ -524,10 +524,10 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
             <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-3 py-1 text-xs font-semibold text-[var(--color-base-text)]/65">{visibleProducts.length} ítems</span>
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-2.5 md:grid-cols-2 xl:grid-cols-4">
             {clampPreviewItems(visibleProducts).map((product) => (
               <div key={product.sku} className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4">
-                <p className="text-sm font-semibold text-[var(--color-base-text)]">{product.name}</p>
+                <p className="text-sm font-semibold text-[var(--color-base-text)] truncate">{product.name}</p>
                 <p className="mt-1 text-xs text-[var(--color-base-text)]/58">SKU {product.sku}</p>
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span className="text-[var(--color-base-text)]/65">Stock</span>
@@ -552,7 +552,7 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
 
   return (
     <div className={`grid ${pagePadding}`}>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         <SummaryPill label="Insumos" value={`${insights.materials.totalMaterials}`} />
         <SummaryPill label="Críticos" value={`${insights.materials.criticalCount}`} tone="warning" />
         <SummaryPill label="Proveedores" value={`${insights.materials.totalSuppliers}`} tone="success" />
@@ -568,16 +568,16 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
           <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-3 py-1 text-xs font-semibold text-[var(--color-base-text)]/65">{visibleMaterials.length} ítems</span>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2.5 md:grid-cols-2 xl:grid-cols-4">
           {clampPreviewItems(visibleMaterials).map((material) => (
             <div key={material.sku} className="rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--color-base-text)]">{material.name}</p>
-                  <p className="mt-1 text-xs text-[var(--color-base-text)]/58">{material.category}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[var(--color-base-text)] truncate">{material.name}</p>
+                  <p className="mt-1 text-xs text-[var(--color-base-text)]/58 truncate">{material.category}</p>
                 </div>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${material.status === 'En stock' ? 'bg-emerald-500/10 text-emerald-600' : material.status === 'Stock bajo' ? 'bg-amber-500/12 text-amber-600' : 'bg-rose-500/10 text-rose-600'}`}>
-                  {material.status}
+                <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] shrink-0 ${material.status === 'En stock' ? 'bg-emerald-500/10 text-emerald-600' : material.status === 'Stock bajo' ? 'bg-amber-500/12 text-amber-600' : 'bg-rose-500/10 text-rose-600'}`}>
+                  {material.status === 'Stock bajo' ? 'Bajo' : material.status}
                 </span>
               </div>
               <p className="mt-3 text-sm text-[var(--color-base-text)]/70">{material.stock} / {material.minimum} {material.unit}</p>
@@ -600,8 +600,8 @@ function FullPreviewModal({ isOpen = false, onClose = () => {}, config, visibleP
         <div className="flex items-center justify-between border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-base-text)]/50">Vista previa completa</p>
-            <h3 className="mt-1 text-xl font-semibold text-[var(--color-base-text)]">{reportTitle}</h3>
-            <p className="mt-1 text-sm text-[var(--color-base-text)]/60">{buildRangeLabel(config.startDate, config.endDate)} · {reportFormats.find((item) => item.value === config.format)?.label}</p>
+            <h3 className="mt-1 text-lg sm:text-xl font-semibold text-[var(--color-base-text)]">{reportTitle}</h3>
+            <p className="mt-1 text-xs sm:text-sm text-[var(--color-base-text)]/60">{buildRangeLabel(config.startDate, config.endDate)} · {reportFormats.find((item) => item.value === config.format)?.label}</p>
           </div>
 
           <button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--color-base-text)]/60 transition-colors hover:bg-[var(--color-app-panel-hover)] hover:text-[var(--color-base-text)]" aria-label="Cerrar">
@@ -640,6 +640,7 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [activeTab, setActiveTab] = useState('config'); // 'config' or 'preview'
 
   useEffect(() => {
     if (!isOpen) {
@@ -653,10 +654,12 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
       setIsFullPreviewOpen(false);
       setIsGenerating(false);
       setStatusMessage('');
+      setActiveTab('config');
       return;
     }
 
     setConfig(createReportConfig(preset));
+    setActiveTab('config');
   }, [isOpen, preset]);
 
   const visiblePages = useMemo(() => reportPages.filter((page) => config.pages[page.id]), [config.pages]);
@@ -865,17 +868,46 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
         <div className="flex items-center justify-between gap-4 border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-base-text)]/50">Generación de reportes</p>
-            <h2 className="mt-1 text-2xl font-semibold text-[var(--color-base-text)]">{reportTitle}</h2>
-            <p className="mt-1 text-sm text-[var(--color-base-text)]/60">Diseño corporativo, secciones activas y previsualización en tiempo real.</p>
+            <h2 className="mt-1 text-xl sm:text-2xl font-semibold text-[var(--color-base-text)]">{reportTitle}</h2>
+            <p className="mt-1 text-sm text-[var(--color-base-text)]/60 hidden sm:block">Diseño corporativo, secciones activas y previsualización en tiempo real.</p>
           </div>
 
-          <button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--color-base-text)]/60 transition-colors hover:bg-[var(--color-app-panel-hover)] hover:text-[var(--color-base-text)]" aria-label="Cerrar">
-            <X className="h-5 w-5" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-sm transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-70"
+              title="Generar y Descargar Reporte"
+            >
+              {isGenerating ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" /> : <Download className="h-4 w-4" />}
+            </button>
+            <button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--color-base-text)]/60 transition-colors hover:bg-[var(--color-app-panel-hover)] hover:text-[var(--color-base-text)]" aria-label="Cerrar">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Tab Selector */}
+        <div className="flex border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] lg:hidden shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab('config')}
+            className={`flex-1 py-3 text-center text-sm font-semibold border-b-2 transition-all ${activeTab === 'config' ? 'border-[var(--color-brand)] text-[var(--color-brand)] bg-[color-mix(in_srgb,var(--color-brand)_4%,transparent)]' : 'border-transparent text-[var(--color-base-text)]/60 hover:text-[var(--color-base-text)]'}`}
+          >
+            Configuración
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('preview')}
+            className={`flex-1 py-3 text-center text-sm font-semibold border-b-2 transition-all ${activeTab === 'preview' ? 'border-[var(--color-brand)] text-[var(--color-brand)] bg-[color-mix(in_srgb,var(--color-brand)_4%,transparent)]' : 'border-transparent text-[var(--color-base-text)]/60 hover:text-[var(--color-base-text)]'}`}
+          >
+            Vista Previa ({visiblePages.length})
           </button>
         </div>
 
         <div className="grid flex-1 min-h-0 gap-0 lg:grid-cols-[420px_minmax(0,1fr)]">
-          <aside className="min-h-0 border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] lg:border-b-0 lg:border-r">
+          <aside className={`min-h-0 border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] lg:border-b-0 lg:border-r ${activeTab === 'config' ? 'block h-full' : 'hidden lg:block'}`}>
             <ScrollArea className="h-full px-4 py-4 sm:px-5">
               <div className="space-y-4 pb-5">
                 <div className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4">
@@ -1096,26 +1128,26 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
             </ScrollArea>
           </aside>
 
-          <section className="min-h-0 bg-[radial-gradient(circle_at_top,_rgba(16,32,58,0.06),_transparent_34%),linear-gradient(180deg,var(--color-base-bg)_0%,rgba(255,255,255,0.68)_100%)]">
+          <section className={`min-h-0 bg-[radial-gradient(circle_at_top,_rgba(16,32,58,0.06),_transparent_34%),linear-gradient(180deg,var(--color-base-bg)_0%,rgba(255,255,255,0.68)_100%)] ${activeTab === 'preview' ? 'block h-full' : 'hidden lg:block'}`}>
             <ScrollArea className="h-full px-4 py-4 sm:px-5">
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-5">
-                <div className="rounded-[28px] border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-5 shadow-[0_20px_55px_-42px_rgba(16,32,58,0.85)]">
+                <div className="rounded-[28px] border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-4 sm:p-5 shadow-[0_20px_55px_-42px_rgba(16,32,58,0.85)]">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-base-text)]/45">Previsualización estructurada</p>
-                      <h3 className="mt-1 text-xl font-semibold text-[var(--color-base-text)]">Reporte Novaxclean</h3>
+                      <h3 className="mt-1 text-lg sm:text-xl font-semibold text-[var(--color-base-text)]">Reporte Novaxclean</h3>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-base-text)]/60">
-                      <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-1">{buildRangeLabel(config.startDate, config.endDate)}</span>
-                      <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-1">{reportFormats.find((item) => item.value === config.format)?.label}</span>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-[var(--color-base-text)]/60">
+                      <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1">{buildRangeLabel(config.startDate, config.endDate)}</span>
+                      <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1">{reportFormats.find((item) => item.value === config.format)?.label}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--color-base-text)]/60">
-                    <span className="rounded-full bg-[color-mix(in_srgb,var(--color-brand)_12%,transparent)] px-3 py-1 font-semibold text-[var(--color-brand)]">{visiblePages.length} páginas activas</span>
-                    <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-1">Membrete corporativo</span>
-                    <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-3 py-1">Fecha de generación: {formatShortDate(config.endDate)}</span>
+                  <div className="mt-3.5 flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-[var(--color-base-text)]/60">
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--color-brand)_12%,transparent)] px-2.5 py-1 font-semibold text-[var(--color-brand)]">{visiblePages.length} páginas activas</span>
+                    <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1">Membrete corporativo</span>
+                    <span className="rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1">Generación: {formatShortDate(config.endDate)}</span>
                   </div>
                 </div>
 

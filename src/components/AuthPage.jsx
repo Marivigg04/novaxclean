@@ -73,14 +73,14 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background p-4 text-on-surface transition-colors">
-      <button className="absolute left-4 top-4 rounded-full border border-outline-variant bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container-low" type="button" onClick={onBackToLanding}>
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background p-4 pt-16 md:pt-4 text-on-surface transition-colors">
+      <button className="absolute left-4 top-4 rounded-full border border-outline-variant bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container-low z-10" type="button" onClick={onBackToLanding}>
         Volver al inicio
       </button>
-      <main className="flex h-[600px] w-full max-w-[1000px] overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-2xl">
+      <main className="flex flex-col md:flex-row h-auto md:h-[600px] w-full max-w-[1000px] overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl">
         <Carousel data={carouselData} currentIndex={currentSlide} onDotClick={setCurrentSlide} />
         
-        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-surface-container-lowest">
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-surface-container-lowest p-6 sm:p-10 py-12 md:py-0">
           <div className="w-full h-full flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div 
@@ -91,7 +91,11 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
                 transition={{ duration: 0.3 }}
                 className="w-full"
               >
-                {isLogin ? <LoginForm onToggle={() => setIsLogin(false)} onLogin={handleLogin} /> : <RegisterForm onToggle={() => setIsLogin(true)} />}
+                {isLogin ? (
+                  <LoginForm onToggle={() => setIsLogin(false)} onLogin={handleLogin} />
+                ) : (
+                  <RegisterForm onToggle={() => setIsLogin(true)} onGoogleRegister={() => handleLogin({ email: 'user@novaxclean.com', password: 'User1234' })} />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

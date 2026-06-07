@@ -15,6 +15,7 @@ import logoAumo from '../../assets/Logo AUMO.png';
 export default function Header({
   onOpenCart,
   onOpenAuth,
+  onToggleSidebar,
   searchValue = '',
   onSearchChange,
   onSearchSubmit,
@@ -31,6 +32,18 @@ export default function Header({
   const isAdmin = isAuthenticated && user?.role === 'Admin';
   const navigate = usePageTransition().navigateTo;
   const location = useLocation();
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const isItemActive = (href) => {
     const locPath = location.pathname;
@@ -189,14 +202,26 @@ export default function Header({
     <>
       <header
         style={{
-          left: isAdmin ? 'calc(var(--sidebar-width, 0px) - 1px)' : 0,
+          left: isAdmin && !isMobile ? 'calc(var(--sidebar-width, 0px) - 1px)' : 0,
           top: 0,
         }}
         className={`fixed right-0 z-30 border-b border-outline-variant bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 transition-all duration-300 ${className}`}
       >
         <nav className={`mx-auto flex w-full max-w-none items-center gap-2 md:gap-3 px-3 md:px-16 ${isAdmin ? 'h-20' : 'py-4 md:py-5'}`}>
-          {/* Hamburger Menu button on the left for mobile/tablet */}
-          {showNavigationLinks && (!isAuthenticated || user?.role !== 'Admin') && (
+          {/* Hamburger Menu button on the left for admin (mobile) */}
+          {isAdmin && onToggleSidebar && (
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface md:hidden transition-colors shrink-0"
+              aria-label="Abrir menú de administración"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+
+          {/* Hamburger Menu button on the left for mobile/tablet (client/visitor) */}
+          {!isAdmin && showNavigationLinks && (
             <button
               type="button"
               onClick={() => setMobileSidebarOpen(true)}
@@ -207,13 +232,13 @@ export default function Header({
             </button>
           )}
 
-          {showBrand && (!isAuthenticated || user?.role !== 'Admin') && (
-            <motion.div layoutId="header-brand" className="shrink-0">
+          {showBrand && (!isAuthenticated || user?.role !== 'Admin' || isMobile) && (
+            <motion.div layoutId="header-brand" className="shrink-0 flex items-center gap-2">
                 <div className="hidden sm:block shrink-0">
                   <img alt="Logo NovaxClean" src={logoAumc} className="logo-light h-13 w-13 object-contain" />
                   <img alt="Logo NovaxClean" src={logoAumo} className="logo-dark h-13 w-13 object-contain" />
                 </div>
-                <span>NovaxClean</span>
+                <span className="font-bold text-primary dark:text-white">NovaxClean</span>
             </motion.div>
           )}
 
@@ -494,7 +519,7 @@ export default function Header({
                 </div>
               </div>
             ) : (
-              <button className="hidden rounded-full bg-secondary px-5 py-2 text-xs font-bold text-on-secondary shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-lg hover:shadow-secondary/25 active:scale-95 lg:block shrink-0" type="button" onClick={onOpenAuth}>
+              <button className="rounded-full bg-secondary px-4 sm:px-5 py-2 text-[11px] sm:text-xs font-bold text-on-secondary shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-lg hover:shadow-secondary/25 active:scale-95 shrink-0" type="button" onClick={onOpenAuth}>
                 Iniciar sesión
               </button>
             )}
@@ -564,19 +589,6 @@ export default function Header({
                     </button>
                   );
                 })}
-                {!isAuthenticated && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileSidebarOpen(false);
-                      onOpenAuth();
-                    }}
-                    className="flex w-full items-center gap-4 px-4 py-3 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-bold hover:bg-secondary/20 transition-all mt-4"
-                  >
-                    <User className="h-5 w-5 text-secondary" />
-                    <span className="text-sm font-semibold">Iniciar sesión</span>
-                  </button>
-                )}
               </nav>
 
               {/* Footer of the sidebar with ThemeToggle inside */}

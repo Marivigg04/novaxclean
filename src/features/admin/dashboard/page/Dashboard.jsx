@@ -95,7 +95,7 @@ export default function Dashboard() {
       />
 
       <main className="flex min-h-screen flex-1 flex-col overflow-auto">
-        <Header onOpenAuth={() => {}} onOpenCart={() => {}} showCartButton={false} showSearch={false} className="md:left-72" />
+        <Header onOpenAuth={() => {}} onOpenCart={() => {}} onToggleSidebar={() => setIsSidebarOpen(true)} showCartButton={false} showSearch={false} className="md:left-72" />
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px]">
@@ -103,7 +103,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setIsReportModalOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
               >
                 <FileDown className="h-4 w-4" />
                 Generar Reporte

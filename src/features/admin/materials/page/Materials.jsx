@@ -283,6 +283,7 @@ export default function Materials() {
         <Header
           onOpenAuth={() => {}}
           onOpenCart={() => {}}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
           showCartButton={false}
           showSearch={false}
           showNavigationLinks={false}
@@ -292,9 +293,6 @@ export default function Materials() {
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px] space-y-6">
             <PageHeader title="Materia Prima" subtitle="Control de insumos, fórmulas y alertas de reorden." className="mb-4">
-              <button type="button" onClick={() => setIsSidebarOpen(true)} className="md:hidden rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-base-text)]">
-                Menú
-              </button>
 
               <MaterialsHeader
                 search={search}

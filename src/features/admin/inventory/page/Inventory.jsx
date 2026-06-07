@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Header from '@/components/layout/Header';
@@ -37,6 +37,8 @@ export default function Inventory() {
   const [sortDirection, setSortDirection] = useState('desc');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const navigate = useNavigate();
   const { logout } = useAuth();
   const categoryFilterOptions = ['Todos', ...inventoryCategories];
@@ -67,6 +69,25 @@ export default function Inventory() {
       return String(left ?? '').localeCompare(String(right ?? ''), 'es', { sensitivity: 'base' }) * direction;
     });
   }, [filteredProducts, sortDirection, sortField]);
+
+  const pageCount = useMemo(() => {
+    return Math.max(1, Math.ceil(sortedProducts.length / pageSize));
+  }, [sortedProducts]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, status, sortField, sortDirection]);
+
+  useEffect(() => {
+    if (page > pageCount) {
+      setPage(pageCount);
+    }
+  }, [pageCount, page]);
+
+  const visibleProducts = useMemo(() => {
+    const startIndex = (page - 1) * pageSize;
+    return sortedProducts.slice(startIndex, startIndex + pageSize);
+  }, [page, sortedProducts]);
 
   const handleAddProduct = (newProduct) => {
     setProducts((prev) => [newProduct, ...prev]);
@@ -162,7 +183,7 @@ export default function Inventory() {
       />
 
       <main className="flex min-h-screen flex-1 flex-col overflow-auto">
-        <Header onOpenAuth={() => {}} onOpenCart={() => {}} showCartButton={false} showSearch={false} className="md:left-72" />
+        <Header onOpenAuth={() => {}} onOpenCart={() => {}} onToggleSidebar={() => setIsSidebarOpen(true)} showCartButton={false} showSearch={false} className="md:left-72" />
 
         <div className="flex-1 px-4 py-6 pt-24 md:px-6">
           <div className="mx-auto w-full max-w-[1600px] space-y-6">
@@ -177,7 +198,10 @@ export default function Inventory() {
             <InventoryStats stats={inventoryStats} />
 
             <InventoryTable
-              filteredProducts={sortedProducts}
+              filteredProducts={visibleProducts}
+              page={page}
+              pageCount={pageCount}
+              onPageChange={setPage}
               category={category}
               setCategory={setCategory}
               status={status}

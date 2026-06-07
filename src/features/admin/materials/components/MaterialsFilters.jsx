@@ -17,32 +17,47 @@ export default function MaterialsFilters({
           <h3 className="text-base font-bold text-[var(--color-base-text)]">Categoría y estado</h3>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-base-text)]/72">
-            <div className="inline-flex items-center gap-2 whitespace-nowrap">
-              <Filter className="h-4 w-4" />
-              <span>Filtros:</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full lg:w-auto text-sm text-[var(--color-base-text)]/72">
+          <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+            <div className="inline-flex items-center gap-2 font-medium text-[var(--color-base-text)]/80">
+              <Filter className="h-4 w-4 text-[var(--color-brand)]" />
+              <span>Filtrar por:</span>
             </div>
 
+            {((category && category !== 'Todos') || status !== 'Todos') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory('');
+                  setStatus('Todos');
+                }}
+                className="text-xs font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand)]/80 hover:underline sm:ml-2 cursor-pointer transition-colors"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5 w-full sm:flex sm:items-center sm:gap-3 sm:w-auto">
             <RoundedSelect
               value={category}
               onChange={setCategory}
               options={categories.map((item) => ({ value: item, label: item }))}
-              placeholder="Seleccionar categoría"
-              className="min-w-[220px]"
+              placeholder="Categoría"
+              className="w-full sm:min-w-[220px]"
             />
 
             <RoundedSelect
               value={status}
               onChange={setStatus}
               options={statuses.map((item) => ({ value: item, label: item }))}
-              placeholder="Todos"
-              className="min-w-[180px]"
+              placeholder="Estado"
+              className="w-full sm:min-w-[180px]"
             />
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]">
-            <span>Ordena desde los encabezados de la tabla</span>
+          <div className="hidden md:inline-flex items-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)] shadow-sm whitespace-nowrap">
+            Ordena desde los encabezados de la tabla
           </div>
         </div>
       </div>

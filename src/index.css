@@ -589,3 +589,19 @@ textarea {
     animation: none;
   }
 }
+
+/* Remove focus outline from Leaflet maps and interactive vectors */
+.leaflet-container :focus,
+.leaflet-interactive:focus,
+path.leaflet-interactive:focus,
+path.leaflet-interactive:active,
+.leaflet-container :focus-visible,
+.leaflet-interactive:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix Leaflet map z-index to prevent overlapping the header */
+.leaflet-container {
+  z-index: 10 !important;
+}

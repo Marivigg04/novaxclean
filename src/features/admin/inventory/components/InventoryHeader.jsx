@@ -17,31 +17,34 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {}, o
           </div>
         </div>
 
-        <div className="flex items-center gap-3 self-end">
+        <div className="flex items-center gap-2 sm:gap-3 self-end w-full justify-end sm:w-auto">
           <button
             type="button"
             onClick={onReport}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+            title="Generar Reporte"
+            className="inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:px-4 sm:py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
           >
             <FileDown className="h-4 w-4" />
-            Generar Reporte
+            <span className="hidden sm:inline">Generar Reporte</span>
           </button>
 
           <button
             type="button"
             onClick={onReplenish}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
+            title="Reabastecer"
+            className="inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:px-4 sm:py-3 text-sm font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]"
           >
             <Truck className="h-4 w-4" />
-            Reabastecer
+            <span className="hidden sm:inline">Reabastecer</span>
           </button>
           <button
             type="button"
             onClick={onNew}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[var(--color-brand)] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.5)] transition-transform hover:scale-[0.99] active:scale-[0.98]"
+            className="inline-flex h-11 sm:h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[var(--color-brand)] px-4 sm:py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.5)] transition-transform hover:scale-[0.99] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
-            Nuevo producto
+            <span className="hidden sm:inline">Nuevo producto</span>
+            <span className="sm:hidden">Nuevo</span>
           </button>
         </div>
       </div>

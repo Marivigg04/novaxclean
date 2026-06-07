@@ -43,14 +43,14 @@ export default function ChartFilters({
           </h3>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
           
           {/* Segmented Control de Categorías */}
-          <div className="flex flex-wrap items-center gap-1 rounded-xl border border-[var(--color-app-line)] bg-[var(--color-base-bg)] p-1.5">
+          <div className="flex w-full sm:w-auto overflow-x-auto items-center gap-1 rounded-xl border border-[var(--color-app-line)] bg-[var(--color-base-bg)] p-1.5 shrink-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => onCategoryChange('all')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 shrink-0 ${
                 selectedCategory === 'all'
                   ? 'bg-[var(--color-base-surface)] text-[var(--color-brand)] shadow-sm border border-[var(--color-app-line)]'
                   : 'text-[var(--color-base-text)]/65 hover:text-[var(--color-base-text)] hover:bg-[var(--color-base-surface)]'
@@ -64,7 +64,7 @@ export default function ChartFilters({
                 key={category}
                 type="button"
                 onClick={() => onCategoryChange(category)}
-                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 shrink-0 ${
                   selectedCategory === category
                     ? 'bg-[var(--color-base-surface)] text-[var(--color-brand)] shadow-sm border border-[var(--color-app-line)]'
                     : 'text-[var(--color-base-text)]/65 hover:text-[var(--color-base-text)] hover:bg-[var(--color-base-surface)]'

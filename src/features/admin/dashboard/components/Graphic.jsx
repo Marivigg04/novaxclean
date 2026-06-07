@@ -54,15 +54,20 @@ export default function Graphic({ data, sortOrder = 'desc' }) {
       {/* Gráfico Recharts */}
       <div className="h-[430px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-app-line)" />
             
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: 'var(--color-base-text)', fontSize: 11 }}
-              dy={10}
+              interval={0}
+              tick={{ fill: 'color-mix(in srgb, var(--color-base-text) 70%, transparent)', fontSize: 9, fontWeight: 500 }}
+              tickFormatter={(value) => typeof value === 'string' && value.length > 18 ? `${value.substring(0, 18)}...` : value}
+              angle={-20}
+              textAnchor="end"
+              height={50}
+              dx={-4}
             />
             
             <YAxis 

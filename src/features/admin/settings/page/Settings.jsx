@@ -103,6 +103,7 @@ export default function Settings() {
           <Header
             onOpenAuth={() => {}}
             onOpenCart={() => {}}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
             showCartButton={false}
             showSearch={false}
             className="md:left-72"

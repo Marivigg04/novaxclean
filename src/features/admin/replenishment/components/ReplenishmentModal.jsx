@@ -360,7 +360,7 @@ export default function ReplenishmentModal({
           <div className="min-w-0">
             <p className="mb-1 text-label-md font-bold uppercase tracking-[0.14em] text-secondary">Reabastecimiento B2B</p>
             <h3 id="replenishment-title" className="text-headline-md font-bold text-primary">{flowStage === 'form' ? 'Solicitar reabastecimiento' : 'Tracking del proveedor a almacén'}</h3>
-            <p className="mt-2 text-body-md text-on-surface-variant">
+            <p className="mt-2 text-body-md text-on-surface-variant hidden sm:block">
               {flowStage === 'form'
                 ? 'El formulario sugiere automáticamente los productos con stock bajo o agotado y su cantidad recomendada.'
                 : 'Simulación logística de carga pesada desde el proveedor hasta el almacén central.'}

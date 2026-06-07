@@ -17,7 +17,6 @@ const items = [
   { key: 'inventario', label: 'Inventario', icon: Package, to: '/admin/inventory' },
   { key: 'materia-prima', label: 'Materia Prima', icon: FlaskConical, to: '/admin/raw-materials' },
   { key: 'ajustes', label: 'Ajustes', icon: Settings2, to: '/admin/settings' },
-  { key: 'cerrar-sesion', label: 'Cerrar sesión', icon: LogOut },
 ]
 
 export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen = false }) {
@@ -47,7 +46,7 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 h-screen ${collapsed ? 'w-28' : 'w-72'} shrink-0 transform flex-col overflow-hidden text-[var(--color-base-text)] shadow-2xl border-r border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] transition-all duration-300 md:static md:z-auto md:flex md:h-auto md:min-h-0 md:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-40 h-screen ${collapsed ? 'w-72 md:w-28' : 'w-72'} shrink-0 transform flex-col overflow-hidden text-[var(--color-base-text)] shadow-2xl border-r border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] transition-all duration-300 md:static md:z-auto md:flex md:h-auto md:min-h-0 md:translate-x-0 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
       style={{ fontFamily: 'Inter, sans-serif' }}
@@ -60,9 +59,9 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
         }}
       >
         <div className="flex items-center gap-3">
-          <img alt="Logo AUMC" src={logoAumc} className={`sidebar-logo-light rounded-xl object-cover transition-all duration-200 ${collapsed ? 'h-16 w-16' : 'h-25 w-25'}`} />
-          <img alt="Logo AUMO" src={logoAumo} className={`sidebar-logo-dark rounded-xl object-cover transition-all duration-200 ${collapsed ? 'hidden' : 'h-25 w-25'}`} />
-          <div className={`transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0 overflow-hidden' : ''}`}>
+          <img alt="Logo AUMC" src={logoAumc} className={`sidebar-logo-light rounded-xl object-cover transition-all duration-200 ${collapsed ? 'h-25 w-25 md:h-16 md:w-16' : 'h-25 w-25'}`} />
+          <img alt="Logo AUMO" src={logoAumo} className={`sidebar-logo-dark rounded-xl object-cover transition-all duration-200 ${collapsed ? 'md:hidden h-25 w-25' : 'h-25 w-25'}`} />
+          <div className={`transition-all duration-200 ${collapsed ? 'md:opacity-0 md:max-w-0 md:overflow-hidden' : ''}`}>
             <h2 className="text-lg font-semibold leading-tight">Novaxclean</h2>
             <p className="text-sm text-[var(--color-base-text)]/65">Panel de control</p>
           </div>
@@ -72,7 +71,7 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
           onClick={() => setCollapsed((s) => !s)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expandir' : 'Colapsar'}
-          className="ml-auto rounded p-1 text-[var(--color-base-text)] hover:bg-[var(--color-app-panel-border)]"
+          className="ml-auto rounded p-1 text-[var(--color-base-text)] hover:bg-[var(--color-app-panel-border)] hidden md:block"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -92,7 +91,7 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
                 onClick={() => onSelect(item.key)}
                 title={item.label}
                 className={({ isActive: navIsActive }) =>
-                    `group relative mb-2 flex w-full items-center ${collapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-3'} overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none ${
+                    `group relative mb-2 flex w-full items-center ${collapsed ? 'justify-start md:justify-center px-3 py-3 md:px-2 md:py-2 gap-3 md:gap-0' : 'gap-3 px-3 py-3'} overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none ${
                       navIsActive ? 'bg-[color-mix(in_srgb,var(--color-brand)_16%,transparent)] text-[var(--color-base-text)]' : ''
                     }`
                   }
@@ -105,10 +104,10 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
                       }`}
                     />
 
-                    <span className={`relative z-10 flex-none text-[18px] transition-transform duration-200 group-hover:translate-x-0.5 ${collapsed ? 'mx-auto' : ''}`}>
+                    <span className={`relative z-10 flex-none text-[18px] transition-transform duration-200 group-hover:translate-x-0.5 ${collapsed ? 'md:mx-auto' : ''}`}>
                       <Icon className={collapsed ? 'h-6 w-6' : 'h-7 w-7'} />
                     </span>
-                    <span className={`relative z-10 flex-1 text-sm font-medium transition-opacity duration-200 ${collapsed ? 'hidden' : ''}`}>{item.label}</span>
+                    <span className={`relative z-10 flex-1 text-sm font-medium transition-opacity duration-200 ${collapsed ? 'md:hidden' : ''}`}>{item.label}</span>
                   </>
                 )}
               </NavLink>
@@ -120,7 +119,7 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
               key={item.key}
               onClick={() => onSelect(item.key)}
               title={item.label}
-              className={`group relative mb-2 flex w-full items-center ${collapsed ? 'justify-center px-2 py-2' : 'gap-3 px-3 py-3'} overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none`}
+              className={`group relative mb-2 flex w-full items-center ${collapsed ? 'justify-start md:justify-center px-3 py-3 md:px-2 md:py-2 gap-3 md:gap-0' : 'gap-3 px-3 py-3'} overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none`}
               style={{
                 backgroundColor: isActive ? 'color-mix(in srgb, var(--color-brand) 16%, transparent)' : 'transparent',
                 color: isActive ? 'var(--color-base-text)' : 'color-mix(in srgb, var(--color-base-text) 72%, transparent)',
@@ -133,10 +132,10 @@ export default function Sidebar({ active = 'ventas', onSelect = () => {}, isOpen
                   isActive ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 group-hover:scale-y-100 group-hover:opacity-100'
                 }`}
               />
-              <span className={`relative z-10 flex-none text-[18px] transition-transform duration-200 group-hover:translate-x-0.5 ${collapsed ? 'mx-auto' : ''}`}>
+              <span className={`relative z-10 flex-none text-[18px] transition-transform duration-200 group-hover:translate-x-0.5 ${collapsed ? 'md:mx-auto' : ''}`}>
                 <Icon className={collapsed ? 'h-6 w-6' : 'h-5 w-5'} />
               </span>
-              <span className={`relative z-10 flex-1 text-sm font-medium transition-opacity duration-200 ${collapsed ? 'hidden' : ''}`}>{item.label}</span>
+              <span className={`relative z-10 flex-1 text-sm font-medium transition-opacity duration-200 ${collapsed ? 'md:hidden' : ''}`}>{item.label}</span>
             </button>
           )
         })}

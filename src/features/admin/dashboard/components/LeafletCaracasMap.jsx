@@ -157,10 +157,6 @@ export default function LeafletCaracasMap({ data = municipalitySales, className 
             Haz clic sobre un municipio para ver detalle de ventas.
           </p>
         </div>
-
-        <span className="rounded-full bg-[var(--color-base-bg)] px-3 py-1 text-xs text-[var(--color-base-text)]/60">
-          {data?.currency ?? 'ventas'}
-        </span>
       </div>
 
       {/* 3. flex-1 min-h-0 PARA QUE EL CONTENEDOR DEL MAPA Y LAS TARJETAS OCUPE EL RESTO DEL ALTO */}
