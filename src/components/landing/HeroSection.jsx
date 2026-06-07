@@ -240,7 +240,7 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
             <div ref={ring1Ref} className="absolute inset-0 rounded-full border border-white/20 bg-white/10" />
             <div ref={ring2Ref} className="absolute inset-0 rounded-full bg-white/5" />
 
-            <div ref={logoRef} className="coin-shell glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+            <div ref={logoRef} className="coin-shell animated-glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full">
               <img src={logoOf2} alt="Logo" className="w-[90%] h-[90%] object-contain" />
             </div>
 
@@ -290,7 +290,7 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
               <Sparkles className="h-7 w-7 lg:h-10 lg:w-10 text-on-secondary-container" />
             </div>
 
-            <div ref={bubble2Ref} className="cloud-shadow glass-panel absolute -bottom-4 -left-4 lg:-bottom-10 lg:-left-10 flex h-20 w-20 lg:h-32 lg:w-32 items-center justify-center rounded-2xl">
+            <div ref={bubble2Ref} className="cloud-shadow animated-glass-panel absolute -bottom-4 -left-4 lg:-bottom-10 lg:-left-10 flex h-20 w-20 lg:h-32 lg:w-32 items-center justify-center rounded-2xl">
               <Microscope className="h-9 w-9 lg:h-14 lg:w-14 text-primary" />
             </div>
           </div>
