@@ -190,6 +190,70 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
       }
     };
   }, []);
+  
+  const handleLogoClick = () => {
+    if (window.innerWidth >= 768) return;
+
+    // Logo pop animation
+    gsap.fromTo(
+      logoRef.current,
+      { scale: 0.9, rotationY: -15, rotationX: 10 },
+      {
+        scale: 1,
+        rotationY: 0,
+        rotationX: 0,
+        duration: 1.2,
+        ease: 'elastic.out(1, 0.5)',
+      }
+    );
+
+    // Particle spray animation
+    const totalParticles = particlesRef.current.length;
+    particlesRef.current.forEach((particle, index) => {
+      if (!particle) return;
+
+      const baseAngle = (index / totalParticles) * 2 * Math.PI;
+      const angle = baseAngle + (Math.random() - 0.5) * 0.5;
+      const distance = 110 + Math.random() * 110;
+      const targetX = Math.cos(angle) * distance;
+      const targetY = Math.sin(angle) * distance;
+      const gravity = 30 + Math.random() * 40;
+
+      gsap.fromTo(
+        particle,
+        { x: 0, y: 0, scale: 0.3, opacity: 0.9, xPercent: -50, yPercent: -50 },
+        {
+          x: targetX,
+          y: targetY + gravity,
+          scale: 1.2 + Math.random() * 0.5,
+          opacity: 0,
+          duration: 1.0 + Math.random() * 0.5,
+          delay: Math.random() * 0.1,
+          ease: 'power3.out',
+        }
+      );
+    });
+  };
+
+  const handleBubble1Click = () => {
+    if (window.innerWidth >= 768) return;
+
+    gsap.fromTo(
+      bubble1Ref.current,
+      { scale: 0.8, rotation: -30 },
+      { scale: 1, rotation: 0, duration: 0.8, ease: 'back.out(1.8)' }
+    );
+  };
+
+  const handleBubble2Click = () => {
+    if (window.innerWidth >= 768) return;
+
+    gsap.fromTo(
+      bubble2Ref.current,
+      { scale: 0.8, rotation: 30 },
+      { scale: 1, rotation: 0, duration: 0.8, ease: 'back.out(1.8)' }
+    );
+  };
 
   return (
     <section
@@ -240,8 +304,8 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
             <div ref={ring1Ref} className="absolute inset-0 rounded-full border border-white/20 bg-white/10" />
             <div ref={ring2Ref} className="absolute inset-0 rounded-full bg-white/5" />
 
-            <div ref={logoRef} className="coin-shell animated-glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-              <img src={logoOf2} alt="Logo" className="w-[90%] h-[90%] object-contain" />
+            <div ref={logoRef} onClick={handleLogoClick} className="coin-shell animated-glass-panel cloud-shadow relative z-20 flex h-full w-full items-center justify-center overflow-hidden rounded-full cursor-pointer md:cursor-default">
+              <img src={logoOf2} alt="Logo" fetchPriority="high" decoding="async" className="w-[90%] h-[90%] object-contain select-none" />
             </div>
 
             {/* Gotas de spray con refracción y highlight especular */}
@@ -286,12 +350,12 @@ export default function HeroSection({ onExploreCatalog, onOpenAuth }) {
               );
             })}
 
-            <div ref={bubble1Ref} className="cloud-shadow absolute -right-4 -top-4 lg:-right-10 lg:-top-10 flex h-16 w-16 lg:h-24 lg:w-24 items-center justify-center rounded-full bg-secondary-container">
-              <Sparkles className="h-7 w-7 lg:h-10 lg:w-10 text-on-secondary-container" />
+            <div ref={bubble1Ref} onClick={handleBubble1Click} className="cloud-shadow absolute -right-4 -top-4 lg:-right-10 lg:-top-10 flex h-16 w-16 lg:h-24 lg:w-24 items-center justify-center rounded-full bg-secondary-container cursor-pointer md:cursor-default">
+              <Sparkles className="h-7 w-7 lg:h-10 lg:w-10 text-on-secondary-container select-none" />
             </div>
 
-            <div ref={bubble2Ref} className="cloud-shadow animated-glass-panel absolute -bottom-4 -left-4 lg:-bottom-10 lg:-left-10 flex h-20 w-20 lg:h-32 lg:w-32 items-center justify-center rounded-2xl">
-              <Microscope className="h-9 w-9 lg:h-14 lg:w-14 text-primary" />
+            <div ref={bubble2Ref} onClick={handleBubble2Click} className="cloud-shadow animated-glass-panel absolute -bottom-4 -left-4 lg:-bottom-10 lg:-left-10 flex h-20 w-20 lg:h-32 lg:w-32 items-center justify-center rounded-2xl cursor-pointer md:cursor-default">
+              <Microscope className="h-9 w-9 lg:h-14 lg:w-14 text-primary select-none" />
             </div>
           </div>
         </div>

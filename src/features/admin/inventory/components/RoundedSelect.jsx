@@ -53,6 +53,8 @@ export default function RoundedSelect({
         type="button"
         onClick={() => setIsOpen((current) => !current)}
         aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={placeholder}
         className="inline-flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2.5 text-sm text-[var(--color-base-text)] outline-none transition-colors hover:bg-[var(--color-app-panel-hover)] focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
       >
         <span className="truncate">{selectedLabel}</span>

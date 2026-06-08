@@ -12,6 +12,7 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {}, o
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar por nombre o SKU..."
+              aria-label="Buscar productos por nombre o SKU"
               className="w-full rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] py-3 pl-10 pr-4 text-sm text-[var(--color-base-text)] outline-none transition-colors placeholder:text-[var(--color-base-text)]/38 focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/10"
             />
           </div>
@@ -22,6 +23,7 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {}, o
             type="button"
             onClick={onReport}
             title="Generar Reporte"
+            aria-label="Generar Reporte de inventario"
             className="group inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:pl-2 sm:pr-4 text-sm font-semibold text-[var(--color-base-text)] transition-all duration-300 hover:bg-[var(--color-app-panel-hover)] hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 active:scale-95 shadow-sm"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500/8 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-500 group-hover:scale-105 shadow-sm">
@@ -34,6 +36,7 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {}, o
             type="button"
             onClick={onReplenish}
             title="Reabastecer"
+            aria-label="Reabastecer productos"
             className="group inline-flex h-11 w-11 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-0 sm:pl-2 sm:pr-4 text-sm font-semibold text-[var(--color-base-text)] transition-all duration-300 hover:bg-[var(--color-app-panel-hover)] hover:border-emerald-500/40 hover:shadow-md hover:shadow-emerald-500/5 active:scale-95 shadow-sm"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/8 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400 transition-all duration-300 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 group-hover:scale-105 shadow-sm">
@@ -44,6 +47,7 @@ export default function InventoryHeader({ search, setSearch, onNew = () => {}, o
           <button
             type="button"
             onClick={onNew}
+            aria-label="Agregar nuevo producto"
             className="inline-flex h-11 sm:h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[var(--color-brand)] px-4 sm:py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.5)] transition-transform hover:scale-[0.99] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />

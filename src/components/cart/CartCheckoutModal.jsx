@@ -550,7 +550,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
       data-lenis-prevent
     >
       <div
-        className={`cart-scrollbar my-auto max-h-[calc(100dvh-3rem)] w-full max-w-6xl overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
+        className={`cart-scrollbar my-auto flex max-h-[calc(100dvh-3rem)] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-outline-variant bg-surface-container-low px-6 py-5 md:px-8">
@@ -570,7 +570,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
         </div>
 
         <ReactLenis asChild>
-          <div className="cart-scrollbar relative max-h-[calc(100dvh-11rem)] overflow-y-auto px-6 py-6 md:px-8" data-lenis-prevent>
+          <div className="cart-scrollbar relative flex-1 max-h-[calc(100dvh-14.5rem)] md:max-h-[calc(100dvh-11rem)] overflow-y-auto px-6 py-6 md:px-8" data-lenis-prevent>
             <AnimatePresence mode="wait">
             {flowStage === 'checkout' ? (
               <motion.form
@@ -884,7 +884,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.32 }}
-                className="grid gap-5"
+                className="grid gap-5 pb-6 md:pb-0"
               >
                 <div className="grid gap-5 lg:grid-cols-[1.35fr_0.9fr] lg:items-stretch">
                   <article className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low shadow-md">

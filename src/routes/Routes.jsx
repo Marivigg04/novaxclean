@@ -1,15 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, lazy, Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { PageTransitionProvider, usePageTransition } from '../context/PageTransitionContext';
 import LandingPage from '../components/landing/LandingPage';
-import CatalogPage from '../components/catalog/CatalogPage';
-import CartPage from '../components/cart/CartPage';
-import AuthPage from '../components/AuthPage';
-import Dashboard from '../features/admin/dashboard/page/Dashboard';
-import Inventory from '@/features/admin/inventory/page/Inventory';
-import Materials from '@/features/admin/materials/page/Materials';
-import Settings from '@/features/admin/settings/page/Settings';
-import Profile from '@/features/user/profile/page/Profile';
+
+const CatalogPage = lazy(() => import('../components/catalog/CatalogPage'));
+const CartPage = lazy(() => import('../components/cart/CartPage'));
+const AuthPage = lazy(() => import('../components/AuthPage'));
+const Dashboard = lazy(() => import('../features/admin/dashboard/page/Dashboard'));
+const Inventory = lazy(() => import('@/features/admin/inventory/page/Inventory'));
+const Materials = lazy(() => import('@/features/admin/materials/page/Materials'));
+const Settings = lazy(() => import('@/features/admin/settings/page/Settings'));
+const Profile = lazy(() => import('@/features/user/profile/page/Profile'));
 
 function LandingRoute({ initialSection }) {
 	const { navigateTo } = usePageTransition();
@@ -131,10 +132,29 @@ function AppRoutesInner() {
 	);
 }
 
+const LoadingFallback = () => (
+  <div className="fixed inset-0 flex flex-col items-center justify-center bg-background">
+    <div className="relative flex items-center justify-center">
+      <div className="absolute w-16 h-16 rounded-full border-2 border-primary/20 animate-ping" />
+      <div className="w-11 h-11 rounded-full border-4 border-surface-container-high border-t-secondary animate-spin" />
+    </div>
+    <div className="flex flex-col items-center gap-1 mt-5">
+      <span className="text-lg font-black tracking-widest text-primary dark:text-primary-fixed">
+        NovaxClean
+      </span>
+      <span className="text-[10px] uppercase tracking-[0.25em] text-outline font-semibold">
+        cargando…
+      </span>
+    </div>
+  </div>
+);
+
 function AppRoutes() {
 	return (
 		<PageTransitionProvider>
-			<AppRoutesInner />
+			<Suspense fallback={<LoadingFallback />}>
+				<AppRoutesInner />
+			</Suspense>
 		</PageTransitionProvider>
 	);
 }

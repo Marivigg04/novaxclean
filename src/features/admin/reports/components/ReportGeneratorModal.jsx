@@ -1135,7 +1135,7 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
                   </div>
                 </Accordion>
 
-                <div className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4">
+                <div className="hidden lg:block rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-base-text)]/45">Acciones</p>
                   <div className="mt-3 flex flex-col gap-3 sm:flex-row">
                     <button
