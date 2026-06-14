@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 
-export default function LoginForm({ onToggle, onLogin }) {
+export default function LoginForm({ onToggle, onLogin, onGoogleLogin }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
@@ -15,8 +15,8 @@ export default function LoginForm({ onToggle, onLogin }) {
   };
 
   const handleGoogleClick = () => {
-    if (onLogin) {
-      onLogin({ email: 'user@novaxclean.com', password: 'User1234' });
+    if (onGoogleLogin) {
+      onGoogleLogin();
     }
   };
 

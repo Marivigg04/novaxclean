@@ -2,15 +2,24 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 
-export default function RegisterForm({ onToggle, onGoogleRegister }) {
+export default function RegisterForm({ onToggle, onGoogleRegister, onRegister }) {
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const name = form.fullName.value.trim();
+    const email = form.email.value.trim();
+    const password = form.password.value;
+
+    if (onRegister) {
+      onRegister({ name, email, password });
+    }
+  };
 
   const handleGoogleClick = () => {
     if (onGoogleRegister) {
       onGoogleRegister();
-    } else {
-      alert('Registro con Google exitoso (Simulado). Iniciando sesión...');
-      onToggle();
     }
   };
 
@@ -23,17 +32,29 @@ export default function RegisterForm({ onToggle, onGoogleRegister }) {
       <h1 className="mb-1 pr-14 text-3xl font-bold text-primary">Crear Cuenta</h1>
       <p className="mb-4 text-on-surface-variant">Únete a la red de limpieza NovaxClean.</p>
       
-      <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-3" onSubmit={handleSubmit}>
         {/* Nombre completo */}
         <div>
           <label className="mb-1 block text-sm font-semibold text-primary">Nombre completo</label>
-          <input className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary" placeholder="Ej. Juan Perez" type="text" />
+          <input
+            name="fullName"
+            required
+            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
+            placeholder="Ej. Juan Perez"
+            type="text"
+          />
         </div>
         
         {/* Correo */}
         <div>
           <label className="mb-1 block text-sm font-semibold text-primary">Correo electrónico</label>
-          <input className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary" placeholder="nombre@empresa.com" type="email" />
+          <input
+            name="email"
+            required
+            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
+            placeholder="nombre@empresa.com"
+            type="email"
+          />
         </div>
         
         {/* Contraseña */}
@@ -41,6 +62,8 @@ export default function RegisterForm({ onToggle, onGoogleRegister }) {
           <label className="mb-1 block text-sm font-semibold text-primary">Contraseña</label>
           <div className="relative">
             <input
+              name="password"
+              required
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest pl-4 pr-12 py-2.5 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
               placeholder="••••••••"
               type={showPassword ? "text" : "password"}
@@ -56,7 +79,9 @@ export default function RegisterForm({ onToggle, onGoogleRegister }) {
           </div>
         </div>
 
-        <button className="mt-1 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition-colors hover:bg-primary-container cursor-pointer">Registrarse</button>
+        <button className="mt-1 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition-colors hover:bg-primary-container cursor-pointer">
+          Registrarse
+        </button>
       </form>
 
       <div className="my-4 flex items-center justify-between gap-3">
@@ -80,7 +105,9 @@ export default function RegisterForm({ onToggle, onGoogleRegister }) {
       </button>
 
       <div className="mt-4 text-center">
-        <button className="font-bold text-secondary hover:underline cursor-pointer" onClick={onToggle}>¿Ya tienes cuenta? Inicia sesión</button>
+        <button className="font-bold text-secondary hover:underline cursor-pointer" onClick={onToggle}>
+          ¿Ya tienes cuenta? Inicia sesión
+        </button>
       </div>
     </div>
   );
