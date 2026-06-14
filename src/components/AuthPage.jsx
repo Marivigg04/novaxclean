@@ -87,12 +87,21 @@ export default function AuthPage({ onBackToLanding, onAuthSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  const { user, login, register, loginWithGoogle } = useAuth();
+
+  // Auto-redirect if user is already authenticated (critical for OAuth redirects)
+  useEffect(() => {
+    if (user) {
+      if (typeof onAuthSuccess === 'function') {
+        onAuthSuccess(user.role);
+      }
+    }
+  }, [user, onAuthSuccess]);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentSlide((p) => (p + 1) % carouselData.length), 5000);
     return () => clearInterval(timer);
   }, []);
-
-  const { login, register, loginWithGoogle } = useAuth();
 
   const handleGoogleLogin = async () => {
     setLoading(true);
