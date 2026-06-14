@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 
-export default function LoginForm({ onToggle, onLogin, onGoogleLogin }) {
+export default function LoginForm({ onToggle, onLogin, onGoogleLogin, onForgotPassword, loading = false }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
@@ -35,7 +35,9 @@ export default function LoginForm({ onToggle, onLogin, onGoogleLogin }) {
           <label className="mb-1 block text-sm font-semibold text-primary">Correo electrónico</label>
           <input
             name="email"
-            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
+            required
+            disabled={loading}
+            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary disabled:opacity-60"
             placeholder="nombre@empresa.com"
             type="email"
           />
@@ -43,11 +45,25 @@ export default function LoginForm({ onToggle, onLogin, onGoogleLogin }) {
 
         {/* Contraseña */}
         <div>
-          <label className="mb-1 block text-sm font-semibold text-primary">Contraseña</label>
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <label className="block text-sm font-semibold text-primary">Contraseña</label>
+            {onForgotPassword ? (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={onForgotPassword}
+                className="text-xs font-bold text-secondary hover:underline cursor-pointer disabled:opacity-60"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            ) : null}
+          </div>
           <div className="relative">
             <input
               name="password"
-              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest pl-4 pr-12 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary"
+              required
+              disabled={loading}
+              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest pl-4 pr-12 py-3 text-on-surface outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary disabled:opacity-60"
               placeholder="••••••••"
               type={showPassword ? "text" : "password"}
             />
@@ -62,7 +78,13 @@ export default function LoginForm({ onToggle, onLogin, onGoogleLogin }) {
           </div>
         </div>
 
-        <button className="mt-2 w-full rounded-lg bg-primary py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container cursor-pointer">Iniciar Sesión</button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 w-full rounded-lg bg-primary py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? 'Iniciando sesión…' : 'Iniciar Sesión'}
+        </button>
       </form>
 
       <div className="my-5 flex items-center justify-between gap-3">

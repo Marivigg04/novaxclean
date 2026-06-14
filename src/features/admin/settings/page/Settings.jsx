@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { footerLinks } from '@/components/landing/content';
 import { useAuth } from '@/context/AuthContext';
+import { usePasswordChangeHandler } from '@/hooks/usePasswordChange';
 import SettingsPanel from '@/features/admin/settings/components/SettingsPanel';
 import Sidebar from '@/shared/Sidebar';
 import PageHeader from '@/shared/PageHeader';
@@ -12,13 +13,14 @@ import PageHeader from '@/shared/PageHeader';
 export default function Settings() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const handleSaveSecurity = usePasswordChangeHandler();
   const [active, setActive] = useState('ajustes');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const profile = useMemo(
     () => ({
       name: user?.name ?? 'Nova Admin',
-      email: 'admin@novaxclean.com',
+      email: user?.email ?? 'admin@novaxclean.com',
       bio: 'Administrador del panel de Novaxclean.',
       avatar: user?.avatar ?? 'NX',
     }),
@@ -119,7 +121,7 @@ export default function Settings() {
                 security={security}
                 notifications={notifications}
                 onSaveProfile={() => {}}
-                onSaveSecurity={() => {}}
+                onSaveSecurity={handleSaveSecurity}
                 onSaveNotifications={() => {}}
                 onUploadPhoto={() => {}}
                 onRemovePhoto={() => {}}

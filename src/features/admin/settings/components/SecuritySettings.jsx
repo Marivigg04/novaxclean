@@ -63,7 +63,13 @@ function PasswordField({ name, label, value, onChange, placeholder, showPassword
   );
 }
 
-export default function SecuritySettings({ initialSecurity, onSave = () => {} }) {
+export default function SecuritySettings({
+  initialSecurity,
+  onSave = () => {},
+  showTwoFactor = true,
+  title = 'Seguridad',
+  subtitle = 'Protege tu cuenta.',
+}) {
   const fallbackSecurity = useMemo(
     () => ({
       currentPassword: '',
@@ -78,22 +84,37 @@ export default function SecuritySettings({ initialSecurity, onSave = () => {} })
 
   const [security, setSecurity] = useState(fallbackSecurity);
   const [showPasswords, setShowPasswords] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setSecurity((current) => ({ ...current, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    onSave(security);
+    setIsSaving(true);
+
+    try {
+      const success = await onSave(security);
+      if (success) {
+        setSecurity((current) => ({
+          ...current,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        }));
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-6 shadow-[0_12px_30px_-20px_rgba(16,32,58,0.35)] md:p-8">
       <div className="mb-6">
-        <h3 className="text-xl font-semibold text-[var(--color-base-text)]">Seguridad</h3>
-        <p className="mt-1 text-sm text-[var(--color-base-text)]/62">Protege tu cuenta.</p>
+        <h3 className="text-xl font-semibold text-[var(--color-base-text)]">{title}</h3>
+        <p className="mt-1 text-sm text-[var(--color-base-text)]/62">{subtitle}</p>
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
@@ -133,22 +154,25 @@ export default function SecuritySettings({ initialSecurity, onSave = () => {} })
           />
         </div>
 
-        <div className="space-y-3">
-          <Toggle
-            checked={security.twoFactorEnabled}
-            onChange={(value) => setSecurity((current) => ({ ...current, twoFactorEnabled: value }))}
-            label="Verificación en dos pasos"
-            description="Solicita un código adicional al iniciar sesión."
-          />
-        </div>
+        {showTwoFactor ? (
+          <div className="space-y-3">
+            <Toggle
+              checked={security.twoFactorEnabled}
+              onChange={(value) => setSecurity((current) => ({ ...current, twoFactorEnabled: value }))}
+              label="Verificación en dos pasos"
+              description="Solicita un código adicional al iniciar sesión."
+            />
+          </div>
+        ) : null}
 
         <div className="flex justify-end">
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.45)] transition-transform hover:scale-[0.99] active:scale-[0.98]"
+            disabled={isSaving}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.45)] transition-transform hover:scale-[0.99] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
-            Guardar cambios
+            {isSaving ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </div>
       </form>
