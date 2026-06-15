@@ -11,6 +11,7 @@ import { inventoryProducts } from '../../features/admin/inventory/data/mockup';
 import { usePageTransition } from '../../context/PageTransitionContext';
 import logoAumc from '../../assets/Logo AUMC.png';
 import logoAumo from '../../assets/Logo AUMO.png';
+import { useAdminNotifications } from '../../features/admin/notifications/hooks/useAdminNotifications';
 
 export default function Header({
   onOpenCart,
@@ -31,6 +32,7 @@ export default function Header({
   const { user, logout, isAuthenticated } = useAuth();
   const { cartCount } = useCart();
   const isAdmin = isAuthenticated && user?.role === 'Admin';
+  const { notifications: rawNotifications, unreadCount, markAsRead } = useAdminNotifications();
   const navigate = usePageTransition().navigateTo;
   const location = useLocation();
 
@@ -169,31 +171,10 @@ export default function Header({
     );
   }
 
-  const notifications = (() => {
-    const lowStock = inventoryProducts
-      .filter((product) => product.status === 'Stock bajo')
-      .slice(0, 3)
-      .map((product, index) => ({
-        id: `low-${product.sku}`,
-        type: 'warning',
-        title: 'Stock bajo',
-        message: `${product.name} tiene ${product.stock} unidades y requiere reposición pronto.`,
-        time: `${index + 1} h atrás`,
-      }));
-
-    const outOfStock = inventoryProducts
-      .filter((product) => product.status === 'Agotado')
-      .slice(0, 3)
-      .map((product, index) => ({
-        id: `out-${product.sku}`,
-        type: 'danger',
-        title: 'Producto agotado',
-        message: `${product.name} se agotó y ya no está disponible en inventario.`,
-        time: `${index + 2} h atrás`,
-      }));
-
-    return [...lowStock, ...outOfStock];
-  })();
+  const notifications = isAdmin ? rawNotifications.map(n => ({
+    ...n,
+    time: new Date(n.created_at).toLocaleDateString() + ' ' + new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  })) : [];
 
   const handleLogout = () => {
     logout();
@@ -472,12 +453,14 @@ export default function Header({
                     className="relative flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
                   >
                     <Bell className="h-5 w-5" />
-                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
+                    {unreadCount > 0 && (
+                      <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
+                    )}
                   </button>
 
                   <AnimatePresence>
                     {notificationsOpen && (
-                      <Notification notifications={notifications} onClose={() => setNotificationsOpen(false)} />
+                      <Notification notifications={notifications} onClose={() => setNotificationsOpen(false)} onMarkAsRead={markAsRead} />
                     )}
                   </AnimatePresence>
                 </div>

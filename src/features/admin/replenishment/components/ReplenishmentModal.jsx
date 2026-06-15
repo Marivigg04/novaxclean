@@ -253,6 +253,7 @@ export default function ReplenishmentModal({
   const normalizedItems = useMemo(() => normalizeReplenishmentItems(items), [items]);
 
   const buildLineItem = (item) => ({
+    id: item.id,
     sku: item.sku,
     name: item.name,
     category: item.category,
@@ -480,13 +481,23 @@ export default function ReplenishmentModal({
     setTruckAngle(-Math.atan2(dy, dx) * (180 / Math.PI));
   };
 
-  const handleMarkReceived = () => {
-    const updatedItems = applyReceiptToItems(normalizedItems, lineItems);
-    onReceiveStock(updatedItems, lineItems);
-    setShowSuccess(true);
-    closeTimerRef.current = window.setTimeout(() => {
-      handleClose();
-    }, 1300);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleMarkReceived = async () => {
+    setIsProcessing(true);
+    try {
+      const updatedItems = applyReceiptToItems(normalizedItems, lineItems);
+      await onReceiveStock(updatedItems, lineItems);
+      setShowSuccess(true);
+      closeTimerRef.current = window.setTimeout(() => {
+        handleClose();
+      }, 1300);
+    } catch (error) {
+      console.error(error);
+      // Parent handles showing error toast. We stay open to allow user to retry or fix issues.
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!isRendered) return null;
@@ -1170,9 +1181,17 @@ export default function ReplenishmentModal({
                       <button 
                         type="button" 
                         onClick={handleMarkReceived} 
-                        className="w-full rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] sm:w-auto animate-pulse"
+                        disabled={isProcessing}
+                        className={`w-full rounded-xl px-5 py-3 text-sm font-bold shadow-lg transition-all flex items-center justify-center gap-2 sm:w-auto ${isProcessing ? 'bg-emerald-600/50 text-white/70 cursor-not-allowed' : 'bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] animate-pulse'}`}
                       >
-                        Ingresar al Almacén
+                        {isProcessing ? (
+                          <>
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          'Ingresar al Almacén'
+                        )}
                       </button>
                     )}
                   </div>

@@ -16,6 +16,7 @@ import {
   insertProduct,
   updateProduct,
   deleteProduct,
+  produceInventoryItems,
 } from '@/features/admin/inventory/data/inventoryService';
 
 import InventoryHeader from '@/features/admin/inventory/components/InventoryHeader';
@@ -215,14 +216,29 @@ export default function Inventory() {
     }
   };
 
-  const handleReceiveInventory = (updatedItems, lineItems) => {
-    setProducts(updatedItems);
-    setIsReplenishmentOpen(false);
-    showInventoryToast({
-      type: 'success',
-      title: 'Reabastecimiento completado',
-      message: `${lineItems.length} productos se ingresaron al inventario y el stock fue actualizado.`,
-    });
+  const handleReceiveInventory = async (updatedItems, lineItems) => {
+    try {
+      await produceInventoryItems(lineItems);
+      
+      const freshProducts = await fetchProducts();
+      setProducts(freshProducts);
+      
+      setIsReplenishmentOpen(false);
+      showInventoryToast({
+        type: 'success',
+        title: 'Reabastecimiento completado',
+        message: `${lineItems.length} productos se ingresaron al inventario y el stock fue actualizado.`,
+      });
+    } catch (err) {
+      console.error('Error in replenishment:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de Reabastecimiento',
+        message: err.message || 'No se pudo completar el reabastecimiento.',
+      });
+      // Rethrow to stop the modal from closing with success
+      throw err;
+    }
   };
 
   return (

@@ -86,12 +86,14 @@ CREATE TABLE user_addresses (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- User Preferences (1:1 extension table)
 CREATE TABLE user_preferences (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     newsletter BOOLEAN NOT NULL DEFAULT true,
     promotions BOOLEAN NOT NULL DEFAULT true,
     currency VARCHAR(10) NOT NULL DEFAULT 'USD' CHECK (currency IN ('USD', 'VES')),
+    email_alerts BOOLEAN NOT NULL DEFAULT true,
+    push_alerts BOOLEAN NOT NULL DEFAULT true,
+    low_stock_alerts BOOLEAN NOT NULL DEFAULT true,
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -304,8 +306,8 @@ BEGIN
   );
   
   -- Create default user preferences
-  INSERT INTO public.user_preferences (user_id, newsletter, promotions, currency)
-  VALUES (new.id, true, true, 'USD');
+  INSERT INTO public.user_preferences (user_id, newsletter, promotions, currency, email_alerts, push_alerts, low_stock_alerts)
+  VALUES (new.id, true, true, 'USD', true, true, true);
   
   RETURN new;
 END;
@@ -642,3 +644,116 @@ CREATE INDEX idx_orders_rider ON orders(delivery_rider_id);
 CREATE INDEX idx_order_items_product ON order_items(product_id);
 CREATE INDEX idx_order_tracking_order ON order_tracking(order_id);
 CREATE INDEX idx_rider_reviews_rider ON rider_reviews(rider_id);
+
+-- =========================================================================
+-- 11. ADMIN NOTIFICATIONS
+-- =========================================================================
+
+CREATE TABLE admin_notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('info', 'warning', 'danger', 'success')),
+    title VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT false,
+    reference_id UUID,
+    reference_type VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE admin_notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Only Admins can manage admin notifications"
+ON admin_notifications FOR ALL
+USING (is_admin());
+
+-- Notifications Triggers
+-- 1. New Order Notification
+CREATE OR REPLACE FUNCTION public.notify_new_order()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO admin_notifications (type, title, message, reference_id, reference_type)
+  VALUES (
+    'info',
+    'Nuevo Pedido Recibido',
+    'Se ha recibido un nuevo pedido (' || NEW.order_number || ') por un total de $' || NEW.total_amount || '.',
+    NEW.id,
+    'order'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_new_order_received
+  AFTER INSERT ON orders
+  FOR EACH ROW EXECUTE FUNCTION public.notify_new_order();
+
+-- 2. Low Stock Notification for Products
+CREATE OR REPLACE FUNCTION public.notify_low_stock_product()
+RETURNS trigger AS $$
+BEGIN
+  -- Only trigger if stock drops below minimum AND it was previously above
+  -- Or if it's an insert and already below minimum_stock
+  IF NEW.stock <= NEW.minimum_stock AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.stock > OLD.minimum_stock)) THEN
+    INSERT INTO admin_notifications (type, title, message, reference_id, reference_type)
+    VALUES (
+      'warning',
+      'Stock bajo en producto',
+      'El producto "' || NEW.name || '" (' || NEW.sku || ') tiene stock bajo (' || NEW.stock || ' unidades).',
+      NEW.id,
+      'product'
+    );
+  END IF;
+  
+  -- Also alert if completely out of stock
+  IF NEW.stock = 0 AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.stock > 0)) THEN
+    INSERT INTO admin_notifications (type, title, message, reference_id, reference_type)
+    VALUES (
+      'danger',
+      'Producto Agotado',
+      'El producto "' || NEW.name || '" (' || NEW.sku || ') se ha agotado por completo.',
+      NEW.id,
+      'product'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_product_stock_change
+  AFTER INSERT OR UPDATE ON products
+  FOR EACH ROW EXECUTE FUNCTION public.notify_low_stock_product();
+
+-- 3. Low Stock Notification for Raw Materials
+CREATE OR REPLACE FUNCTION public.notify_low_stock_raw_material()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.stock <= NEW.minimum_stock AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.stock > OLD.minimum_stock)) THEN
+    INSERT INTO admin_notifications (type, title, message, reference_id, reference_type)
+    VALUES (
+      'warning',
+      'Stock bajo en materia prima',
+      'La materia prima "' || NEW.name || '" (' || NEW.sku || ') tiene stock bajo (' || NEW.stock || ' ' || NEW.unit || ').',
+      NEW.id,
+      'raw_material'
+    );
+  END IF;
+  
+  IF NEW.stock = 0 AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.stock > 0)) THEN
+    INSERT INTO admin_notifications (type, title, message, reference_id, reference_type)
+    VALUES (
+      'danger',
+      'Materia Prima Agotada',
+      'La materia prima "' || NEW.name || '" (' || NEW.sku || ') se ha agotado por completo.',
+      NEW.id,
+      'raw_material'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_raw_material_stock_change
+  AFTER INSERT OR UPDATE ON raw_materials
+  FOR EACH ROW EXECUTE FUNCTION public.notify_low_stock_raw_material();

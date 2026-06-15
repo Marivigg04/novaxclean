@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 function ToggleSwitch({ checked, onChange }) {
   return (
@@ -22,10 +24,88 @@ function ToggleSwitch({ checked, onChange }) {
 }
 
 export default function PreferencesTab() {
+  const { user } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [currency, setCurrency] = useState('USD ($) - Dólar');
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    async function loadPreferences() {
+      try {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('newsletter, promotions, currency')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          if (error.code !== 'PGRST116') {
+            console.error('Error fetching preferences:', error);
+          }
+        } else if (data) {
+          setNewsletter(data.newsletter);
+          setPromotions(data.promotions);
+          setCurrency(data.currency === 'VES' ? 'VES (Bs) - Bolívar' : 'USD ($) - Dólar');
+        }
+      } catch (err) {
+        console.error('Error loading preferences:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadPreferences();
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    
+    try {
+      const dbCurrency = currency === 'VES (Bs) - Bolívar' ? 'VES' : 'USD';
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          newsletter,
+          promotions,
+          currency: dbCurrency,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      showInventoryToast({
+        type: 'success',
+        title: 'Cambios guardados',
+        message: 'Tus preferencias se actualizaron correctamente.',
+      });
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      showInventoryToast({
+        type: 'error',
+        title: 'Error al guardar',
+        message: 'No se pudieron actualizar tus preferencias.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="w-8 h-8 border-4 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -93,15 +173,13 @@ export default function PreferencesTab() {
         </button>
         <button
           type="button"
-          onClick={() => {
-            showInventoryToast({
-              type: 'success',
-              title: 'Cambios guardados',
-              message: 'Tus preferencias se actualizaron correctamente.',
-            });
-          }}
-          className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
         >
+          {isSaving && (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          )}
           Guardar Cambios
         </button>
       </div>

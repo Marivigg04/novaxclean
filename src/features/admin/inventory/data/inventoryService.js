@@ -94,6 +94,38 @@ export async function deleteProduct(id) {
   if (error) throw error;
 }
 
+/**
+ * Execute production runs for a list of items to replenish inventory.
+ * @param {Array} lineItems - Array of items with { id, quantity, name }
+ */
+export async function produceInventoryItems(lineItems) {
+  for (const item of lineItems) {
+    if (!item.quantity || item.quantity <= 0) continue;
+
+    // 1. Get the formula ID for the product
+    const { data: formulaData, error: formulaError } = await supabase
+      .from('formulas')
+      .select('id')
+      .eq('product_id', item.id)
+      .maybeSingle();
+
+    if (formulaError || !formulaData) {
+      throw new Error(`El producto "${item.name}" no tiene una fórmula asociada en la base de datos.`);
+    }
+
+    // 2. Execute production run via RPC
+    const { error: rpcError } = await supabase.rpc('execute_production_run', {
+      p_formula_id: formulaData.id,
+      p_quantity_to_produce: item.quantity,
+    });
+
+    if (rpcError) {
+      console.error('RPC Error:', rpcError);
+      throw new Error(`Error produciendo "${item.name}": ${rpcError.message}`);
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Categories & Badges (lookups)
 // ---------------------------------------------------------------------------
