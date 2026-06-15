@@ -48,6 +48,17 @@ CREATE TABLE delivery_riders (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Exchange Rates (For dynamic currency conversion)
+CREATE TABLE exchange_rates (
+    currency VARCHAR(10) PRIMARY KEY,
+    rate NUMERIC(10, 4) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Insert default VES rate placeholder
+INSERT INTO exchange_rates (currency, rate) VALUES ('VES', 36.5000);
+
+
 -- =========================================================================
 -- 2. USER PROFILE & SETTINGS MODULE
 -- =========================================================================
@@ -424,6 +435,7 @@ ALTER TABLE order_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rider_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE replenishments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE replenishment_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exchange_rates ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check if the current user is an Admin
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -470,6 +482,15 @@ USING (true);
 
 CREATE POLICY "Only Admins can write categories"
 ON categories FOR ALL
+USING (is_admin());
+
+-- 9.4a Exchange Rates policies (Public read, Admin write)
+CREATE POLICY "Anyone can read exchange rates"
+ON exchange_rates FOR SELECT
+USING (true);
+
+CREATE POLICY "Only Admins can write exchange rates"
+ON exchange_rates FOR ALL
 USING (is_admin());
 
 -- 9.4b Badges policies (Public read, Admin write)

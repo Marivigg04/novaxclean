@@ -1,8 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../../utils/currencyFormatter';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
+import { useAuth } from '../../context/AuthContext';
 
 export default function MiniCart({ isOpen, onToggle, onClose, items }) {
   const navigate = useNavigate();
+  const { rate } = useExchangeRate();
+  const { user } = useAuth();
+  const currencyPref = user?.currency || 'VES';
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       const miniCart = document.getElementById('mini-cart');
@@ -45,7 +52,7 @@ export default function MiniCart({ isOpen, onToggle, onClose, items }) {
               <div className="flex-1">
                 <p className="text-label-md font-bold text-on-surface">{item.name}</p>
                 <p className="text-sm text-outline">
-                  {item.quantity} x {item.price}
+                  {item.quantity} x {formatCurrency(item.price, rate, currencyPref)}
                 </p>
               </div>
             </div>
@@ -55,7 +62,9 @@ export default function MiniCart({ isOpen, onToggle, onClose, items }) {
         <div className="border-t border-outline-variant px-1 pt-4">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-label-md text-on-surface-variant">Total</span>
-            <span className="text-headline-md font-bold text-primary">$49.99</span>
+            <span className="text-headline-md font-bold text-primary">
+              {formatCurrency(items.reduce((sum, item) => sum + (item.price * item.quantity), 0), rate, currencyPref)}
+            </span>
           </div>
           <button
             className="w-full rounded-xl bg-primary py-3 font-bold text-on-primary transition-all hover:brightness-110"

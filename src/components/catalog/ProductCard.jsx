@@ -1,4 +1,14 @@
+import { formatCurrency } from '../../utils/currencyFormatter';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
+import { useAuth } from '../../context/AuthContext';
+
 export default function ProductCard({ product, onAddToCart }) {
+  const { rate } = useExchangeRate();
+  const { user } = useAuth();
+  const currencyPref = user?.currency || 'VES';
+  
+  const displayPrice = formatCurrency(product.price, rate, currencyPref);
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest cloud-shadow transition-all duration-300 hover:-translate-y-1">
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-variant">
@@ -21,7 +31,7 @@ export default function ProductCard({ product, onAddToCart }) {
       <div className="flex flex-1 flex-col p-8">
         <div className="mb-2 flex items-start justify-between gap-4">
           <h4 className="text-headline-md font-semibold text-primary">{product.name}</h4>
-          <span className="text-headline-md font-bold text-primary">{product.price}</span>
+          <span className="text-headline-md font-bold text-primary">{displayPrice}</span>
         </div>
 
         <p className="mb-6 flex-1 text-body-md text-on-surface-variant">{product.description}</p>
