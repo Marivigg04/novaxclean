@@ -67,20 +67,21 @@ export default function MaterialsTable({
         ? [
             { value: 'name', label: 'Materia Prima', align: 'left' },
             { value: 'sku', label: 'SKU', align: 'left' },
-            { value: 'category', label: 'Categoría', align: 'left' },
+            { value: 'category_name', label: 'Categoría', align: 'left' },
             { value: 'stock', label: 'Stock', align: 'center' },
-            { value: 'minimum', label: 'Mínimo', align: 'center' },
+            { value: 'minimum_stock', label: 'Mínimo', align: 'center' },
             { value: 'unit', label: 'Unidad', align: 'left' },
-            { value: 'unitCost', label: 'Costo Unitario', align: 'right' },
-            { value: 'supplier', label: 'Proveedor', align: 'left' },
+            { value: 'unit_cost', label: 'Costo Unitario', align: 'right' },
+            { value: 'supplier_name', label: 'Proveedor', align: 'left' },
             { value: 'status', label: 'Estado', align: 'left' },
           ]
         : [
-            { value: 'product', label: 'Producto terminado', align: 'left' },
-            { value: 'sku', label: 'SKU', align: 'left' },
-            { value: 'category', label: 'Categoría', align: 'left' },
-            { value: 'yieldLabel', label: 'Rinde', align: 'left' },
-            { value: 'estimatedCost', label: 'Costo estimado', align: 'right' },
+            { value: 'product_name', label: 'Producto Terminado', align: 'left' },
+            { value: 'sku', label: 'SKU Fórmula', align: 'left' },
+            { value: 'category_name', label: 'Categoría', align: 'left' },
+            { value: 'yield_label', label: 'Rinde', align: 'left' },
+            { value: 'ingredients', label: 'Ingredientes', align: 'left' },
+            { value: 'estimated_cost', label: 'Costo Estimado', align: 'right' },
             { value: 'status', label: 'Estado', align: 'left' },
           ]
     ),
@@ -135,7 +136,7 @@ export default function MaterialsTable({
               {activeView === 'insumos' ? (
                 data.map((item, index) => (
                   <motion.tr
-                    key={item.sku}
+                    key={item.id || item.sku}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.22, ease: 'easeOut', delay: index * 0.025 }}
@@ -145,12 +146,12 @@ export default function MaterialsTable({
                       <div className="font-semibold text-[var(--color-base-text)]">{item.name}</div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.sku}</td>
-                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.category}</td>
+                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.category_name}</td>
                     <td className="px-4 py-4 text-center text-sm font-semibold text-[var(--color-base-text)]">{item.stock}</td>
-                    <td className="px-4 py-4 text-center text-sm text-[var(--color-base-text)]/70">{item.minimum}</td>
+                    <td className="px-4 py-4 text-center text-sm text-[var(--color-base-text)]/70">{item.minimum_stock}</td>
                     <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.unit}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--color-base-text)]">{formatCurrency(item.unitCost)} US$</td>
-                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.supplier}</td>
+                    <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--color-base-text)]">{formatCurrency(item.unit_cost)} US$</td>
+                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.supplier_name}</td>
                     <td className="px-4 py-4"><StatusBadge status={item.status} /></td>
                     <td className="px-4 py-4"><ActionButtons label={item.name} onEdit={() => onEditRequest(item)} onDelete={() => onDeleteRequest(item)} /></td>
                   </motion.tr>
@@ -158,21 +159,21 @@ export default function MaterialsTable({
               ) : (
                 data.map((item, index) => (
                   <motion.tr
-                    key={item.sku}
+                    key={item.id || item.sku}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.22, ease: 'easeOut', delay: index * 0.025 }}
                     className="transition-colors hover:bg-[var(--color-app-panel-hover)]/50"
                   >
                     <td className="px-4 py-4">
-                      <div className="font-semibold text-[var(--color-base-text)]">{item.product}</div>
+                      <div className="font-semibold text-[var(--color-base-text)]">{item.product_name}</div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.sku}</td>
-                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.category}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-[var(--color-base-text)]">{item.yieldLabel}</td>
+                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.category_name}</td>
+                    <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{item.yield_label}</td>
                     <td className="px-4 py-4">
                       <div className="flex flex-wrap gap-2">
-                        {item.ingredients.map((ingredient) => (
+                        {item.ingredients?.map((ingredient) => (
                           <span
                             key={`${item.sku}-${ingredient.name}`}
                             className="inline-flex rounded-full border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-base-text)]/78"
@@ -182,9 +183,9 @@ export default function MaterialsTable({
                         ))}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--color-base-text)]">{formatCurrency(item.estimatedCost)} US$</td>
-                    <td className="px-4 py-4"><StatusBadge status={item.status} formula /></td>
-                    <td className="px-4 py-4"><ActionButtons label={item.product} onEdit={() => onEditRequest(item)} onDelete={() => onDeleteRequest(item)} /></td>
+                    <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--color-base-text)]">{formatCurrency(item.estimated_cost)} US$</td>
+                    <td className="px-4 py-4"><StatusBadge status={item.status} /></td>
+                    <td className="px-4 py-4"><ActionButtons label={item.product_name} onEdit={() => onEditRequest(item)} onDelete={() => onDeleteRequest(item)} /></td>
                   </motion.tr>
                 ))
               )}
@@ -198,7 +199,7 @@ export default function MaterialsTable({
         {activeView === 'insumos' ? (
           data.map((item, index) => (
             <motion.div
-              key={item.sku}
+              key={item.id || item.sku}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut', delay: index * 0.03 }}
@@ -215,11 +216,11 @@ export default function MaterialsTable({
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[var(--color-app-panel-border)]/55 pt-3 text-xs">
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Categoría</span>
-                  <span className="font-medium text-[var(--color-base-text)]">{item.category}</span>
+                  <span className="font-medium text-[var(--color-base-text)]">{item.category_name}</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Costo Unitario</span>
-                  <span className="font-bold text-[var(--color-brand)]">{formatCurrency(item.unitCost)} US$</span>
+                  <span className="font-bold text-[var(--color-brand)]">{formatCurrency(item.unit_cost)} US$</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Stock Actual</span>
@@ -227,13 +228,13 @@ export default function MaterialsTable({
                 </div>
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Stock Mínimo</span>
-                  <span className="font-medium text-[var(--color-base-text)]">{item.minimum} {item.unit}</span>
+                  <span className="font-medium text-[var(--color-base-text)]">{item.minimum_stock} {item.unit}</span>
                 </div>
               </div>
 
               <div className="mt-2.5 border-t border-[var(--color-app-panel-border)]/35 pt-2.5 text-xs">
                 <span className="text-[var(--color-base-text)]/50 block">Proveedor</span>
-                <span className="font-medium text-[var(--color-base-text)]">{item.supplier}</span>
+                <span className="font-medium text-[var(--color-base-text)]">{item.supplier_name}</span>
               </div>
 
               <div className="mt-3.5 flex items-center justify-end gap-4 border-t border-[var(--color-app-panel-border)]/45 pt-3 text-[var(--color-base-text)]/65">
@@ -261,7 +262,7 @@ export default function MaterialsTable({
         ) : (
           data.map((item, index) => (
             <motion.div
-              key={item.sku}
+              key={item.id || item.sku}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut', delay: index * 0.03 }}
@@ -269,36 +270,36 @@ export default function MaterialsTable({
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="font-bold text-[var(--color-base-text)] text-sm">{item.product}</h4>
+                  <h4 className="font-bold text-[var(--color-base-text)] text-sm">{item.product_name}</h4>
                   <p className="mt-1 text-xs text-[var(--color-base-text)]/55">SKU: {item.sku}</p>
                 </div>
-                <StatusBadge status={item.status} formula />
+                <StatusBadge status={item.status} />
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[var(--color-app-panel-border)]/55 pt-3 text-xs">
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Categoría</span>
-                  <span className="font-medium text-[var(--color-base-text)]">{item.category}</span>
+                  <span className="font-medium text-[var(--color-base-text)]">{item.category_name}</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-base-text)]/50 block">Costo Estimado</span>
-                  <span className="font-bold text-[var(--color-brand)]">{formatCurrency(item.estimatedCost)} US$</span>
+                  <span className="font-bold text-[var(--color-brand)]">{formatCurrency(item.estimated_cost)} US$</span>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <span className="text-[var(--color-base-text)]/50 block">Rinde</span>
-                  <span className="font-semibold text-[var(--color-base-text)]">{item.yieldLabel}</span>
+                  <span className="font-medium text-[var(--color-base-text)]">{item.yield_label}</span>
                 </div>
               </div>
 
               <div className="mt-3 border-t border-[var(--color-app-panel-border)]/35 pt-3">
                 <span className="text-[var(--color-base-text)]/50 block text-[10px] uppercase font-semibold tracking-wider mb-2">Ingredientes de Fórmula</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {item.ingredients.map((ingredient) => (
+                  {item.ingredients?.map((ingredient) => (
                     <span
                       key={`${item.sku}-${ingredient.name}`}
-                      className="inline-flex rounded-lg border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-base-text)]/78"
+                      className="inline-flex items-center rounded-lg border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-2 py-1 text-[10px] font-medium text-[var(--color-base-text)]/80"
                     >
-                      {ingredient.name} · {ingredient.qty}
+                      {ingredient.name} <span className="ml-1 opacity-60">· {ingredient.qty}</span>
                     </span>
                   ))}
                 </div>

@@ -1,6 +1,12 @@
 import { AlertTriangle, Boxes, CircleDollarSign, Truck } from 'lucide-react';
 import { inventoryCategories, inventoryProducts } from '../../inventory/data/mockup';
 
+// ---------------------------------------------------------------------------
+// Raw material data is now loaded from Supabase via rawMaterialsService.js.
+// The static catalog below is kept ONLY to feed formula recipes (BOM cost
+// calculations). It will be removed once formulas are also migrated.
+// ---------------------------------------------------------------------------
+
 const rawMaterialCatalog = [
   { sku: 'MP-CHE-001', name: 'Ácido Sulfónico', category: 'Químicos', stock: 42, minimum: 20, unit: 'Kg', unitCost: 18.4, supplier: 'Quimlab Industrial' },
   { sku: 'MP-CHE-002', name: 'Soda Cáustica', category: 'Químicos', stock: 64, minimum: 25, unit: 'Kg', unitCost: 6.55, supplier: 'Quimlab Industrial' },
@@ -35,6 +41,7 @@ const rawMaterialCatalog = [
 
 const rawMaterialMap = new Map(rawMaterialCatalog.map((item) => [item.sku, item]));
 
+/** @deprecated Use fetchRawMaterials() from rawMaterialsService.js instead. */
 export const materialRows = rawMaterialCatalog.map((item) => ({
   ...item,
   status: item.stock === 0 ? 'Agotado' : item.stock <= item.minimum ? 'Stock bajo' : 'En stock',
@@ -79,11 +86,13 @@ export const productionFormulas = recipeCatalog.map((recipe) => ({
   status: getFormulaStatus(recipe.ingredients),
 }));
 
+/** @deprecated Use categories from rawMaterialsService.js instead. */
 export const materialCategories = ['Todos', ...new Set(materialRows.map((item) => item.category))];
 export const materialStatuses = ['Todos', 'En stock', 'Stock bajo', 'Agotado'];
 export const formulaCategories = ['Todos', ...inventoryCategories];
 export const formulaStatuses = ['Todos', 'Lista', 'En revisión', 'En ajuste'];
 
+/** @deprecated Stats are now computed dynamically in Materials.jsx. */
 export const materialStats = [
   {
     title: 'Total Insumos',

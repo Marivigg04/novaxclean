@@ -1,38 +1,37 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { PlusCircle, Save, X, Trash2 } from 'lucide-react';
+import { PlusCircle, Save, X, Trash2, Loader2 } from 'lucide-react';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { uploadProductImage } from '@/features/admin/inventory/data/inventoryService';
 
 function buildInitialForm(type, item) {
   if (type === 'formula') {
     return {
-      product: item?.product ?? '',
+      product_id: item?.product_id ?? '',
       sku: item?.sku ?? `FP-${Date.now()}`,
-      category: item?.category ?? '',
-      yieldLabel: item?.yieldLabel ?? '',
-      batchSize: item?.batchSize ? String(item.batchSize) : '',
+      yield_label: item?.yield_label ?? '',
+      batch_size: item?.batch_size ? String(item.batch_size) : '',
       status: item?.status ?? 'Lista',
+      notes: item?.notes ?? '',
       ingredients: item?.ingredients?.length
         ? item.ingredients.map((ingredient) => ({
-            id: `${ingredient.sku ?? ingredient.name}-${ingredient.qty}`,
-            materialSku: ingredient.sku ?? '',
+            id: `${ingredient.material_id}-${ingredient.qty}`,
+            material_id: ingredient.material_id ?? '',
             qty: String(ingredient.qty ?? ''),
           }))
-        : [{ id: 'ingredient-0', materialSku: '', qty: '' }],
-      notes: item?.notes ?? '',
+        : [{ id: 'ingredient-0', material_id: '', qty: '' }],
     };
   }
 
   return {
     name: item?.name ?? '',
     sku: item?.sku ?? `MP-${Date.now()}`,
-    category: item?.category ?? '',
-    stock: item?.stock ?? '',
-    minimum: item?.minimum ?? '',
+    category_id: item?.category_id ?? '',
+    stock: item?.stock != null ? String(item.stock) : '',
+    minimum_stock: item?.minimum_stock != null ? String(item.minimum_stock) : '',
     unit: item?.unit ?? '',
-    unitCost: item?.unitCost ?? '',
-    supplier: item?.supplier ?? '',
-    status: item?.status ?? 'En stock',
+    unit_cost: item?.unit_cost != null ? String(item.unit_cost) : '',
+    supplier_id: item?.supplier_id ?? '',
   };
 }
 
@@ -42,13 +41,17 @@ export default function MaterialsEntryModal({
   mode = 'create',
   item = null,
   categories = [],
+  suppliers = [],
   statuses = [],
   materialOptions = [],
+  productOptions = [],
   onClose = () => {},
   onSubmit = () => {},
+  loading: externalLoading = false,
 }) {
   const [form, setForm] = useState(() => buildInitialForm(type, item));
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const formulaIngredients = Array.isArray(form.ingredients) ? form.ingredients : [{ id: 'ingredient-0', materialSku: '', qty: '' }];
 
   useScrollLock(isOpen);
@@ -65,6 +68,7 @@ export default function MaterialsEntryModal({
     if (!isOpen) {
       setForm(buildInitialForm(type, item));
       setError('');
+      setLoading(false);
       return;
     }
 
@@ -102,87 +106,115 @@ export default function MaterialsEntryModal({
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // ── Formula submit (Supabase) ───────────────────────────
     if (type === 'formula') {
-      if (!form.product.trim()) return setError('El nombre de la fórmula es requerido.');
+      if (!form.product_id) return setError('El producto terminado es requerido.');
       if (!form.sku.trim()) return setError('El SKU es requerido.');
-      if (!form.category.trim()) return setError('La categoría es requerida.');
 
       const ingredients = formulaIngredients
         .map((ingredient) => {
-          const material = materialOptions.find((option) => option.sku === ingredient.materialSku);
+          const material = materialOptions.find((option) => option.id === ingredient.material_id);
           const qty = parseFloat(ingredient.qty);
 
           return {
-            sku: material?.sku ?? '',
-            name: material?.name ?? '',
+            material_id: material?.id ?? '',
             qty,
-            unit: material?.unit ?? '',
-            unitCost: material?.unitCost ?? 0,
+            unit_cost: material?.unit_cost ?? 0,
+            status: material?.status ?? '',
           };
         })
-        .filter((ingredient) => ingredient.sku && !Number.isNaN(ingredient.qty) && ingredient.qty > 0);
+        .filter((ingredient) => ingredient.material_id && !Number.isNaN(ingredient.qty) && ingredient.qty > 0);
 
       if (!ingredients.length) return setError('Agrega al menos un insumo válido en el desglose BOM.');
 
-      const estimatedCost = ingredients.reduce((total, ingredient) => total + ingredient.qty * ingredient.unitCost, 0);
       const formulaStatus =
         form.status !== 'Lista'
           ? form.status
-          : ingredients.some((ingredient) => materialOptions.find((option) => option.sku === ingredient.sku)?.status === 'Agotado')
+          : ingredients.some((ingredient) => ingredient.status === 'Agotado')
             ? 'En ajuste'
-            : ingredients.some((ingredient) => materialOptions.find((option) => option.sku === ingredient.sku)?.status === 'Stock bajo')
+            : ingredients.some((ingredient) => ingredient.status === 'Stock bajo')
               ? 'En revisión'
               : 'Lista';
 
-      onSubmit({
-        ...(item ?? {}),
-        product: form.product.trim(),
-        sku: form.sku.trim(),
-        category: form.category,
-        yieldLabel: form.yieldLabel.trim(),
-        batchSize: form.batchSize.trim(),
-        estimatedCost,
-        status: formulaStatus,
-        ingredients,
-        notes: form.notes.trim(),
-      });
-      onClose();
+      setLoading(true);
+      setError('');
+
+      try {
+        await onSubmit({
+          ...(item ?? {}),
+          product_id: form.product_id,
+          sku: form.sku.trim(),
+          yield_label: form.yield_label.trim(),
+          yield_units: 1, // Defaulting to 1 as per discussion
+          batch_size: form.batch_size.trim(),
+          status: formulaStatus,
+          ingredients,
+          notes: form.notes.trim(),
+        });
+        onClose();
+      } catch (err) {
+        setError(err.message || 'Ocurrió un error al guardar la fórmula.');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
+    // ── Material submit (Supabase) ───────────────────────────────────────
     if (!form.name.trim()) return setError('El nombre es requerido.');
     if (!form.sku.trim()) return setError('El SKU es requerido.');
-    if (!form.category.trim()) return setError('La categoría es requerida.');
 
-    const stock = parseInt(form.stock, 10);
-    const minimum = parseInt(form.minimum, 10);
-    const unitCost = parseFloat(form.unitCost);
+    const stock = parseFloat(form.stock);
+    const minimum_stock = parseFloat(form.minimum_stock);
+    const unit_cost = parseFloat(form.unit_cost);
 
     if (Number.isNaN(stock) || stock < 0) return setError('Stock inválido.');
-    if (Number.isNaN(minimum) || minimum < 0) return setError('Stock mínimo inválido.');
-    if (Number.isNaN(unitCost) || unitCost < 0) return setError('Costo unitario inválido.');
+    if (Number.isNaN(minimum_stock) || minimum_stock < 0) return setError('Stock mínimo inválido.');
+    if (Number.isNaN(unit_cost) || unit_cost < 0) return setError('Costo unitario inválido.');
+    if (!form.unit.trim()) return setError('La unidad es requerida.');
 
-    const status = stock === 0 ? 'Agotado' : stock <= minimum ? 'Stock bajo' : 'En stock';
+    setLoading(true);
+    setError('');
 
-    onSubmit({
-      ...(item ?? {}),
-      name: form.name.trim(),
-      sku: form.sku.trim(),
-      category: form.category,
-      stock,
-      minimum,
-      unit: form.unit.trim(),
-      unitCost,
-      supplier: form.supplier.trim(),
-      status,
-    });
-    onClose();
+    try {
+      await onSubmit({
+        ...(item ?? {}),
+        name: form.name.trim(),
+        sku: form.sku.trim(),
+        category_id: form.category_id || null,
+        stock,
+        minimum_stock,
+        unit: form.unit.trim(),
+        unit_cost,
+        supplier_id: form.supplier_id || null,
+      });
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Ocurrió un error al guardar el insumo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
+
+  // ── Build select options from [{id, name}] objects ─────────────────────
+  const categoryOptions = Array.isArray(categories)
+    ? categories.filter((c) => typeof c === 'object' && c.id).map((c) => ({ value: c.id, label: c.name }))
+    : [];
+  const supplierOptions = Array.isArray(suppliers)
+    ? suppliers.map((s) => ({ value: s.id, label: s.name }))
+    : [];
+
+  // For formulas that still use string categories
+  const formulaCategoryStrings = Array.isArray(categories)
+    ? categories.filter((c) => typeof c === 'string')
+    : [];
+
+  const isSubmitting = loading || externalLoading;
 
   return createPortal(
     <div
@@ -191,7 +223,7 @@ export default function MaterialsEntryModal({
       aria-modal="true"
       data-lenis-prevent
     >
-      <button type="button" className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm" aria-label="Cerrar modal" onClick={onClose} />
+      <button type="button" className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm" aria-label="Cerrar modal" onClick={!isSubmitting ? onClose : undefined} />
 
       <form
         onSubmit={handleSubmit}
@@ -205,7 +237,7 @@ export default function MaterialsEntryModal({
             <h3 className="mt-1 text-lg font-semibold text-[var(--color-base-text)]">{type === 'formula' ? 'Configurar fórmula' : 'Registrar insumo'}</h3>
           </div>
 
-          <button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--color-base-text)]/60 transition-colors hover:bg-[var(--color-app-panel-hover)]">
+          <button type="button" onClick={onClose} disabled={isSubmitting} className="rounded-full p-2 text-[var(--color-base-text)]/60 transition-colors hover:bg-[var(--color-app-panel-hover)] disabled:opacity-40">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -215,35 +247,30 @@ export default function MaterialsEntryModal({
             <div className="grid gap-3 md:grid-cols-2">
               <label className="block md:col-span-2">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Producto terminado</span>
-                <input name="product" value={form.product} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="Nombre del producto" />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU de fórmula</span>
-                <input name="sku" value={form.sku} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none whitespace-nowrap" placeholder="FP-001" />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Categoría</span>
-                <select name="category" value={form.category} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none">
-                  <option value="">Seleccionar</option>
-                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                <select name="product_id" value={form.product_id} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50">
+                  <option value="">Seleccionar producto</option>
+                  {productOptions.map((prod) => <option key={prod.id} value={prod.id}>{prod.name} ({prod.category_name})</option>)}
                 </select>
               </label>
 
+              <label className="block md:col-span-2">
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU de fórmula</span>
+                <input name="sku" value={form.sku} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none whitespace-nowrap disabled:opacity-50" placeholder="FP-001" />
+              </label>
+
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Rinde</span>
-                <input name="yieldLabel" value={form.yieldLabel} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="1 lote / 100 unidades" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Rinde (ej. 1 lote / 100 unidades)</span>
+                <input name="yield_label" value={form.yield_label} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="1 lote / 100 unidades" />
               </label>
 
               <label className="block">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Tamaño del lote</span>
-                <input name="batchSize" value={form.batchSize} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="100 unidades" />
+                <input name="batch_size" value={form.batch_size} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="100 unidades" />
               </label>
 
               <label className="block md:col-span-2">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Estado inicial</span>
-                <select name="status" value={form.status} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none">
+                <select name="status" value={form.status} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50">
                   {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
                 </select>
               </label>
@@ -256,25 +283,26 @@ export default function MaterialsEntryModal({
 
                 <div className="cart-scrollbar max-h-56 space-y-2 overflow-y-auto overscroll-contain pr-1" data-lenis-prevent>
                   {formulaIngredients.map((ingredient, index) => {
-                    const selectedMaterial = materialOptions.find((option) => option.sku === ingredient.materialSku);
+                    const selectedMaterial = materialOptions.find((option) => option.id === ingredient.material_id);
 
                     return (
                       <div key={ingredient.id} className="grid gap-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-2 md:grid-cols-[1fr_120px_auto] md:items-end">
                         <label className="block min-w-0">
                           <span className="block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-base-text)]/55">Insumo #{index + 1}</span>
                           <select
-                            value={ingredient.materialSku}
-                            onChange={(event) => updateIngredient(ingredient.id, { materialSku: event.target.value })}
-                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none"
+                            value={ingredient.material_id}
+                            onChange={(event) => updateIngredient(ingredient.id, { material_id: event.target.value })}
+                            disabled={isSubmitting}
+                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none disabled:opacity-50"
                           >
                             <option value="">Seleccionar insumo</option>
                             {materialOptions.map((material) => (
-                              <option key={material.sku} value={material.sku}>
+                              <option key={material.id} value={material.id}>
                                 {material.name} · {material.sku}
                               </option>
                             ))}
                           </select>
-                          {selectedMaterial ? <p className="mt-1 text-xs text-[var(--color-base-text)]/55">{selectedMaterial.unit} · {selectedMaterial.category}</p> : null}
+                          {selectedMaterial ? <p className="mt-1 text-xs text-[var(--color-base-text)]/55">{selectedMaterial.unit} · {selectedMaterial.category_name ?? selectedMaterial.category}</p> : null}
                         </label>
 
                         <label className="block">
@@ -285,7 +313,8 @@ export default function MaterialsEntryModal({
                             step="0.01"
                             value={ingredient.qty}
                             onChange={(event) => updateIngredient(ingredient.id, { qty: event.target.value })}
-                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none"
+                            disabled={isSubmitting}
+                            className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-4 text-sm outline-none disabled:opacity-50"
                             placeholder="0"
                           />
                         </label>
@@ -306,58 +335,54 @@ export default function MaterialsEntryModal({
 
               <label className="block md:col-span-2">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Notas de producción</span>
-                <textarea name="notes" value={form.notes} onChange={handleChange} className="mt-2 min-h-28 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm outline-none" placeholder="Observaciones, proceso o detalles técnicos" />
+                <textarea name="notes" value={form.notes} onChange={handleChange} disabled={isSubmitting} className="mt-2 min-h-28 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3 text-sm outline-none disabled:opacity-50" placeholder="Observaciones, proceso o detalles técnicos" />
               </label>
             </div>
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               <label className="block md:col-span-2">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Nombre</span>
-                <input name="name" value={form.name} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="Nombre del insumo" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Nombre <span className="text-rose-500">*</span></span>
+                <input name="name" value={form.name} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="Nombre del insumo" />
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU</span>
-                <input name="sku" value={form.sku} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none whitespace-nowrap" placeholder="MP-001" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">SKU <span className="text-rose-500">*</span></span>
+                <input name="sku" value={form.sku} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none whitespace-nowrap disabled:opacity-50" placeholder="MP-001" />
               </label>
 
               <label className="block">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Categoría</span>
-                <select name="category" value={form.category} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none">
+                <select name="category_id" value={form.category_id} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50">
                   <option value="">Seleccionar</option>
-                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                  {categoryOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Stock</span>
-                <input name="stock" value={form.stock} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="0" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Stock <span className="text-rose-500">*</span></span>
+                <input name="stock" value={form.stock} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="0" />
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Stock mínimo</span>
-                <input name="minimum" value={form.minimum} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="0" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Stock mínimo <span className="text-rose-500">*</span></span>
+                <input name="minimum_stock" value={form.minimum_stock} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="0" />
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Unidad</span>
-                <input name="unit" value={form.unit} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="Kg / Litros / Unidades" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Unidad <span className="text-rose-500">*</span></span>
+                <input name="unit" value={form.unit} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="Kg / Litros / Unidades" />
               </label>
 
               <label className="block">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Costo unitario</span>
-                <input name="unitCost" value={form.unitCost} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="0.00" />
+                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Costo unitario <span className="text-rose-500">*</span></span>
+                <input name="unit_cost" value={form.unit_cost} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50" placeholder="0.00" />
               </label>
 
               <label className="block md:col-span-2">
                 <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Proveedor</span>
-                <input name="supplier" value={form.supplier} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none" placeholder="Empresa proveedora" />
-              </label>
-
-              <label className="block md:col-span-2">
-                <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Estado</span>
-                <select name="status" value={form.status} onChange={handleChange} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none">
-                  {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                <select name="supplier_id" value={form.supplier_id} onChange={handleChange} disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 text-sm outline-none disabled:opacity-50">
+                  <option value="">Sin proveedor</option>
+                  {supplierOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
               </label>
             </div>
@@ -368,11 +393,20 @@ export default function MaterialsEntryModal({
           {error ? <p className="mb-3 text-xs text-red-600">{error}</p> : null}
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/80 transition-colors hover:bg-[var(--color-app-panel-hover)]">Cancelar</button>
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/80 transition-colors hover:bg-[var(--color-app-panel-hover)] disabled:opacity-40">Cancelar</button>
 
-            <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110">
-              {mode === 'create' ? <PlusCircle className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-              {mode === 'create' ? 'Agregar' : 'Guardar'}
+            <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110 disabled:opacity-60">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Guardando…
+                </>
+              ) : (
+                <>
+                  {mode === 'create' ? <PlusCircle className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                  {mode === 'create' ? 'Agregar' : 'Guardar'}
+                </>
+              )}
             </button>
           </div>
         </div>

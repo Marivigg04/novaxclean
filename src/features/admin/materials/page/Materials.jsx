@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, Boxes, CircleDollarSign, Truck } from 'lucide-react';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -17,14 +18,26 @@ import MaterialsEntryModal from '../components/MaterialsEntryModal';
 import MaterialsDeleteModal from '../components/MaterialsDeleteModal';
 import ReportGeneratorModal from '@/features/admin/reports/components/ReportGeneratorModal';
 import ReplenishmentModal from '@/features/admin/replenishment/components/ReplenishmentModal';
+
 import {
-  formulaCategories,
+  fetchRawMaterials,
+  fetchCategories,
+  fetchSuppliers,
+  insertRawMaterial,
+  updateRawMaterial,
+  deleteRawMaterial,
+} from '../data/rawMaterialsService';
+
+import {
+  fetchFormulas,
+  fetchProductsForFormulas,
+  saveFormula,
+  deleteFormula as deleteFormulaService,
+} from '../data/formulasService';
+
+import {
   formulaStatuses,
-  materialCategories,
-  materialRows,
-  materialStats,
   materialStatuses,
-  productionFormulas,
 } from '../data/mockup';
 
 const pageSize = 6;
@@ -44,8 +57,15 @@ export default function Materials() {
   const [formulaStatus, setFormulaStatus] = useState('Todos');
   const [formulaSortField, setFormulaSortField] = useState('estimatedCost');
   const [formulaSortDirection, setFormulaSortDirection] = useState('desc');
-  const [materials, setMaterials] = useState(materialRows);
-  const [formulas, setFormulas] = useState(productionFormulas);
+
+  // ── Data from Supabase ─────────────────────────────────────────────────
+  const [materials, setMaterials] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [formulas, setFormulas] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
@@ -54,6 +74,68 @@ export default function Materials() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  // ── Initial data load from Supabase ────────────────────────────────────
+  const loadData = useCallback(async () => {
+    try {
+      const [materialsData, categoriesData, suppliersData, formulasData, productsData] = await Promise.all([
+        fetchRawMaterials(),
+        fetchCategories(),
+        fetchSuppliers(),
+        fetchFormulas(),
+        fetchProductsForFormulas(),
+      ]);
+      setMaterials(materialsData);
+      setCategories(categoriesData);
+      setSuppliers(suppliersData);
+      setFormulas(formulasData);
+      setProducts(productsData);
+    } catch (err) {
+      console.error('Error loading materials/formulas data:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: 'No se pudieron cargar los datos.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // ── Dynamic stats ──────────────────────────────────────────────────────
+  const computedStats = useMemo(() => {
+    const total = materials.length;
+    const totalValue = materials.reduce((sum, m) => sum + m.stock * m.unit_cost, 0);
+    const alerts = materials.filter((m) => m.status !== 'En stock').length;
+    const uniqueSuppliers = new Set(materials.map((m) => m.supplier_name).filter((n) => n !== 'Sin proveedor')).size;
+
+    return [
+      { title: 'Total Insumos', value: `${total} referencias`, description: 'Referencias activas en catálogo interno', icon: Boxes },
+      { title: 'Valor del Almacén', value: `$${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(totalValue)} US$`, description: 'Costo estimado del stock de materia prima', icon: CircleDollarSign },
+      { title: 'Alertas de Reorden', value: `${alerts} insumos`, description: 'Insumos con stock crítico o por debajo del mínimo', icon: AlertTriangle, badge: alerts > 0 ? 'Alerta' : undefined },
+      { title: 'Proveedores', value: `${uniqueSuppliers} proveedores`, description: 'Red de abastecimiento registrada', icon: Truck },
+    ];
+  }, [materials]);
+
+  // ── Categories for filters ─────────────────────────────────────────────
+  const materialCategoryOptions = useMemo(
+    () => ['Todos', ...categories.map((c) => c.name)],
+    [categories],
+  );
+
+  const formulaCategoryOptions = useMemo(
+    () => {
+      // Get unique category names from loaded formulas
+      const cats = Array.from(new Set(formulas.map(f => f.category_name).filter(Boolean)));
+      return ['Todos', ...cats.sort()];
+    },
+    [formulas],
+  );
+
+  // ── Reset filters on view switch ───────────────────────────────────────
   useEffect(() => {
     setMaterialCategory('Todos');
     setMaterialStatus('Todos');
@@ -70,12 +152,13 @@ export default function Materials() {
     setPage(1);
   }, [search, materialCategory, materialStatus, materialSortField, materialSortDirection, formulaCategory, formulaStatus, formulaSortField, formulaSortDirection]);
 
+  // ── Materials filtering & sorting ──────────────────────────────────────
   const filteredMaterials = useMemo(() => {
     const normalizedSearch = search.toLowerCase();
 
     return materials.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(normalizedSearch) || item.sku.toLowerCase().includes(normalizedSearch);
-      const matchesCategory = materialCategory === 'Todos' || item.category === materialCategory;
+      const matchesCategory = materialCategory === 'Todos' || item.category_name === materialCategory;
       const matchesStatus = materialStatus === 'Todos' || item.status === materialStatus;
 
       return matchesSearch && matchesCategory && matchesStatus;
@@ -104,12 +187,13 @@ export default function Materials() {
 
   const materialPageCount = Math.max(1, Math.ceil(sortedMaterials.length / pageSize));
 
+  // ── Formulas filtering & sorting (unchanged — still mock) ──────────────
   const filteredFormulas = useMemo(() => {
     const normalizedSearch = search.toLowerCase();
 
     return formulas.filter((item) => {
-      const matchesSearch = item.product.toLowerCase().includes(normalizedSearch) || item.sku.toLowerCase().includes(normalizedSearch);
-      const matchesCategory = formulaCategory === 'Todos' || item.category === formulaCategory;
+      const matchesSearch = item.product_name.toLowerCase().includes(normalizedSearch) || item.sku.toLowerCase().includes(normalizedSearch);
+      const matchesCategory = formulaCategory === 'Todos' || item.category_name === formulaCategory;
       const matchesStatus = formulaStatus === 'Todos' || item.status === formulaStatus;
 
       return matchesSearch && matchesCategory && matchesStatus;
@@ -138,7 +222,8 @@ export default function Materials() {
 
   const formulaPageCount = Math.max(1, Math.ceil(sortedFormulas.length / pageSize));
 
-  const currentCategories = activeView === 'formulas' ? formulaCategories : materialCategories;
+  // ── Current view bindings ──────────────────────────────────────────────
+  const currentCategories = activeView === 'formulas' ? formulaCategoryOptions : materialCategoryOptions;
   const currentStatuses = activeView === 'formulas' ? formulaStatuses : materialStatuses;
   const currentCategory = activeView === 'formulas' ? formulaCategory : materialCategory;
   const currentStatus = activeView === 'formulas' ? formulaStatus : materialStatus;
@@ -154,19 +239,40 @@ export default function Materials() {
     }
   }, [currentPageCount, page]);
 
-  const handleCreateEntry = (newEntry) => {
+  // ── CRUD Handlers (Supabase) ─────────────────────────────────────────
+  const handleCreateEntry = async (newEntry) => {
     if (entryType === 'formula') {
-      setFormulas((current) => [newEntry, ...current]);
-      showInventoryToast({
-        type: 'success',
-        title: 'Fórmula agregada',
-        message: `${newEntry.product} se agregó correctamente.`,
-      });
-      setIsEntryModalOpen(false);
+      try {
+        await saveFormula(newEntry, newEntry.ingredients);
+        const freshFormulas = await fetchFormulas();
+        setFormulas(freshFormulas);
+        showInventoryToast({
+          type: 'success',
+          title: 'Fórmula agregada',
+          message: `La fórmula ${newEntry.sku} se agregó correctamente.`,
+        });
+        setIsEntryModalOpen(false);
+      } catch (err) {
+        console.error('Error creating formula:', err);
+        throw err;
+      }
       return;
     }
 
-    setMaterials((current) => [newEntry, ...current]);
+    // Material — Supabase insert
+    await insertRawMaterial({
+      sku: newEntry.sku,
+      name: newEntry.name,
+      category_id: newEntry.category_id,
+      stock: newEntry.stock,
+      minimum_stock: newEntry.minimum_stock,
+      unit: newEntry.unit,
+      unit_cost: newEntry.unit_cost,
+      supplier_id: newEntry.supplier_id,
+    });
+
+    const freshMaterials = await fetchRawMaterials();
+    setMaterials(freshMaterials);
     showInventoryToast({
       type: 'success',
       title: 'Insumo agregado',
@@ -175,40 +281,83 @@ export default function Materials() {
     setIsEntryModalOpen(false);
   };
 
-  const handleUpdateEntry = (updatedEntry) => {
+  const handleUpdateEntry = async (updatedEntry) => {
     if (editingEntry?.type === 'formula') {
-      setFormulas((current) => current.map((item) => (item.sku === updatedEntry.sku ? updatedEntry : item)));
-      showInventoryToast({
-        type: 'edit',
-        title: 'Fórmula actualizada',
-        message: `${updatedEntry.product} se actualizó correctamente.`,
-      });
-    } else {
-      setMaterials((current) => current.map((item) => (item.sku === updatedEntry.sku ? updatedEntry : item)));
-      showInventoryToast({
-        type: 'edit',
-        title: 'Insumo actualizado',
-        message: `${updatedEntry.name} se actualizó correctamente.`,
-      });
+      try {
+        await saveFormula(updatedEntry, updatedEntry.ingredients);
+        const freshFormulas = await fetchFormulas();
+        setFormulas(freshFormulas);
+        showInventoryToast({
+          type: 'edit',
+          title: 'Fórmula actualizada',
+          message: `La fórmula ${updatedEntry.sku} se actualizó correctamente.`,
+        });
+        setEditingEntry(null);
+      } catch (err) {
+        console.error('Error updating formula:', err);
+        throw err;
+      }
+      return;
     }
 
+    // Material — Supabase update
+    await updateRawMaterial(updatedEntry.id, {
+      sku: updatedEntry.sku,
+      name: updatedEntry.name,
+      category_id: updatedEntry.category_id,
+      stock: updatedEntry.stock,
+      minimum_stock: updatedEntry.minimum_stock,
+      unit: updatedEntry.unit,
+      unit_cost: updatedEntry.unit_cost,
+      supplier_id: updatedEntry.supplier_id,
+    });
+
+    const freshMaterials = await fetchRawMaterials();
+    setMaterials(freshMaterials);
+    showInventoryToast({
+      type: 'edit',
+      title: 'Insumo actualizado',
+      message: `${updatedEntry.name} se actualizó correctamente.`,
+    });
     setEditingEntry(null);
   };
 
-  const handleDeleteEntry = (entry) => {
+  const handleDeleteEntry = async (entry) => {
     if (deletingEntry?.type === 'formula') {
-      setFormulas((current) => current.filter((item) => item.sku !== entry.sku));
-      showInventoryToast({
-        type: 'delete',
-        title: 'Fórmula eliminada',
-        message: `${entry.product} fue eliminada correctamente.`,
-      });
-    } else {
-      setMaterials((current) => current.filter((item) => item.sku !== entry.sku));
+      try {
+        await deleteFormulaService(entry.id);
+        setFormulas((prev) => prev.filter((item) => item.id !== entry.id));
+        showInventoryToast({
+          type: 'delete',
+          title: 'Fórmula eliminada',
+          message: `La fórmula ${entry.sku} fue eliminada correctamente.`,
+        });
+      } catch (err) {
+        console.error('Error deleting formula:', err);
+        showInventoryToast({
+          type: 'delete',
+          title: 'Error',
+          message: `No se pudo eliminar la fórmula ${entry.sku}.`,
+        });
+      }
+      setDeletingEntry(null);
+      return;
+    }
+
+    try {
+      await deleteRawMaterial(entry.id);
+      setMaterials((prev) => prev.filter((item) => item.id !== entry.id));
       showInventoryToast({
         type: 'delete',
         title: 'Insumo eliminado',
         message: `${entry.name} fue eliminado correctamente.`,
+      });
+    } catch (err) {
+      console.error('Error deleting material:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error',
+        message: `No se pudo eliminar ${entry.name}.`,
       });
     }
 
@@ -308,7 +457,7 @@ export default function Materials() {
               />
             </PageHeader>
 
-            <MaterialsStats stats={materialStats} />
+            <MaterialsStats stats={computedStats} />
 
             <MaterialsFilters
               category={currentCategory}
@@ -325,19 +474,28 @@ export default function Materials() {
               </div>
             ) : null}
 
-            <MaterialsTable
-              activeView={activeView}
-              filteredRows={currentRows}
-              page={page}
-              pageCount={currentPageCount}
-              onPageChange={setPage}
-              sortField={currentSortField}
-              sortDirection={currentSortDirection}
-              onSortChange={activeView === 'formulas' ? setFormulaSortField : setMaterialSortField}
-              onSortDirectionChange={activeView === 'formulas' ? setFormulaSortDirection : setMaterialSortDirection}
-              onEditRequest={(item) => setEditingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
-              onDeleteRequest={(item) => setDeletingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-16">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="h-8 w-8 rounded-full border-4 border-[var(--color-app-panel-border)] border-t-[var(--color-brand)] animate-spin" />
+                  <span className="text-sm text-[var(--color-base-text)]/55">Cargando {activeView}…</span>
+                </div>
+              </div>
+            ) : (
+              <MaterialsTable
+                activeView={activeView}
+                filteredRows={currentRows}
+                page={page}
+                pageCount={currentPageCount}
+                onPageChange={setPage}
+                sortField={currentSortField}
+                sortDirection={currentSortDirection}
+                onSortChange={activeView === 'formulas' ? setFormulaSortField : setMaterialSortField}
+                onSortDirectionChange={activeView === 'formulas' ? setFormulaSortDirection : setMaterialSortDirection}
+                onEditRequest={(item) => setEditingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
+                onDeleteRequest={(item) => setDeletingEntry({ type: activeView === 'formulas' ? 'formula' : 'material', item })}
+              />
+            )}
           </div>
         </div>
 
@@ -349,9 +507,11 @@ export default function Materials() {
         type={modalType}
         mode={editingEntry ? 'edit' : 'create'}
         item={editingEntry?.item ?? null}
-        categories={(modalType === 'formula' ? formulaCategories : materialCategories).filter((item) => item !== 'Todos')}
+        categories={categories}
+        suppliers={suppliers}
         statuses={(modalType === 'formula' ? formulaStatuses : materialStatuses).filter((item) => item !== 'Todos')}
         materialOptions={materials}
+        productOptions={products}
         onClose={() => {
           setIsEntryModalOpen(false);
           setEditingEntry(null);
