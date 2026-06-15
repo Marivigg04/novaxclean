@@ -611,7 +611,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
     { label: 'Telefono', value: user?.phone || 'No disponible' },
   ];
 
-  const registeredAddress = user?.address || 'No hay direccion registrada para esta cuenta';
+  const registeredAddress = user?.address || user?.defaultAddress?.location_details || 'No hay direccion registrada para esta cuenta';
   const inTracking = flowStage === 'tracking' || flowStage === 'delivered';
   const canConfirmPayment = paymentMethod !== '' && flowStage === 'checkout' && !isResolvingDestination;
 

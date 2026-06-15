@@ -1,21 +1,68 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
+import { fetchUserOrders } from '@/features/user/profile/data/userService';
 
 export default function OrdersTab() {
-  const orders = [
-    { id: '#NX-9032', date: '25 May 2026', total: '$145.00', status: 'Entregado', items: 3 },
-    { id: '#NX-8941', date: '12 May 2026', total: '$32.50', status: 'En camino', items: 1 },
-    { id: '#NX-8722', date: '04 May 2026', total: '$89.90', status: 'Entregado', items: 2 },
-  ];
+  const { user } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
+
+  const loadOrders = useCallback(async () => {
+    if (!user?.id) {
+      setOrders([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const rows = await fetchUserOrders(user.id);
+      setOrders(rows);
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: error.message || 'No se pudieron cargar tus pedidos.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-sm text-[var(--color-base-text)]/70">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Cargando pedidos...
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold">Historial de Pedidos</h3>
+        <div className="rounded-2xl border border-dashed border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-center text-sm text-[var(--color-base-text)]/70">
+          Aún no tienes pedidos registrados en tu cuenta.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold">Historial de Pedidos</h3>
-        <button className="text-sm font-bold text-[var(--color-brand)] hover:opacity-80 transition-opacity">Ver todos</button>
+        <span className="text-sm font-bold text-[var(--color-brand)]">{orders.length} pedido{orders.length === 1 ? '' : 's'}</span>
       </div>
 
-      {/* Vista de Tarjetas para Móviles */}
       <div className="space-y-4 md:hidden">
         {orders.map((order) => {
           const isExpanded = selectedOrderId === order.id;
@@ -60,7 +107,9 @@ export default function OrdersTab() {
               {isExpanded && (
                 <div className="mt-2 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-4 text-xs text-[var(--color-base-text)]/80">
                   <p className="font-bold text-[var(--color-base-text)]">Detalles del pedido</p>
-                  <p className="mt-1">Aquí verás los artículos comprados, dirección de envío y método de pago asociados al pedido {order.id}.</p>
+                  {order.deliveryAddress ? (
+                    <p className="mt-2"><span className="font-semibold">Dirección:</span> {order.deliveryAddress}</p>
+                  ) : null}
                   <div className="mt-4 flex justify-end">
                     <button
                       type="button"
@@ -77,7 +126,6 @@ export default function OrdersTab() {
         })}
       </div>
 
-      {/* Tabla para Desktop */}
       <div className="hidden md:block overflow-x-auto rounded-2xl border border-[var(--color-app-panel-border)] cart-scrollbar">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)]">
@@ -121,6 +169,9 @@ export default function OrdersTab() {
                           <div>
                             <p className="font-semibold text-[var(--color-base-text)]">Pedido {order.id}</p>
                             <p className="mt-1">Fecha: {order.date} · Total: {order.total} · Artículos: {order.items}</p>
+                            {order.deliveryAddress ? (
+                              <p className="mt-1">Dirección: {order.deliveryAddress}</p>
+                            ) : null}
                           </div>
                           <button type="button" onClick={() => setSelectedOrderId(null)} className="rounded-full border border-[var(--color-app-panel-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]">
                             Cerrar

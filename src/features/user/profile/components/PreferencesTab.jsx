@@ -1,5 +1,13 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
+import { fetchUserPreferences, updateUserPreferences } from '@/features/user/profile/data/userService';
+
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD ($) - Dólar' },
+  { value: 'VES', label: 'VES (Bs) - Bolívar' },
+];
 
 function ToggleSwitch({ checked, onChange }) {
   return (
@@ -22,10 +30,80 @@ function ToggleSwitch({ checked, onChange }) {
 }
 
 export default function PreferencesTab() {
+  const { user } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
+  const [currency, setCurrency] = useState('USD');
   const [currencyOpen, setCurrencyOpen] = useState(false);
-  const [currency, setCurrency] = useState('USD ($) - Dólar');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const loadPreferences = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const prefs = await fetchUserPreferences(user.id);
+      setNewsletter(prefs.newsletter);
+      setPromotions(prefs.promotions);
+      setCurrency(prefs.currency);
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: error.message || 'No se pudieron cargar tus preferencias.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadPreferences();
+  }, [loadPreferences]);
+
+  const selectedCurrencyLabel = CURRENCY_OPTIONS.find((option) => option.value === currency)?.label ?? CURRENCY_OPTIONS[0].label;
+
+  const handleSave = async () => {
+    if (!user?.id) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Sesión requerida',
+        message: 'Inicia sesión para guardar preferencias.',
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateUserPreferences(user.id, { newsletter, promotions, currency });
+      showInventoryToast({
+        type: 'success',
+        title: 'Cambios guardados',
+        message: 'Tus preferencias se actualizaron correctamente.',
+      });
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error al guardar',
+        message: error.message || 'No se pudieron guardar tus preferencias.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-sm text-[var(--color-base-text)]/70">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Cargando preferencias...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -65,7 +143,7 @@ export default function PreferencesTab() {
                   className="w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-3.5 text-left text-sm font-medium outline-none flex items-center justify-between"
                   onClick={() => setCurrencyOpen((s) => !s)}
                 >
-                  <span>{currency}</span>
+                  <span>{selectedCurrencyLabel}</span>
                   <span className={`material-symbols-outlined ml-3 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} aria-hidden>
                     expand_more
                   </span>
@@ -73,12 +151,26 @@ export default function PreferencesTab() {
 
                 {currencyOpen ? (
                   <ul role="listbox" className="absolute z-40 mt-2 w-full overflow-hidden rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-lg">
-                    <li role="option" tabIndex={0} className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]" onClick={() => { setCurrency('USD ($) - Dólar'); setCurrencyOpen(false); }} onKeyDown={(e) => { if (e.key === 'Enter') { setCurrency('USD ($) - Dólar'); setCurrencyOpen(false); } }}>
-                      USD ($) - Dólar
-                    </li>
-                    <li role="option" tabIndex={0} className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]" onClick={() => { setCurrency('VES (Bs) - Bolívar'); setCurrencyOpen(false); }} onKeyDown={(e) => { if (e.key === 'Enter') { setCurrency('VES (Bs) - Bolívar'); setCurrencyOpen(false); } }}>
-                      VES (Bs) - Bolívar
-                    </li>
+                    {CURRENCY_OPTIONS.map((option) => (
+                      <li
+                        key={option.value}
+                        role="option"
+                        tabIndex={0}
+                        className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]"
+                        onClick={() => {
+                          setCurrency(option.value);
+                          setCurrencyOpen(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setCurrency(option.value);
+                            setCurrencyOpen(false);
+                          }
+                        }}
+                      >
+                        {option.label}
+                      </li>
+                    ))}
                   </ul>
                 ) : null}
               </div>
@@ -88,20 +180,20 @@ export default function PreferencesTab() {
       </div>
 
       <div className="pt-4 flex justify-end gap-4">
-        <button className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+        <button
+          type="button"
+          onClick={loadPreferences}
+          className="rounded-xl border border-[var(--color-app-panel-border)] px-6 py-3 font-bold transition-all hover:bg-[var(--color-app-panel-hover)]"
+        >
           Descartar
         </button>
         <button
           type="button"
-          onClick={() => {
-            showInventoryToast({
-              type: 'success',
-              title: 'Cambios guardados',
-              message: 'Tus preferencias se actualizaron correctamente.',
-            });
-          }}
-          className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+          disabled={isSaving}
+          onClick={handleSave}
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60"
         >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Guardar Cambios
         </button>
       </div>

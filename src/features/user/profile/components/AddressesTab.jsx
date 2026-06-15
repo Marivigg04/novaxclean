@@ -1,25 +1,74 @@
-import { useState } from 'react';
-import { Plus, Home, Briefcase } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Plus, Home, Briefcase, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
+import {
+  deleteUserAddress,
+  fetchUserAddresses,
+  insertUserAddress,
+  updateUserAddress,
+} from '@/features/user/profile/data/userService';
+
+function pickAddressIcon(type) {
+  return type?.toLowerCase().includes('oficina') ? Briefcase : Home;
+}
+
+function mapAddressForView(row) {
+  return {
+    ...row,
+    icon: pickAddressIcon(row.type),
+    location: row.location_details ?? row.location,
+  };
+}
 
 export default function AddressesTab() {
-  const [addresses, setAddresses] = useState([
-    { id: 1, type: 'Mi Casa', icon: Home, location: 'Av. Libertador 123, Edificio Nova, Apto 4B, Caracas, 1050', isDefault: true },
-    { id: 2, type: 'Oficina', icon: Briefcase, location: 'Torre Empresarial Centro, Piso 8, Oficina 801, Caracas, 1010', isDefault: false },
-  ]);
-
+  const { user, refreshUser } = useAuth();
+  const [addresses, setAddresses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [newAddress, setNewAddress] = useState({ type: '', location: '', isDefault: false });
   const [editingId, setEditingId] = useState(null);
 
+  const loadAddresses = useCallback(async () => {
+    if (!user?.id) {
+      setAddresses([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const rows = await fetchUserAddresses(user.id);
+      setAddresses(rows.map(mapAddressForView));
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: error.message || 'No se pudieron cargar tus direcciones.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadAddresses();
+  }, [loadAddresses]);
+
   function handleOpenModal() {
-    setNewAddress({ type: '', location: '', isDefault: false });
+    setNewAddress({ type: '', location: '', isDefault: addresses.length === 0 });
     setEditingId(null);
     setIsModalOpen(true);
   }
 
   function handleOpenEditModal(address) {
-    setNewAddress({ type: address.type, location: address.location, isDefault: !!address.isDefault });
+    setNewAddress({
+      type: address.type,
+      location: address.location,
+      isDefault: !!address.isDefault,
+    });
     setEditingId(address.id);
     setIsModalOpen(true);
   }
@@ -32,70 +81,125 @@ export default function AddressesTab() {
     }, 260);
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    const icon = newAddress.type.toLowerCase().includes('oficina') ? Briefcase : Home;
-    const payload = { type: newAddress.type || 'Dirección', icon, location: newAddress.location, isDefault: !!newAddress.isDefault };
 
-    if (editingId != null) {
-      setAddresses((current) => {
-        let updated = current.map((a) => (a.id === editingId ? { ...a, ...payload } : a));
-        if (payload.isDefault) {
-          updated = updated.map((a) => (a.id === editingId ? { ...a, isDefault: true } : { ...a, isDefault: false }));
-        }
-        return updated;
+    if (!user?.id) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Sesión requerida',
+        message: 'Inicia sesión para guardar direcciones.',
       });
-    } else {
-      const nextId = addresses.length ? Math.max(...addresses.map((a) => a.id)) + 1 : 1;
-      const addressToAdd = { id: nextId, ...payload };
-      setAddresses((current) => {
-        let updated = [...current];
-        if (addressToAdd.isDefault) {
-          updated = updated.map((a) => ({ ...a, isDefault: false }));
-        }
-        return [...updated, addressToAdd];
-      });
+      return;
     }
 
-    // animate closing then unmount and reset editingId
-    setIsClosing(true);
-    window.setTimeout(() => {
-      setIsClosing(false);
-      setIsModalOpen(false);
-      setEditingId(null);
-    }, 260);
+    setIsSaving(true);
+
+    try {
+      const payload = {
+        type: newAddress.type || 'Dirección',
+        location: newAddress.location,
+        isDefault: !!newAddress.isDefault,
+      };
+
+      if (editingId != null) {
+        await updateUserAddress(user.id, editingId, payload);
+      } else {
+        await insertUserAddress(user.id, payload);
+      }
+
+      await loadAddresses();
+      await refreshUser();
+
+      showInventoryToast({
+        type: 'success',
+        title: editingId ? 'Dirección actualizada' : 'Dirección guardada',
+        message: 'Tu dirección se guardó correctamente en tu cuenta.',
+      });
+
+      setIsClosing(true);
+      window.setTimeout(() => {
+        setIsClosing(false);
+        setIsModalOpen(false);
+        setEditingId(null);
+      }, 260);
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error al guardar',
+        message: error.message || 'No se pudo guardar la dirección.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDelete(addressId) {
+    if (!user?.id) return;
+
+    try {
+      await deleteUserAddress(user.id, addressId);
+      await loadAddresses();
+      await refreshUser();
+      showInventoryToast({
+        type: 'success',
+        title: 'Dirección eliminada',
+        message: 'La dirección se eliminó de tu cuenta.',
+      });
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error al eliminar',
+        message: error.message || 'No se pudo eliminar la dirección.',
+      });
+    }
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold">Mis Direcciones</h3>
-        <button onClick={handleOpenModal} className="flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-white transition-transform hover:scale-95 active:scale-90">
+        <button
+          type="button"
+          onClick={handleOpenModal}
+          className="flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-white transition-transform hover:scale-95 active:scale-90"
+        >
           <Plus className="h-4 w-4" />
           Nueva Dirección
         </button>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        {addresses.map((address) => (
-          <div key={address.id} className="relative rounded-2xl border border-[var(--color-app-panel-border)] p-6 transition-all hover:border-[var(--color-brand)] hover:shadow-md bg-[var(--color-base-surface)]">
-            {address.isDefault && (
-              <span className="absolute right-4 top-4 rounded bg-[var(--color-brand)]/10 px-2 py-1 text-xs font-bold text-[var(--color-brand)]">
-                Principal
-              </span>
-            )}
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-brand)]/10 text-[var(--color-brand)]">
-              <address.icon className="h-6 w-6" />
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-sm text-[var(--color-base-text)]/70">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Cargando direcciones...
+        </div>
+      ) : addresses.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-center text-sm text-[var(--color-base-text)]/70">
+          Aún no tienes direcciones guardadas. Agrega la primera para usarla en tus pedidos.
+        </div>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2">
+          {addresses.map((address) => (
+            <div key={address.id} className="relative rounded-2xl border border-[var(--color-app-panel-border)] p-6 transition-all hover:border-[var(--color-brand)] hover:shadow-md bg-[var(--color-base-surface)]">
+              {address.isDefault && (
+                <span className="absolute right-4 top-4 rounded bg-[var(--color-brand)]/10 px-2 py-1 text-xs font-bold text-[var(--color-brand)]">
+                  Principal
+                </span>
+              )}
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-brand)]/10 text-[var(--color-brand)]">
+                <address.icon className="h-6 w-6" />
+              </div>
+              <h4 className="mb-2 text-lg font-bold">{address.type}</h4>
+              <p className="mb-6 text-sm leading-relaxed text-[var(--color-base-text)]/70">{address.location}</p>
+              <div className="flex gap-4 text-sm font-bold">
+                <button type="button" onClick={() => handleOpenEditModal(address)} className="text-[var(--color-brand)] hover:opacity-80 transition-opacity">Editar</button>
+                <button type="button" className="text-red-500 hover:opacity-80 transition-opacity" onClick={() => handleDelete(address.id)}>Eliminar</button>
+              </div>
             </div>
-            <h4 className="mb-2 text-lg font-bold">{address.type}</h4>
-            <p className="mb-6 text-sm leading-relaxed text-[var(--color-base-text)]/70">{address.location}</p>
-            <div className="flex gap-4 text-sm font-bold">
-              <button onClick={() => handleOpenEditModal(address)} className="text-[var(--color-brand)] hover:opacity-80 transition-opacity">Editar</button>
-              <button className="text-red-500 hover:opacity-80 transition-opacity" onClick={() => setAddresses((cur) => cur.filter((a) => a.id !== address.id))}>Eliminar</button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {isModalOpen ? (
         <div onClick={handleCloseModal} className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}>
@@ -131,7 +235,10 @@ export default function AddressesTab() {
 
               <div className="mt-4 flex justify-end gap-3">
                 <button type="button" onClick={handleCloseModal} className="rounded-xl px-4 py-2">Cancelar</button>
-                <button type="submit" className="rounded-xl bg-[var(--color-brand)] px-4 py-2 text-white font-bold">{editingId ? 'Guardar cambios' : 'Guardar'}</button>
+                <button type="submit" disabled={isSaving} className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2 text-white font-bold disabled:opacity-60">
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {editingId ? 'Guardar cambios' : 'Guardar'}
+                </button>
               </div>
             </form>
           </div>
