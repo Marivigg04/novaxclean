@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, PlusCircle } from 'lucide-react';
 import RoundedSelect from '@/features/admin/inventory/components/RoundedSelect';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function NewProductModal({ isOpen = false, onClose = () => {}, onSubmit = () => {}, categories = [] }) {
   const [form, setForm] = useState({ name: '', stock: '', category: '', price: '' });
   const [error, setError] = useState('');
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+
+  useScrollLock(isRendered);
 
   useEffect(() => {
     let timeoutId;
@@ -63,10 +67,21 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
     onClose();
   };
 
-  return (
-    <div className={`fixed inset-0 z-[120] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <form onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()} className={`relative z-10 w-full max-w-md overflow-visible rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
-        <div className="flex items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black/55 p-4 backdrop-blur-sm ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent
+      onClick={onClose}
+    >
+      <form
+        onSubmit={handleSubmit}
+        onClick={(e) => e.stopPropagation()}
+        data-lenis-prevent
+        className={`relative z-10 flex h-[min(90dvh,calc(100dvh-2rem))] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
+      >
+        <div className="flex shrink-0 items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">Nuevo producto</p>
             <h3 className="mt-1 text-lg font-semibold text-[var(--color-base-text)]">Agregar producto</h3>
@@ -77,7 +92,7 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
           </button>
         </div>
 
-        <div className="p-5">
+        <div className="cart-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-5" data-lenis-prevent>
           <label className="block mb-3">
             <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Nombre</span>
             <input name="name" value={form.name} onChange={handleChange} className="mt-2 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2 text-sm outline-none" placeholder="Nombre del producto" />
@@ -105,10 +120,12 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
             <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Precio</span>
             <input name="price" value={form.price} onChange={handleChange} className="mt-2 w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-2 text-sm outline-none" placeholder="0.00" />
           </label>
+        </div>
 
-          {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
+        <div className="shrink-0 border-t border-[var(--color-app-panel-border)] px-5 py-4">
+          {error ? <p className="mb-3 text-xs text-red-600">{error}</p> : null}
 
-          <div className="mt-5 flex justify-end gap-3">
+          <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/80 transition-colors hover:bg-[var(--color-app-panel-hover)]">Cancelar</button>
 
             <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110">
@@ -118,6 +135,7 @@ export default function NewProductModal({ isOpen = false, onClose = () => {}, on
           </div>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
