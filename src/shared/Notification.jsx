@@ -29,15 +29,21 @@ function getIcon(type) {
 	return Bell;
 }
 
-export default function Notification({ notifications = [], onClose = () => {} }) {
+export default function Notification({ notifications = [], onClose = () => {}, onMarkAsRead = () => {} }) {
 	const modalRef = useRef(null);
 	const navigate = useNavigate();
 	const { user } = useAuth();
 
-	const handleItemClick = () => {
+	const handleItemClick = (item) => {
 		onClose();
+		onMarkAsRead(item.id);
+		
 		if (user?.role === 'Admin') {
-			navigate('/admin/inventory');
+			if (item.reference_type === 'order') {
+				navigate('/admin/orders');
+			} else {
+				navigate('/admin/inventory');
+			}
 		} else {
 			navigate('/perfil?tab=pedidos');
 		}
@@ -103,8 +109,10 @@ export default function Notification({ notifications = [], onClose = () => {} })
 							return (
 								<div
 									key={item.id}
-									onClick={handleItemClick}
-									className="group flex cursor-pointer gap-3 rounded-2xl border border-transparent px-3 py-3 transition-colors hover:border-[var(--color-app-panel-border)] hover:bg-[var(--color-app-panel-hover)]"
+									onClick={() => handleItemClick(item)}
+									className={`group flex cursor-pointer gap-3 rounded-2xl border px-3 py-3 transition-colors hover:border-[var(--color-app-panel-border)] hover:bg-[var(--color-app-panel-hover)] ${
+										!item.is_read ? 'border-[var(--color-app-panel-border)] bg-[var(--color-app-panel-hover)]' : 'border-transparent'
+									}`}
 								>
 									<div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${styles.badge} group-hover:scale-105 transition-transform duration-200`}>
 										<Icon className={`h-4 w-4 ${styles.icon}`} />
@@ -117,7 +125,9 @@ export default function Notification({ notifications = [], onClose = () => {} })
 												<p className="mt-0.5 text-xs text-[var(--color-base-text)]/62">{item.message}</p>
 											</div>
 
-											<span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${styles.dot}`} />
+											{!item.is_read && (
+												<span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${styles.dot}`} />
+											)}
 										</div>
 
 										<div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-[var(--color-base-text)]/45">

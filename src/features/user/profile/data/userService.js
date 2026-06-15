@@ -323,9 +323,14 @@ export async function fetchUserOrders(userId) {
       order_number,
       status,
       total_amount,
+      fulfillment_mode,
+      payment_method,
       created_at,
       delivery_address,
-      order_items (quantity)
+      order_items (
+        quantity,
+        products (name)
+      )
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -333,7 +338,11 @@ export async function fetchUserOrders(userId) {
   if (error) throw error;
 
   return (data ?? []).map((order) => {
-    const items = (order.order_items ?? []).reduce((sum, item) => sum + Number(item.quantity ?? 0), 0);
+    const lineItems = (order.order_items ?? []).map((item) => ({
+      name: item.products?.name ?? 'Producto',
+      quantity: Number(item.quantity ?? 0),
+    }));
+    const items = lineItems.reduce((sum, item) => sum + item.quantity, 0);
 
     return {
       id: order.order_number,
@@ -342,6 +351,9 @@ export async function fetchUserOrders(userId) {
       total: formatOrderTotal(order.total_amount),
       status: order.status,
       items,
+      lineItems,
+      fulfillmentMode: order.fulfillment_mode,
+      paymentMethod: order.payment_method,
       deliveryAddress: order.delivery_address ?? '',
     };
   });
