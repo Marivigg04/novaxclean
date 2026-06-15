@@ -1,17 +1,22 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Boxes, PackageCheck, TriangleAlert, ArchiveX } from 'lucide-react';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { footerLinks } from '@/components/landing/content';
 import Sidebar from '@/shared/Sidebar';
 import { useAuth } from '@/context/AuthContext';
+
+import { inventoryStatuses } from '@/features/admin/inventory/data/mockup';
 import {
-  inventoryCategories,
-  inventoryProducts as inventoryProductsMock,
-  inventoryStats,
-  inventoryStatuses,
-} from '@/features/admin/inventory/data/mockup';
+  fetchProducts,
+  fetchCategories,
+  fetchBadges,
+  insertProduct,
+  updateProduct,
+  deleteProduct,
+} from '@/features/admin/inventory/data/inventoryService';
 
 import InventoryHeader from '@/features/admin/inventory/components/InventoryHeader';
 import InventoryStats from '@/features/admin/inventory/components/InventoryStats';
@@ -29,7 +34,14 @@ export default function Inventory() {
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [productToEdit, setProductToEdit] = useState(null);
-  const [products, setProducts] = useState(inventoryProductsMock);
+
+  // ── Data from Supabase ─────────────────────────────────────────────────
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // ── Filters & sorting ──────────────────────────────────────────────────
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('Todos');
@@ -41,20 +53,69 @@ export default function Inventory() {
   const pageSize = 10;
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const categoryFilterOptions = ['Todos', ...inventoryCategories];
 
+  // ── Initial data load from Supabase ────────────────────────────────────
+  const loadData = useCallback(async () => {
+    try {
+      const [productsData, categoriesData, badgesData] = await Promise.all([
+        fetchProducts(),
+        fetchCategories(),
+        fetchBadges(),
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+      setBadges(badgesData);
+    } catch (err) {
+      console.error('Error loading inventory data:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: 'No se pudieron cargar los datos del inventario.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // ── Dynamic stats computed from real data ──────────────────────────────
+  const computedStats = useMemo(() => {
+    const total = products.length;
+    const inStock = products.filter((p) => p.status === 'En stock').length;
+    const lowStock = products.filter((p) => p.status === 'Stock bajo').length;
+    const outOfStock = products.filter((p) => p.status === 'Agotado').length;
+
+    return [
+      { title: 'Productos', value: String(total), description: 'Total de referencias activas', icon: Boxes },
+      { title: 'En stock', value: String(inStock), description: 'Unidades con disponibilidad alta', icon: PackageCheck },
+      { title: 'Stock bajo', value: String(lowStock), description: 'Productos para reponer pronto', icon: TriangleAlert },
+      { title: 'Agotados', value: String(outOfStock), description: 'Sin inventario disponible', icon: ArchiveX },
+    ];
+  }, [products]);
+
+  // ── Category filter options built from DB data ─────────────────────────
+  const categoryFilterOptions = useMemo(
+    () => ['Todos', ...categories.map((c) => c.name)],
+    [categories],
+  );
+
+  // ── Filtering ──────────────────────────────────────────────────────────
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch =
         product.name.toLowerCase().includes(search.toLowerCase()) ||
         product.sku.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = !category || category === 'Todos' || product.category === category;
+      const matchesCategory = !category || category === 'Todos' || product.category_name === category;
       const matchesStatus = status === 'Todos' || product.status === status;
 
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }, [products, search, category, status]);
 
+  // ── Sorting ────────────────────────────────────────────────────────────
   const sortedProducts = useMemo(() => {
     const direction = sortDirection === 'asc' ? 1 : -1;
 
@@ -70,6 +131,7 @@ export default function Inventory() {
     });
   }, [filteredProducts, sortDirection, sortField]);
 
+  // ── Pagination ─────────────────────────────────────────────────────────
   const pageCount = useMemo(() => {
     return Math.max(1, Math.ceil(sortedProducts.length / pageSize));
   }, [sortedProducts]);
@@ -89,33 +151,68 @@ export default function Inventory() {
     return sortedProducts.slice(startIndex, startIndex + pageSize);
   }, [page, sortedProducts]);
 
-  const handleAddProduct = (newProduct) => {
-    setProducts((prev) => [newProduct, ...prev]);
+  // ── CRUD Handlers (Supabase) ───────────────────────────────────────────
+  const handleAddProduct = async (productData) => {
+    await insertProduct(productData);
+    const freshProducts = await fetchProducts();
+    setProducts(freshProducts);
     showInventoryToast({
       type: 'success',
       title: 'Producto agregado',
-      message: `${newProduct.name} se agregó correctamente al inventario.`,
+      message: `${productData.name} se agregó correctamente al inventario.`,
     });
   };
 
-  const handleDeleteProduct = (product) => {
-    setProducts((prev) => prev.filter((item) => item.sku !== product.sku));
-    setProductToDelete(null);
-    showInventoryToast({
-      type: 'delete',
-      title: 'Producto eliminado',
-      message: `${product.name} fue eliminado del inventario.`,
-    });
+  const handleDeleteProduct = async (product) => {
+    try {
+      await deleteProduct(product.id);
+      setProducts((prev) => prev.filter((item) => item.id !== product.id));
+      setProductToDelete(null);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Producto eliminado',
+        message: `${product.name} fue eliminado del inventario.`,
+      });
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error',
+        message: `No se pudo eliminar ${product.name}.`,
+      });
+    }
   };
 
-  const handleUpdateProduct = (updated) => {
-    setProducts((prev) => prev.map((p) => (p.sku === updated.sku ? updated : p)));
-    setProductToEdit(null);
-    showInventoryToast({
-      type: 'edit',
-      title: 'Producto actualizado',
-      message: `${updated.name} se actualizó correctamente.`,
-    });
+  const handleUpdateProduct = async (updated) => {
+    try {
+      await updateProduct(updated.id, {
+        sku: updated.sku,
+        name: updated.name,
+        category_id: updated.category_id,
+        description: updated.description,
+        price: updated.price,
+        stock: updated.stock,
+        minimum_stock: updated.minimum_stock,
+        badge_id: updated.badge_id,
+        image_url: updated.image_url,
+      });
+      // Refresh from DB to get joined names
+      const freshProducts = await fetchProducts();
+      setProducts(freshProducts);
+      setProductToEdit(null);
+      showInventoryToast({
+        type: 'edit',
+        title: 'Producto actualizado',
+        message: `${updated.name} se actualizó correctamente.`,
+      });
+    } catch (err) {
+      console.error('Error updating product:', err);
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error',
+        message: `No se pudo actualizar ${updated.name}.`,
+      });
+    }
   };
 
   const handleReceiveInventory = (updatedItems, lineItems) => {
@@ -195,32 +292,42 @@ export default function Inventory() {
               onReplenish={() => setIsReplenishmentOpen(true)}
             />
 
-            <InventoryStats stats={inventoryStats} />
+            <InventoryStats stats={computedStats} />
 
-            <InventoryTable
-              filteredProducts={visibleProducts}
-              page={page}
-              pageCount={pageCount}
-              onPageChange={setPage}
-              category={category}
-              setCategory={setCategory}
-              status={status}
-              setStatus={setStatus}
-              categories={categoryFilterOptions}
-              statuses={inventoryStatuses}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSortChange={setSortField}
-              onSortDirectionChange={setSortDirection}
-              onDeleteRequest={setProductToDelete}
-              onEditRequest={setProductToEdit}
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-16">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="h-8 w-8 rounded-full border-4 border-[var(--color-app-panel-border)] border-t-[var(--color-brand)] animate-spin" />
+                  <span className="text-sm text-[var(--color-base-text)]/55">Cargando inventario…</span>
+                </div>
+              </div>
+            ) : (
+              <InventoryTable
+                filteredProducts={visibleProducts}
+                page={page}
+                pageCount={pageCount}
+                onPageChange={setPage}
+                category={category}
+                setCategory={setCategory}
+                status={status}
+                setStatus={setStatus}
+                categories={categoryFilterOptions}
+                statuses={inventoryStatuses}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSortChange={setSortField}
+                onSortDirectionChange={setSortDirection}
+                onDeleteRequest={setProductToDelete}
+                onEditRequest={setProductToEdit}
+              />
+            )}
 
             <NewProductModal
               isOpen={isNewModalOpen}
               onClose={() => setIsNewModalOpen(false)}
               onSubmit={handleAddProduct}
-              categories={inventoryCategories}
+              categories={categories}
+              badges={badges}
             />
 
             <DeleteProductModal
@@ -235,7 +342,8 @@ export default function Inventory() {
               product={productToEdit}
               onClose={() => setProductToEdit(null)}
               onSubmit={handleUpdateProduct}
-              categories={inventoryCategories}
+              categories={categories}
+              badges={badges}
             />
 
             <ReportGeneratorModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} preset="inventory" />
