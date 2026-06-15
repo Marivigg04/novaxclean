@@ -29,7 +29,7 @@ function ToggleSwitch({ checked, onChange }) {
   );
 }
 
-export default function PreferencesTab() {
+export default function PreferencesTab({ embedded = false }) {
   const { user } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
@@ -98,17 +98,17 @@ export default function PreferencesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10 text-sm text-[var(--color-base-text)]/70">
+      <div className={`flex items-center justify-center gap-2 text-sm text-[var(--color-base-text)]/70 ${embedded ? 'py-6' : 'rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10'}`}>
         <Loader2 className="h-5 w-5 animate-spin" />
         Cargando preferencias...
       </div>
     );
   }
 
-  return (
-    <div className="space-y-8">
+  const content = (
+    <>
       <div>
-        <h3 className="mb-5 text-xl font-bold">Comunicaciones</h3>
+        <h4 className="mb-4 text-base font-bold text-[var(--color-base-text)]">Comunicaciones</h4>
         <div className="space-y-4 rounded-2xl border border-[var(--color-app-panel-border)] p-6 bg-[var(--color-base-surface)]">
           <div className="flex items-center justify-between gap-4 rounded-lg p-2">
             <div>
@@ -131,7 +131,7 @@ export default function PreferencesTab() {
       </div>
 
       <div>
-        <h3 className="mb-5 text-xl font-bold">Configuración Regional</h3>
+        <h4 className="mb-4 text-base font-bold text-[var(--color-base-text)]">Configuración regional</h4>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className="block">
@@ -197,6 +197,20 @@ export default function PreferencesTab() {
           Guardar Cambios
         </button>
       </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-8">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="mb-1 text-xl font-bold text-[var(--color-base-text)]">Preferencias</h3>
+        <p className="text-sm text-[var(--color-base-text)]/60">Comunicaciones y configuración regional.</p>
+      </div>
+      {content}
     </div>
   );
 }
