@@ -88,6 +88,13 @@ CREATE TABLE user_preferences (
 -- 3. PRODUCTS & REVIEWS
 -- =========================================================================
 
+-- Badges Lookup Table (Product labels like 'Nuevo', 'Eco-Friendly')
+CREATE TABLE badges (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Finished Products Catalog (Ratings columns removed for normalized reviews)
 CREATE TABLE products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -98,7 +105,7 @@ CREATE TABLE products (
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     stock INT NOT NULL DEFAULT 0 CHECK (stock >= 0),
     minimum_stock INT NOT NULL DEFAULT 5 CHECK (minimum_stock >= 0),
-    badge VARCHAR(30) CHECK (badge IN ('Nuevo', 'Eco-Friendly') OR badge IS NULL),
+    badge_id UUID REFERENCES badges(id) ON DELETE SET NULL,
     image_url TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -401,6 +408,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE raw_materials ENABLE ROW LEVEL SECURITY;
@@ -462,6 +470,15 @@ USING (true);
 
 CREATE POLICY "Only Admins can write categories"
 ON categories FOR ALL
+USING (is_admin());
+
+-- 9.4b Badges policies (Public read, Admin write)
+CREATE POLICY "Anyone can read badges"
+ON badges FOR SELECT
+USING (true);
+
+CREATE POLICY "Only Admins can write badges"
+ON badges FOR ALL
 USING (is_admin());
 
 -- 9.5 Products catalog policies (Public read, Admin write)
