@@ -48,9 +48,9 @@ export default function InventoryTable({
     () => [
       { value: 'name', label: 'Producto', align: 'left' },
       { value: 'sku', label: 'SKU', align: 'left' },
-      { value: 'category', label: 'Categoría', align: 'left' },
+      { value: 'category_name', label: 'Categoría', align: 'left' },
       { value: 'stock', label: 'Stock', align: 'center' },
-      { value: 'minimum', label: 'Mínimo', align: 'center' },
+      { value: 'minimum_stock', label: 'Mínimo', align: 'center' },
       { value: 'price', label: 'Precio', align: 'left' },
       { value: 'status', label: 'Estado', align: 'left' },
     ],
@@ -150,7 +150,7 @@ export default function InventoryTable({
             <tbody className="divide-y divide-[var(--color-app-panel-border)] bg-[var(--color-base-surface)]">
               {filteredProducts.map((product, index) => (
                 <motion.tr
-                  key={product.sku}
+                  key={product.id || product.sku}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.22, ease: 'easeOut', delay: index * 0.025 }}
@@ -160,9 +160,9 @@ export default function InventoryTable({
                     <div className="font-semibold text-[var(--color-base-text)]">{product.name}</div>
                   </td>
                   <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{product.sku}</td>
-                  <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{product.category}</td>
+                  <td className="px-4 py-4 text-sm text-[var(--color-base-text)]/70">{product.category_name}</td>
                   <td className="px-4 py-4 text-center text-sm font-semibold text-[var(--color-base-text)]">{product.stock}</td>
-                  <td className="px-4 py-4 text-center text-sm text-[var(--color-base-text)]/70">{product.minimum}</td>
+                  <td className="px-4 py-4 text-center text-sm text-[var(--color-base-text)]/70">{product.minimum_stock}</td>
                   <td className="px-4 py-4 text-sm font-medium text-[var(--color-base-text)]">{formatCurrency(product.price)}</td>
                   <td className="px-4 py-4"><StatusBadge status={product.status} /></td>
                   <td className="px-4 py-4">
@@ -195,7 +195,7 @@ export default function InventoryTable({
       <div className="mt-4 space-y-3 md:hidden">
         {filteredProducts.map((product, index) => (
           <motion.div 
-            key={product.sku} 
+            key={product.id || product.sku} 
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut', delay: index * 0.03 }}
@@ -212,7 +212,7 @@ export default function InventoryTable({
             <div className="mt-3 grid grid-cols-2 gap-2 border-y border-[var(--color-app-panel-border)]/55 py-2 text-xs">
               <div>
                 <span className="text-[var(--color-base-text)]/50 block">Categoría</span>
-                <span className="font-medium text-[var(--color-base-text)]">{product.category}</span>
+                <span className="font-medium text-[var(--color-base-text)]">{product.category_name}</span>
               </div>
               <div>
                 <span className="text-[var(--color-base-text)]/50 block">Precio</span>
@@ -224,7 +224,7 @@ export default function InventoryTable({
               </div>
               <div>
                 <span className="text-[var(--color-base-text)]/50 block">Stock Mínimo</span>
-                <span className="font-medium text-[var(--color-base-text)]">{product.minimum}</span>
+                <span className="font-medium text-[var(--color-base-text)]">{product.minimum_stock}</span>
               </div>
             </div>
 
