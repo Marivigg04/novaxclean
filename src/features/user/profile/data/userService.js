@@ -193,8 +193,15 @@ async function clearDefaultAddresses(userId, excludeId = null) {
   if (error) throw error;
 }
 
-export async function insertUserAddress(userId, { type, location, isDefault = false, city = 'Caracas' }) {
-  const geocoded = await geocodeAddress(location, city);
+export async function insertUserAddress(userId, { type, location, isDefault = false, latitude, longitude, city = 'Caracas' }) {
+  let lat = latitude;
+  let lng = longitude;
+
+  if (lat == null || lng == null) {
+    const geocoded = await geocodeAddress(location, city);
+    lat = geocoded.lat;
+    lng = geocoded.lng;
+  }
 
   if (isDefault) {
     await clearDefaultAddresses(userId);
@@ -206,8 +213,8 @@ export async function insertUserAddress(userId, { type, location, isDefault = fa
       user_id: userId,
       type: type.trim(),
       location_details: location.trim(),
-      latitude: geocoded.lat,
-      longitude: geocoded.lng,
+      latitude: lat,
+      longitude: lng,
       is_default: isDefault,
     })
     .select()
@@ -217,8 +224,15 @@ export async function insertUserAddress(userId, { type, location, isDefault = fa
   return mapAddressRow(data);
 }
 
-export async function updateUserAddress(userId, addressId, { type, location, isDefault = false, city = 'Caracas' }) {
-  const geocoded = await geocodeAddress(location, city);
+export async function updateUserAddress(userId, addressId, { type, location, isDefault = false, latitude, longitude, city = 'Caracas' }) {
+  let lat = latitude;
+  let lng = longitude;
+
+  if (lat == null || lng == null) {
+    const geocoded = await geocodeAddress(location, city);
+    lat = geocoded.lat;
+    lng = geocoded.lng;
+  }
 
   if (isDefault) {
     await clearDefaultAddresses(userId, addressId);
@@ -229,8 +243,8 @@ export async function updateUserAddress(userId, addressId, { type, location, isD
     .update({
       type: type.trim(),
       location_details: location.trim(),
-      latitude: geocoded.lat,
-      longitude: geocoded.lng,
+      latitude: lat,
+      longitude: lng,
       is_default: isDefault,
     })
     .eq('id', addressId)
