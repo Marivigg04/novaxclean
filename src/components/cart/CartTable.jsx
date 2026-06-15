@@ -1,6 +1,13 @@
 import { Trash2 } from 'lucide-react';
 
-export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, onIncreaseQuantity }) {
+export default function CartTable({
+  items,
+  onBackToCatalog,
+  onDecreaseQuantity,
+  onIncreaseQuantity,
+  onRemoveItem,
+  onClearCart,
+}) {
   return (
     <section className="cart-subtle-float overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-lg">
       {/* Desktop Table View */}
@@ -18,7 +25,7 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
           </thead>
           <tbody className="divide-y divide-outline-variant/60">
             {items.map((item) => (
-              <tr key={item.name} className="group transition-colors hover:bg-surface-container-lowest">
+              <tr key={item.id} className="group transition-colors hover:bg-surface-container-lowest">
                 <td className="px-6 py-6">
                   <div className="flex items-center gap-5">
                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container border border-outline-variant/30">
@@ -27,7 +34,11 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
                     <div>
                       <p className="text-body-md font-bold text-primary group-hover:text-[var(--color-brand)] transition-colors">{item.name}</p>
                       <p className="mt-1 text-label-md text-on-surface-variant">Ref: {item.ref}</p>
-                      <button className="mt-2.5 flex items-center gap-1.5 text-xs font-bold text-error/80 hover:text-error transition-colors" type="button">
+                      <button
+                        className="mt-2.5 flex items-center gap-1.5 text-xs font-bold text-error/80 hover:text-error transition-colors"
+                        type="button"
+                        onClick={() => onRemoveItem?.(item.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                         Eliminar
                       </button>
@@ -38,11 +49,11 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
                 <td className="px-6 py-6 align-middle text-center">
                   <div className="flex flex-col items-center gap-1">
                     <div className={`cart-quantity-control ${item.pulse === 'increase' ? 'cart-quantity-control-increase' : item.pulse === 'decrease' ? 'cart-quantity-control-decrease' : ''}`}>
-                      <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.name)} aria-label={`Disminuir cantidad de ${item.name}`}>
+                      <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.id)} aria-label={`Disminuir cantidad de ${item.name}`}>
                         -
                       </button>
                       <input className="cart-quantity-input" type="text" value={item.quantity} readOnly />
-                      <button className="cart-quantity-button" type="button" onClick={() => onIncreaseQuantity(item.name)} aria-label={`Aumentar cantidad de ${item.name}`}>
+                      <button className="cart-quantity-button" type="button" onClick={() => onIncreaseQuantity(item.id)} aria-label={`Aumentar cantidad de ${item.name}`}>
                         +
                       </button>
                     </div>
@@ -60,7 +71,7 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
       {/* Mobile Card List View */}
       <div className="block md:hidden divide-y divide-outline-variant/60">
         {items.map((item) => (
-          <div key={item.name} className="flex gap-4 p-5 items-start bg-surface-container-lowest group">
+          <div key={item.id} className="flex gap-4 p-5 items-start bg-surface-container-lowest group">
             <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container border border-outline-variant/30">
               <img alt={item.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" src={item.image} />
             </div>
@@ -74,18 +85,22 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
               <div className="flex items-center justify-between gap-4 mt-1">
                 <span className="text-body-md font-semibold text-on-surface">{item.price}</span>
                 <div className={`cart-quantity-control ${item.pulse === 'increase' ? 'cart-quantity-control-increase' : item.pulse === 'decrease' ? 'cart-quantity-control-decrease' : ''}`}>
-                  <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.name)} aria-label={`Disminuir cantidad de ${item.name}`}>
+                  <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.id)} aria-label={`Disminuir cantidad de ${item.name}`}>
                     -
                   </button>
                   <input className="cart-quantity-input" type="text" value={item.quantity} readOnly />
-                  <button className="cart-quantity-button" type="button" onClick={() => onIncreaseQuantity(item.name)} aria-label={`Aumentar cantidad de ${item.name}`}>
+                  <button className="cart-quantity-button" type="button" onClick={() => onIncreaseQuantity(item.id)} aria-label={`Aumentar cantidad de ${item.name}`}>
                     +
                   </button>
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-4 pt-3 mt-1 border-t border-outline-variant/30">
-                <button className="flex items-center gap-1.5 text-xs font-bold text-error/80 hover:text-error transition-colors" type="button">
+                <button
+                  className="flex items-center gap-1.5 text-xs font-bold text-error/80 hover:text-error transition-colors"
+                  type="button"
+                  onClick={() => onRemoveItem?.(item.id)}
+                >
                   <Trash2 className="h-3.5 w-3.5" />
                   Eliminar
                 </button>
@@ -102,7 +117,11 @@ export default function CartTable({ items, onBackToCatalog, onDecreaseQuantity, 
         </button>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="rounded-xl border border-outline-variant px-5 py-2.5 text-label-md font-bold text-on-surface-variant transition-all hover:bg-surface-container-low active:scale-[0.98]" type="button">
+          <button
+            className="rounded-xl border border-outline-variant px-5 py-2.5 text-label-md font-bold text-on-surface-variant transition-all hover:bg-surface-container-low active:scale-[0.98]"
+            type="button"
+            onClick={onClearCart}
+          >
             Vaciar Carrito
           </button>
         </div>

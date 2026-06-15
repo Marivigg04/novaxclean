@@ -7,9 +7,11 @@ import FilterBar from './FilterBar';
 import ProductGrid from './ProductGrid';
 import Footer from '../layout/Footer';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import { supabase } from '../../lib/supabase';
 
 export default function CatalogPage({ onOpenCart, onOpenAuth }) {
+  const { addToCart } = useCart();
   const [dbProducts, setDbProducts] = useState([]);
   const [dbCategories, setDbCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,12 +176,14 @@ export default function CatalogPage({ onOpenCart, onOpenAuth }) {
     setGuestPromptClosing(false);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (product) => {
     if (!isAuthenticated) {
       setGuestPromptClosing(false);
       setGuestPromptVisible(true);
       return;
     }
+
+    addToCart(product, 1);
 
     if (typeof onOpenCart === 'function') {
       onOpenCart();

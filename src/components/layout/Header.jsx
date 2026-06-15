@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 import UserAvatarIcon from '../../shared/UserAvatarIcon';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import Notification from '../../shared/Notification';
 import { inventoryProducts } from '../../features/admin/inventory/data/mockup';
 import { usePageTransition } from '../../context/PageTransitionContext';
@@ -28,6 +29,7 @@ export default function Header({
   className = '',
 }) {
   const { user, logout, isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
   const isAdmin = isAuthenticated && user?.role === 'Admin';
   const navigate = usePageTransition().navigateTo;
   const location = useLocation();
@@ -447,12 +449,17 @@ export default function Header({
             {/* show cart button based on prop */}
             {showCartButton ? (
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-lg hover:shadow-secondary/25 active:scale-95 shrink-0"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-on-secondary shadow-sm transition-all duration-150 hover:scale-105 hover:shadow-lg hover:shadow-secondary/25 active:scale-95 shrink-0"
                 type="button"
                 onClick={onOpenCart}
                 aria-label="Carrito"
               >
                 <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white shadow-sm border border-secondary">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             ) : null}
             {isAuthenticated ? (

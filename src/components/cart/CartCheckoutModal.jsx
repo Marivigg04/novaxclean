@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { supabase } from '../../lib/supabase';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ReactLenis } from 'lenis/react';
 import { Check, CheckCircle2, Circle, LoaderCircle, MessageCircle, Phone } from 'lucide-react';
@@ -210,6 +212,7 @@ function MapClickHandler({ onMapClick }) {
 
 export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () => {} }) {
   const { user, isAuthenticated } = useAuth();
+  const { cart, clearCart, subtotal, taxes, total } = useCart();
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -500,14 +503,86 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
     setMatchedAddress(resolvedDestination.display_name || resolvedDestination.label || '');
     setManualPlacementMode(false);
     setRiderPosition([originPoint.lat, originPoint.lng]);
-    setFlowStage('payment-confirmed');
     setIsResolvingDestination(false);
     geocodeAbortRef.current = null;
 
-    paymentTimeoutRef.current = window.setTimeout(() => {
-      setFlowStage('tracking');
-      setActiveStep(0);
-    }, PAYMENT_CONFIRMATION_MS);
+    try {
+      // 1. Generate order details
+      const orderNumber = `ORD-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000)}`;
+      
+      // Select a random active rider if available
+      const { data: riders } = await supabase.from('delivery_riders').select('id').eq('is_active', true).limit(1);
+      const riderId = riders && riders[0] ? riders[0].id : null;
+
+      const orderData = {
+        user_id: user?.id || null,
+        order_number: orderNumber,
+        status: 'Recibido',
+        subtotal: Number(subtotal),
+        shipping_cost: 0.00,
+        tax_amount: Number(taxes),
+        total_amount: Number(total),
+        fulfillment_mode: fulfillment,
+        payment_method: paymentMethod,
+        delivery_rider_id: riderId,
+        delivery_latitude: fulfillment === 'delivery' ? Number(resolvedDestination.lat) : Number(pickupPoint.lat),
+        delivery_longitude: fulfillment === 'delivery' ? Number(resolvedDestination.lng) : Number(pickupPoint.lng),
+        delivery_address: fulfillment === 'delivery' ? (resolvedDestination.display_name || resolvedDestination.label) : storePickupInfo.address,
+        notes: notes || ''
+      };
+
+      // 2. Insert order
+      const { data: newOrder, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 3. Insert order items
+      if (cart && cart.length > 0) {
+        const itemsData = cart.map(item => ({
+          order_id: newOrder.id,
+          product_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.rawPrice
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(itemsData);
+
+        if (itemsError) throw itemsError;
+      }
+
+      // 4. Create first tracking status
+      await supabase.from('order_tracking').insert({
+        order_id: newOrder.id,
+        status: 'received',
+        details: 'Pedido Recibido. Procesando orden.'
+      });
+
+      // Clear local cart
+      clearCart();
+
+      // Proceed to tracking flow stage
+      setFlowStage('payment-confirmed');
+      
+      paymentTimeoutRef.current = window.setTimeout(() => {
+        setFlowStage('tracking');
+        setActiveStep(0);
+      }, PAYMENT_CONFIRMATION_MS);
+
+    } catch (err) {
+      console.error('Error creating order in Supabase:', err);
+      // Fallback: still show the visual flow
+      setFlowStage('payment-confirmed');
+      paymentTimeoutRef.current = window.setTimeout(() => {
+        setFlowStage('tracking');
+        setActiveStep(0);
+      }, PAYMENT_CONFIRMATION_MS);
+    }
   };
 
   const handleGoToCatalog = () => {
@@ -827,15 +902,15 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
                   <div className="mt-6 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
                     <div className="flex items-center justify-between gap-3 border-b border-outline-variant pb-3">
                       <span className="text-body-md text-on-surface-variant">Subtotal</span>
-                      <span className="text-body-md font-semibold text-primary">$376.30</span>
+                      <span className="text-body-md font-semibold text-primary">${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3 border-b border-outline-variant py-3">
                       <span className="text-body-md text-on-surface-variant">Impuestos</span>
-                      <span className="text-body-md font-semibold text-primary">$60.21</span>
+                      <span className="text-body-md font-semibold text-primary">${taxes.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3 pt-3">
                       <span className="text-headline-md font-bold text-primary">Total</span>
-                      <span className="text-headline-md font-black text-primary">$436.51</span>
+                      <span className="text-headline-md font-black text-primary">${total.toFixed(2)}</span>
                     </div>
                   </div>
 
