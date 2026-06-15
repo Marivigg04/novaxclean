@@ -67,6 +67,7 @@ export default function SecuritySettings({
   initialSecurity,
   onSave = () => {},
   showTwoFactor = true,
+  embedded = false,
   title = 'Seguridad',
   subtitle = 'Protege tu cuenta.',
 }) {
@@ -110,6 +111,72 @@ export default function SecuritySettings({
     }
   };
 
+  const form = (
+    <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="grid gap-4 md:grid-cols-2">
+        <PasswordField
+          name="currentPassword"
+          label="Contraseña actual"
+          value={security.currentPassword}
+          onChange={handleChange}
+          placeholder="Ingresa tu contraseña actual"
+          showPasswords={showPasswords}
+          onToggleVisibility={() => setShowPasswords((current) => !current)}
+        />
+
+        <div className="hidden md:block" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <PasswordField
+          name="newPassword"
+          label="Nueva contraseña"
+          value={security.newPassword}
+          onChange={handleChange}
+          placeholder="Mínimo 8 caracteres"
+          showPasswords={showPasswords}
+          onToggleVisibility={() => setShowPasswords((current) => !current)}
+        />
+
+        <PasswordField
+          name="confirmPassword"
+          label="Confirmar contraseña"
+          value={security.confirmPassword}
+          onChange={handleChange}
+          placeholder="Repite la contraseña nueva"
+          showPasswords={showPasswords}
+          onToggleVisibility={() => setShowPasswords((current) => !current)}
+        />
+      </div>
+
+      {showTwoFactor ? (
+        <div className="space-y-3">
+          <Toggle
+            checked={security.twoFactorEnabled}
+            onChange={(value) => setSecurity((current) => ({ ...current, twoFactorEnabled: value }))}
+            label="Verificación en dos pasos"
+            description="Solicita un código adicional al iniciar sesión."
+          />
+        </div>
+      ) : null}
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.45)] transition-transform hover:scale-[0.99] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Save className="h-4 w-4" />
+          {isSaving ? 'Guardando…' : 'Guardar cambios'}
+        </button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
+  }
+
   return (
     <section className="rounded-3xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-6 shadow-[0_12px_30px_-20px_rgba(16,32,58,0.35)] md:p-8">
       <div className="mb-6">
@@ -117,65 +184,7 @@ export default function SecuritySettings({
         <p className="mt-1 text-sm text-[var(--color-base-text)]/62">{subtitle}</p>
       </div>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="grid gap-4 md:grid-cols-2">
-          <PasswordField
-            name="currentPassword"
-            label="Contraseña actual"
-            value={security.currentPassword}
-            onChange={handleChange}
-            placeholder="Ingresa tu contraseña actual"
-            showPasswords={showPasswords}
-            onToggleVisibility={() => setShowPasswords((current) => !current)}
-          />
-
-          <div className="hidden md:block" />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <PasswordField
-            name="newPassword"
-            label="Nueva contraseña"
-            value={security.newPassword}
-            onChange={handleChange}
-            placeholder="Mínimo 8 caracteres"
-            showPasswords={showPasswords}
-            onToggleVisibility={() => setShowPasswords((current) => !current)}
-          />
-
-          <PasswordField
-            name="confirmPassword"
-            label="Confirmar contraseña"
-            value={security.confirmPassword}
-            onChange={handleChange}
-            placeholder="Repite la contraseña nueva"
-            showPasswords={showPasswords}
-            onToggleVisibility={() => setShowPasswords((current) => !current)}
-          />
-        </div>
-
-        {showTwoFactor ? (
-          <div className="space-y-3">
-            <Toggle
-              checked={security.twoFactorEnabled}
-              onChange={(value) => setSecurity((current) => ({ ...current, twoFactorEnabled: value }))}
-              label="Verificación en dos pasos"
-              description="Solicita un código adicional al iniciar sesión."
-            />
-          </div>
-        ) : null}
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(16,32,58,0.45)] transition-transform hover:scale-[0.99] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Save className="h-4 w-4" />
-            {isSaving ? 'Guardando…' : 'Guardar cambios'}
-          </button>
-        </div>
-      </form>
+      {form}
     </section>
   );
 }

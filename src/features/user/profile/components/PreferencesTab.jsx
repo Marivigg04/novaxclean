@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
-import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
-import { supabase } from '@/lib/supabase';
+import { useCallback, useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
+import { fetchUserPreferences, updateUserPreferences } from '@/features/user/profile/data/userService';
+
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD ($) - Dólar' },
+  { value: 'VES', label: 'VES (Bs) - Bolívar' },
+];
 
 function ToggleSwitch({ checked, onChange }) {
   return (
@@ -23,77 +29,67 @@ function ToggleSwitch({ checked, onChange }) {
   );
 }
 
-export default function PreferencesTab() {
+export default function PreferencesTab({ embedded = false }) {
   const { user } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
   const [currency, setCurrency] = useState('USD');
   const [currencyOpen, setCurrencyOpen] = useState(false);
-  const [currency, setCurrency] = useState('USD ($) - Dólar');
-  
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    
-    async function loadPreferences() {
-      try {
-        const { data, error } = await supabase
-          .from('user_preferences')
-          .select('newsletter, promotions, currency')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          if (error.code !== 'PGRST116') {
-            console.error('Error fetching preferences:', error);
-          }
-        } else if (data) {
-          setNewsletter(data.newsletter);
-          setPromotions(data.promotions);
-          setCurrency(data.currency === 'VES' ? 'VES (Bs) - Bolívar' : 'USD ($) - Dólar');
-        }
-      } catch (err) {
-        console.error('Error loading preferences:', err);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadPreferences = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
     }
-    
+
+    setIsLoading(true);
+    try {
+      const prefs = await fetchUserPreferences(user.id);
+      setNewsletter(prefs.newsletter);
+      setPromotions(prefs.promotions);
+      setCurrency(prefs.currency);
+    } catch (error) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Error de carga',
+        message: error.message || 'No se pudieron cargar tus preferencias.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     loadPreferences();
-  }, [user]);
+  }, [loadPreferences]);
+
+  const selectedCurrencyLabel = CURRENCY_OPTIONS.find((option) => option.value === currency)?.label ?? CURRENCY_OPTIONS[0].label;
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user?.id) {
+      showInventoryToast({
+        type: 'delete',
+        title: 'Sesión requerida',
+        message: 'Inicia sesión para guardar preferencias.',
+      });
+      return;
+    }
+
     setIsSaving(true);
-    
     try {
-      const dbCurrency = currency === 'VES (Bs) - Bolívar' ? 'VES' : 'USD';
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          newsletter,
-          promotions,
-          currency: dbCurrency,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-      if (error) throw error;
-
+      await updateUserPreferences(user.id, { newsletter, promotions, currency });
       showInventoryToast({
         type: 'success',
         title: 'Cambios guardados',
         message: 'Tus preferencias se actualizaron correctamente.',
       });
     } catch (error) {
-      console.error('Error saving preferences:', error);
       showInventoryToast({
-        type: 'error',
+        type: 'delete',
         title: 'Error al guardar',
-        message: 'No se pudieron actualizar tus preferencias.',
+        message: error.message || 'No se pudieron guardar tus preferencias.',
       });
     } finally {
       setIsSaving(false);
@@ -102,16 +98,17 @@ export default function PreferencesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="w-8 h-8 border-4 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin"></div>
+      <div className={`flex items-center justify-center gap-2 text-sm text-[var(--color-base-text)]/70 ${embedded ? 'py-6' : 'rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] p-10'}`}>
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Cargando preferencias...
       </div>
     );
   }
 
-  return (
-    <div className="space-y-8">
+  const content = (
+    <>
       <div>
-        <h3 className="mb-5 text-xl font-bold">Comunicaciones</h3>
+        <h4 className="mb-4 text-base font-bold text-[var(--color-base-text)]">Comunicaciones</h4>
         <div className="space-y-4 rounded-2xl border border-[var(--color-app-panel-border)] p-6 bg-[var(--color-base-surface)]">
           <div className="flex items-center justify-between gap-4 rounded-lg p-2">
             <div>
@@ -134,7 +131,7 @@ export default function PreferencesTab() {
       </div>
 
       <div>
-        <h3 className="mb-5 text-xl font-bold">Configuración Regional</h3>
+        <h4 className="mb-4 text-base font-bold text-[var(--color-base-text)]">Configuración regional</h4>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className="block">
@@ -192,16 +189,28 @@ export default function PreferencesTab() {
         </button>
         <button
           type="button"
-          onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+          onClick={handleSave}
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60"
         >
-          {isSaving && (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          )}
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Guardar Cambios
         </button>
       </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-8">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="mb-1 text-xl font-bold text-[var(--color-base-text)]">Preferencias</h3>
+        <p className="text-sm text-[var(--color-base-text)]/60">Comunicaciones y configuración regional.</p>
+      </div>
+      {content}
     </div>
   );
 }
