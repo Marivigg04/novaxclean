@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, X, Sparkles, ArrowRight, ShoppingCart, Home, BookOpen, Package, MapPin, Settings, Menu } from 'lucide-react';
+import { Bell, Search, X, Sparkles, ArrowRight, ShoppingCart, Home, BookOpen, Package, MapPin, Settings, Menu, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../../shared/ThemeToggle';
 import UserAvatarIcon from '../../shared/UserAvatarIcon';
@@ -162,7 +162,8 @@ export default function Header({
     navItems.push(
       { label: 'Mis Pedidos', href: '/perfil?tab=pedidos', icon: Package },
       { label: 'Direcciones', href: '/perfil?tab=direcciones', icon: MapPin },
-      { label: 'Preferencias', href: '/perfil?tab=preferencias', icon: Settings }
+      { label: 'Preferencias', href: '/perfil?tab=preferencias', icon: Settings },
+      { label: 'Seguridad', href: '/perfil?tab=seguridad', icon: Shield }
     );
   }
 

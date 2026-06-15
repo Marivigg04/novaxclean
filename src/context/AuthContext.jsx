@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { requestPasswordReset, verifyAndChangePassword } from "../lib/password";
 
 const AuthContext = createContext();
 
@@ -150,13 +151,28 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const resetPassword = async (email) => {
+    await requestPasswordReset(email);
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    const email = user?.email;
+    if (!email) {
+      throw new Error('No hay una sesión activa.');
+    }
+
+    await verifyAndChangePassword(email, currentPassword, newPassword);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
       login, 
       register, 
       loginWithGoogle,
-      logout, 
+      logout,
+      resetPassword,
+      changePassword,
       loading,
       isAuthenticated: !!user, 
       isAdmin: user?.role === 'Admin' 

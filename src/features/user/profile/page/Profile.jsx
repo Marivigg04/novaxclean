@@ -9,11 +9,12 @@ import UserInfoTab from '../components/UserInfoTab';
 import OrdersTab from '../components/OrdersTab';
 import AddressesTab from '../components/AddressesTab';
 import PreferencesTab from '../components/PreferencesTab';
+import UserSecurityTab from '../components/UserSecurityTab';
 
 export default function Profile() {
   const navigate = useNavigate();
   const location = useLocation();
-  const allowedTabs = new Set(['perfil', 'pedidos', 'direcciones', 'preferencias']);
+  const allowedTabs = new Set(['perfil', 'pedidos', 'direcciones', 'preferencias', 'seguridad']);
   const params = new URLSearchParams(location.search);
   const requestedTab = params.get('tab');
   const activeTab = requestedTab && allowedTabs.has(requestedTab) ? requestedTab : 'perfil';
@@ -38,6 +39,7 @@ export default function Profile() {
           {activeTab === 'pedidos' && <OrdersTab />}
           {activeTab === 'direcciones' && <AddressesTab />}
           {activeTab === 'preferencias' && <PreferencesTab />}
+          {activeTab === 'seguridad' && <UserSecurityTab />}
         </div>
       </main>
 
