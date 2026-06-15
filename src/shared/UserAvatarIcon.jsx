@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 const SIZE_CLASSES = {
   sm: 'h-8 w-8 text-sm',
   md: 'h-10 w-10 text-base',
@@ -5,16 +7,22 @@ const SIZE_CLASSES = {
 };
 
 export default function UserAvatarIcon({ avatar, name, size = 'md', className = '' }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const isImageAvatar = typeof avatar === 'string' && /^(data:|https?:|blob:)/.test(avatar);
-  const label = String(avatar ?? name?.[0] ?? 'U').slice(0, 2).toUpperCase();
+  const label = String(name?.[0] ?? 'U').slice(0, 2).toUpperCase();
   const resolvedSize = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
 
-  if (isImageAvatar) {
+  useEffect(() => {
+    setImageFailed(false);
+  }, [avatar]);
+
+  if (isImageAvatar && !imageFailed) {
     return (
       <img
         src={avatar}
         alt={name || 'Avatar'}
         className={`rounded-full object-cover ${resolvedSize} ${className}`}
+        onError={() => setImageFailed(true)}
       />
     );
   }

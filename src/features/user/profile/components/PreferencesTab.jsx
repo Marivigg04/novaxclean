@@ -27,6 +27,7 @@ export default function PreferencesTab() {
   const { user } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
+  const [currency, setCurrency] = useState('USD');
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [currency, setCurrency] = useState('USD ($) - Dólar');
   
@@ -145,7 +146,7 @@ export default function PreferencesTab() {
                   className="w-full rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] p-3.5 text-left text-sm font-medium outline-none flex items-center justify-between"
                   onClick={() => setCurrencyOpen((s) => !s)}
                 >
-                  <span>{currency}</span>
+                  <span>{selectedCurrencyLabel}</span>
                   <span className={`material-symbols-outlined ml-3 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} aria-hidden>
                     expand_more
                   </span>
@@ -153,12 +154,26 @@ export default function PreferencesTab() {
 
                 {currencyOpen ? (
                   <ul role="listbox" className="absolute z-40 mt-2 w-full overflow-hidden rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-lg">
-                    <li role="option" tabIndex={0} className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]" onClick={() => { setCurrency('USD ($) - Dólar'); setCurrencyOpen(false); }} onKeyDown={(e) => { if (e.key === 'Enter') { setCurrency('USD ($) - Dólar'); setCurrencyOpen(false); } }}>
-                      USD ($) - Dólar
-                    </li>
-                    <li role="option" tabIndex={0} className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]" onClick={() => { setCurrency('VES (Bs) - Bolívar'); setCurrencyOpen(false); }} onKeyDown={(e) => { if (e.key === 'Enter') { setCurrency('VES (Bs) - Bolívar'); setCurrencyOpen(false); } }}>
-                      VES (Bs) - Bolívar
-                    </li>
+                    {CURRENCY_OPTIONS.map((option) => (
+                      <li
+                        key={option.value}
+                        role="option"
+                        tabIndex={0}
+                        className="cursor-pointer px-4 py-3 transition-colors duration-150 hover:bg-[var(--color-brand)]/10 hover:text-[var(--color-brand)] focus-visible:bg-[var(--color-brand)]/10 focus-visible:text-[var(--color-brand)]"
+                        onClick={() => {
+                          setCurrency(option.value);
+                          setCurrencyOpen(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setCurrency(option.value);
+                            setCurrencyOpen(false);
+                          }
+                        }}
+                      >
+                        {option.label}
+                      </li>
+                    ))}
                   </ul>
                 ) : null}
               </div>
@@ -168,7 +183,11 @@ export default function PreferencesTab() {
       </div>
 
       <div className="pt-4 flex justify-end gap-4">
-        <button className="rounded-xl bg-[var(--color-brand)] px-6 py-3 font-bold text-white shadow-[0_8px_16px_-8px_rgba(47,94,162,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+        <button
+          type="button"
+          onClick={loadPreferences}
+          className="rounded-xl border border-[var(--color-app-panel-border)] px-6 py-3 font-bold transition-all hover:bg-[var(--color-app-panel-hover)]"
+        >
           Descartar
         </button>
         <button
