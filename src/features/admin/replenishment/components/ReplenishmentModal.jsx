@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -27,6 +28,7 @@ import {
   normalizeReplenishmentItems,
   suggestReplenishmentQuantity,
 } from '../replenishmentData';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 const DEFAULT_SUPPLIERS_BY_CONTEXT = {
   inventory: [
@@ -226,6 +228,8 @@ export default function ReplenishmentModal({
 }) {
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+
+  useScrollLock(isRendered);
   const [flowStage, setFlowStage] = useState('form');
   const [activeStep, setActiveStep] = useState(0);
   const [selectedSupplier, setSelectedSupplier] = useState('');
@@ -501,9 +505,20 @@ export default function ReplenishmentModal({
     });
   };
 
-  return (
-    <div className={`fixed inset-0 z-[120] flex items-center justify-center overflow-y-auto bg-primary/55 px-2 py-4 backdrop-blur-sm md:px-4 md:py-6 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`} role="dialog" aria-modal="true" aria-labelledby="replenishment-title" onClick={handleClose}>
-      <div className={`cart-scrollbar my-auto max-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`} onClick={(event) => event.stopPropagation()}>
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-primary/55 px-2 py-4 backdrop-blur-sm md:px-4 md:py-6 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="replenishment-title"
+      data-lenis-prevent
+      onClick={handleClose}
+    >
+      <div
+        className={`flex h-[min(calc(100dvh-2rem),960px)] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-outline-variant bg-surface-container-lowest shadow-2xl ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
+        data-lenis-prevent
+        onClick={(event) => event.stopPropagation()}
+      >
         
         {/* Modal Header */}
         <div className="flex items-start justify-between gap-4 border-b border-outline-variant bg-surface-container-low px-4 py-4 md:px-8 md:py-5">
@@ -528,7 +543,7 @@ export default function ReplenishmentModal({
         </div>
 
         {/* Modal Scrollable Container */}
-        <div className="cart-scrollbar relative max-h-[calc(100dvh-10.5rem)] overflow-y-auto px-4 py-4 md:px-8 md:py-6">
+        <div className="cart-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 md:px-8 md:py-6" data-lenis-prevent>
           <AnimatePresence mode="wait">
             {showSuccess ? (
               <ReplenishmentSuccess title="Mercancía ingresada al almacén" />
@@ -1193,7 +1208,7 @@ export default function ReplenishmentModal({
                             transition={{ duration: 0.2 }}
                             className="mt-3 overflow-hidden border-t border-outline-variant/30 pt-3"
                           >
-                            <div className="max-h-[140px] overflow-y-auto space-y-2 pr-1 cart-scrollbar">
+                            <div className="max-h-[140px] overflow-y-auto overscroll-contain space-y-2 pr-1 cart-scrollbar" data-lenis-prevent>
                               {lineItems.map((item) => (
                                 <div key={item.sku} className="flex items-center justify-between text-xs text-primary bg-surface-container-low/60 p-2 rounded-lg border border-outline-variant/30">
                                   <div className="flex items-center gap-2 min-w-0">
@@ -1218,6 +1233,7 @@ export default function ReplenishmentModal({
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

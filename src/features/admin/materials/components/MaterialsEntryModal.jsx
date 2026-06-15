@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { PlusCircle, Save, X, Trash2 } from 'lucide-react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 function buildInitialForm(type, item) {
   if (type === 'formula') {
@@ -49,6 +51,8 @@ export default function MaterialsEntryModal({
   const [error, setError] = useState('');
   const formulaIngredients = Array.isArray(form.ingredients) ? form.ingredients : [{ id: 'ingredient-0', materialSku: '', qty: '' }];
 
+  useScrollLock(isOpen);
+
   const title = useMemo(() => {
     if (type === 'formula') {
       return mode === 'create' ? 'Nueva fórmula' : 'Editar fórmula';
@@ -67,8 +71,6 @@ export default function MaterialsEntryModal({
     setForm(buildInitialForm(type, item));
     setError('');
   }, [isOpen, item, type]);
-
-  if (!isOpen) return null;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -180,12 +182,24 @@ export default function MaterialsEntryModal({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden p-4"
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent
+    >
       <button type="button" className="fixed inset-0 h-full w-full bg-black/55 backdrop-blur-sm" aria-label="Cerrar modal" onClick={onClose} />
 
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] max-h-[90vh]">
-        <div className="flex items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
+      <form
+        onSubmit={handleSubmit}
+        onClick={(event) => event.stopPropagation()}
+        data-lenis-prevent
+        className="relative z-10 flex h-[min(90dvh,calc(100dvh-2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)]"
+      >
+        <div className="flex shrink-0 items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">{title}</p>
             <h3 className="mt-1 text-lg font-semibold text-[var(--color-base-text)]">{type === 'formula' ? 'Configurar fórmula' : 'Registrar insumo'}</h3>
@@ -196,7 +210,7 @@ export default function MaterialsEntryModal({
           </button>
         </div>
 
-        <div className="max-h-[calc(90vh-78px)] overflow-y-auto p-5">
+        <div className="cart-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-5" data-lenis-prevent>
           {type === 'formula' ? (
             <div className="grid gap-3 md:grid-cols-2">
               <label className="block md:col-span-2">
@@ -240,7 +254,7 @@ export default function MaterialsEntryModal({
                   <button type="button" onClick={addIngredient} className="rounded-lg border border-[var(--color-app-panel-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-base-text)] transition-colors hover:bg-[var(--color-app-panel-hover)]">Agregar insumo</button>
                 </div>
 
-                <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                <div className="cart-scrollbar max-h-56 space-y-2 overflow-y-auto overscroll-contain pr-1" data-lenis-prevent>
                   {formulaIngredients.map((ingredient, index) => {
                     const selectedMaterial = materialOptions.find((option) => option.sku === ingredient.materialSku);
 
@@ -348,10 +362,12 @@ export default function MaterialsEntryModal({
               </label>
             </div>
           )}
+        </div>
 
-          {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
+        <div className="shrink-0 border-t border-[var(--color-app-panel-border)] px-5 py-4">
+          {error ? <p className="mb-3 text-xs text-red-600">{error}</p> : null}
 
-          <div className="mt-5 flex justify-end gap-3">
+          <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-base-text)]/80 transition-colors hover:bg-[var(--color-app-panel-hover)]">Cancelar</button>
 
             <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110">
@@ -361,6 +377,7 @@ export default function MaterialsEntryModal({
           </div>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, PlusCircle, ImagePlus, Loader2 } from 'lucide-react';
 import RoundedSelect from '@/features/admin/inventory/components/RoundedSelect';
 import { uploadProductImage } from '@/features/admin/inventory/data/inventoryService';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 const INITIAL_FORM = {
   sku: '',
@@ -30,7 +32,8 @@ export default function NewProductModal({
   const [isClosing, setIsClosing] = useState(false);
   const fileInputRef = useRef(null);
 
-  // ── Transition management ──────────────────────────────────────────────
+  useScrollLock(isRendered);
+
   useEffect(() => {
     let timeoutId;
     let closingTimeoutId;
@@ -59,7 +62,6 @@ export default function NewProductModal({
     };
   }, [isOpen, isRendered]);
 
-  // ── Reset on close ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) {
       setForm(INITIAL_FORM);
@@ -72,7 +74,6 @@ export default function NewProductModal({
 
   if (!isRendered) return null;
 
-  // ── Handlers ───────────────────────────────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((c) => ({ ...c, [name]: value }));
@@ -84,7 +85,6 @@ export default function NewProductModal({
     setError('');
   };
 
-  // ── Image handling ─────────────────────────────────────────────────────
   const processFile = (file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -124,11 +124,9 @@ export default function NewProductModal({
     setImagePreview(null);
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!form.sku.trim()) return setError('El SKU es requerido.');
     if (!form.name.trim()) return setError('El nombre es requerido.');
 
@@ -145,13 +143,11 @@ export default function NewProductModal({
     setError('');
 
     try {
-      // Upload image if one was selected
       let imageUrl = null;
       if (imageFile) {
         imageUrl = await uploadProductImage(imageFile);
       }
 
-      // Call parent handler (does the Supabase insert)
       await onSubmit({
         sku: form.sku.trim(),
         name: form.name.trim(),
@@ -172,28 +168,26 @@ export default function NewProductModal({
     }
   };
 
-  // ── Category & Badge options for RoundedSelect ─────────────────────────
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
   const badgeOptions = [
     { value: '', label: 'Sin badge' },
     ...badges.map((b) => ({ value: b.id, label: b.name })),
   ];
 
-  // ── Render ─────────────────────────────────────────────────────────────
-  return (
+  return createPortal(
     <div
-      className={`fixed inset-0 z-[120] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}
+      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black/55 p-4 backdrop-blur-sm ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}
       role="dialog"
       aria-modal="true"
+      data-lenis-prevent
       onClick={!loading ? onClose : undefined}
     >
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className={`relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
-        style={{ maxHeight: 'min(92vh, 780px)' }}
+        data-lenis-prevent
+        className={`relative z-10 flex h-[min(92dvh,calc(100dvh-2rem))] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] shadow-[0_20px_55px_-30px_rgba(16,32,58,0.8)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
       >
-        {/* ── Header ────────────────────────────────────────────────── */}
         <div className="flex shrink-0 items-start justify-between border-b border-[var(--color-app-panel-border)] px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-base-text)]/50">
@@ -214,9 +208,7 @@ export default function NewProductModal({
           </button>
         </div>
 
-        {/* ── Scrollable body ───────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Row 1: SKU + Nombre */}
+        <div className="cart-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 space-y-4" data-lenis-prevent>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="block text-sm font-medium text-[var(--color-base-text)]/75">
@@ -247,7 +239,6 @@ export default function NewProductModal({
             </label>
           </div>
 
-          {/* Row 2: Categoría + Badge */}
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Categoría</span>
@@ -272,7 +263,6 @@ export default function NewProductModal({
             </label>
           </div>
 
-          {/* Row 3: Descripción */}
           <label className="block">
             <span className="block text-sm font-medium text-[var(--color-base-text)]/75">Descripción</span>
             <textarea
@@ -286,7 +276,6 @@ export default function NewProductModal({
             />
           </label>
 
-          {/* Row 4: Precio + Stock + Stock Mínimo */}
           <div className="grid grid-cols-3 gap-3">
             <label className="block">
               <span className="block text-sm font-medium text-[var(--color-base-text)]/75">
@@ -331,7 +320,6 @@ export default function NewProductModal({
             </label>
           </div>
 
-          {/* Row 5: Image Upload */}
           <div>
             <span className="block text-sm font-medium text-[var(--color-base-text)]/75 mb-2">
               Imagen del producto
@@ -390,11 +378,9 @@ export default function NewProductModal({
             </div>
           </div>
 
-          {/* Error */}
           {error ? <p className="text-xs text-rose-600">{error}</p> : null}
         </div>
 
-        {/* ── Footer ────────────────────────────────────────────────── */}
         <div className="shrink-0 border-t border-[var(--color-app-panel-border)] px-5 py-4 flex justify-end gap-3">
           <button
             type="button"
@@ -424,6 +410,7 @@ export default function NewProductModal({
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

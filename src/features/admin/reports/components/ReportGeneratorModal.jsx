@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BarChart3, ChevronDown, Download, FileDown, Filter, LayoutPanelTop, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 
 import ScrollArea from '@/shared/ScrollArea';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import productsSales from '@/features/admin/dashboard/data/productsSales.json';
 import { inventoryProducts } from '@/features/admin/inventory/data/mockup';
 import { materialRows } from '@/features/admin/materials/data/mockup';
@@ -590,14 +592,20 @@ function PreviewPage({ pageId, config, insights, variant = 'compact' }) {
 }
 
 function FullPreviewModal({ isOpen = false, onClose = () => {}, config, visiblePages, reportTitle, reportInsights }) {
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/65 p-0 backdrop-blur-md sm:p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[130] flex items-center justify-center overflow-hidden bg-black/65 p-0 backdrop-blur-md sm:p-4" data-lenis-prevent>
       <button type="button" className="fixed inset-0 h-full w-full" aria-label="Cerrar vista previa" onClick={onClose} />
 
-      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[92vh] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)]">
-        <div className="flex items-center justify-between border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
+      <div
+        className="relative z-10 flex h-[100dvh] w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[92vh] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)]"
+        data-lenis-prevent
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-base-text)]/50">Vista previa completa</p>
             <h3 className="mt-1 text-lg sm:text-xl font-semibold text-[var(--color-base-text)]">{reportTitle}</h3>
@@ -609,7 +617,7 @@ function FullPreviewModal({ isOpen = false, onClose = () => {}, config, visibleP
           </button>
         </div>
 
-        <ScrollArea className="flex-1 px-4 py-5 sm:px-6">
+        <ScrollArea className="min-h-0 flex-1 px-4 py-5 sm:px-6">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
             {visiblePages.map((page) => (
               <PageCard
@@ -625,7 +633,8 @@ function FullPreviewModal({ isOpen = false, onClose = () => {}, config, visibleP
           </div>
         </ScrollArea>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -643,6 +652,8 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
   const [activeTab, setActiveTab] = useState('config'); // 'config' or 'preview'
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+
+  useScrollLock(isRendered);
 
   useEffect(() => {
     let timeoutId;
@@ -896,9 +907,20 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
 
   if (!isRendered) return null;
 
-  return (
-    <div className={`fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-0 backdrop-blur-sm sm:p-4 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`} role="dialog" aria-modal="true" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className={`relative z-10 flex h-full w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[94vh] sm:max-w-[1660px] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}>
+  return createPortal(
+    <>
+    <div
+      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black/60 p-0 backdrop-blur-sm sm:p-4 ${isClosing ? 'cart-modal-overlay-exit' : 'cart-modal-overlay-enter'}`}
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        data-lenis-prevent
+        className={`relative z-10 flex h-[100dvh] w-full flex-col overflow-hidden bg-[var(--color-base-bg)] sm:h-[94vh] sm:max-w-[1660px] sm:rounded-[32px] sm:border sm:border-[var(--color-app-panel-border)] sm:shadow-[0_24px_70px_-35px_rgba(16,32,58,0.9)] ${isClosing ? 'cart-modal-panel-exit' : 'cart-modal-panel-enter'}`}
+      >
         <div className="flex items-center justify-between gap-4 border-b border-[var(--color-app-panel-border)] bg-[var(--color-base-surface)] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-base-text)]/50">Generación de reportes</p>
@@ -1209,6 +1231,7 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
           </section>
         </div>
       </div>
+    </div>
 
       <FullPreviewModal
         isOpen={isFullPreviewOpen}
@@ -1218,6 +1241,7 @@ export default function ReportGeneratorModal({ isOpen = false, onClose = () => {
         reportTitle={reportTitle}
         reportInsights={reportInsights}
       />
-    </div>
+    </>,
+    document.body,
   );
 }
