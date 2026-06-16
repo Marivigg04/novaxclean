@@ -53,9 +53,10 @@ async function reverseGeocode(lat, lng) {
   }
 }
 
-function MapClickHandler({ onMapClick }) {
+function MapClickHandler({ onMapClick, onInteraction }) {
   const map = useMap();
   useMapEvent('click', (event) => {
+    if (onInteraction) onInteraction();
     map.panTo(event.latlng);
     if (onMapClick) {
       onMapClick(event.latlng);
@@ -64,8 +65,20 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapCenterListener({ onCenterChange }) {
+function MapCenterListener({ onCenterChange, onInteraction }) {
   const map = useMap();
+  useMapEvent('dragstart', () => {
+    if (onInteraction) onInteraction();
+  });
+  useMapEvent('zoomstart', () => {
+    if (onInteraction) onInteraction();
+  });
+  useMapEvent('mousedown', () => {
+    if (onInteraction) onInteraction();
+  });
+  useMapEvent('touchstart', () => {
+    if (onInteraction) onInteraction();
+  });
   useMapEvent('moveend', () => {
     if (onCenterChange) {
       onCenterChange(map.getCenter());
@@ -117,7 +130,7 @@ export default function AddressesTab() {
   const [editingId, setEditingId] = useState(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const debounceTimeoutRef = useRef(null);
-  const isFirstRender = useRef(true);
+  const hasInteracted = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -154,7 +167,7 @@ export default function AddressesTab() {
   }, [loadAddresses]);
 
   function handleOpenModal() {
-    isFirstRender.current = true;
+    hasInteracted.current = false;
     setNewAddress({
       type: '',
       location: '',
@@ -167,7 +180,7 @@ export default function AddressesTab() {
   }
 
   function handleOpenEditModal(address) {
-    isFirstRender.current = true;
+    hasInteracted.current = false;
     setNewAddress({
       type: address.type,
       location: address.location,
@@ -194,14 +207,15 @@ export default function AddressesTab() {
     if (!latlng) return;
     const { lat, lng } = latlng;
     
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (!hasInteracted.current) {
       return;
     }
     
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
+    
+    setIsGeocoding(true);
     
     debounceTimeoutRef.current = setTimeout(async () => {
       setNewAddress((c) => ({
@@ -210,7 +224,6 @@ export default function AddressesTab() {
         longitude: lng,
       }));
       
-      setIsGeocoding(true);
       try {
         const addressName = await reverseGeocode(lat, lng);
         if (addressName) {
@@ -450,8 +463,14 @@ export default function AddressesTab() {
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <MapClickHandler onMapClick={handleMapMoveEnd} />
-                    <MapCenterListener onCenterChange={handleMapMoveEnd} />
+                    <MapClickHandler
+                      onMapClick={handleMapMoveEnd}
+                      onInteraction={() => { hasInteracted.current = true; }}
+                    />
+                    <MapCenterListener
+                      onCenterChange={handleMapMoveEnd}
+                      onInteraction={() => { hasInteracted.current = true; }}
+                    />
                     <MapUpdater center={[newAddress.latitude, newAddress.longitude]} />
                   </MapContainer>
                   

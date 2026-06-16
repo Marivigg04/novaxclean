@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ReactLenis } from 'lenis/react';
 import { Check, CheckCircle2, Circle, LoaderCircle, MessageCircle, Phone } from 'lucide-react';
 import L from 'leaflet';
-import { MapContainer, Marker, Polyline, TileLayer, useMapEvent } from 'react-leaflet';
+import { MapContainer, Marker, Polyline, TileLayer, useMapEvent, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const paymentMethods = [
@@ -74,6 +74,7 @@ async function geocodeDestination(address, city, signal) {
   url.searchParams.set('viewbox', '-67.12,10.58,-66.76,10.34');
   url.searchParams.set('bounded', '1');
   url.searchParams.set('addressdetails', '1');
+  url.searchParams.set('email', 'novaxclean-app-geo@outlook.com');
 
   try {
     const response = await fetch(url.toString(), {
@@ -210,6 +211,20 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center && center[0] != null && center[1] != null) {
+      const currentCenter = map.getCenter();
+      const dist = Math.abs(currentCenter.lat - center[0]) + Math.abs(currentCenter.lng - center[1]);
+      if (dist > 0.0001) {
+        map.setView(center, map.getZoom());
+      }
+    }
+  }, [center, map]);
+  return null;
+}
+
 export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () => {} }) {
   const { user, isAuthenticated } = useAuth();
   const { cart, clearCart, subtotal, taxes, total } = useCart();
@@ -265,8 +280,36 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
     beneficiary: 'NovaxClean C.A.',
     reference: 'Pedido + nombre del cliente',
   };
+  const [routePath, setRoutePath] = useState(() => createRoutePath(originPoint, destination));
 
-  const routePath = useMemo(() => createRoutePath(originPoint, destination), [destination]);
+  useEffect(() => {
+    if (!destination?.lat || !destination?.lng) return;
+
+    let isMounted = true;
+    async function fetchRealRoute() {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${originPoint.lng},${originPoint.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('OSRM routing request failed');
+        const data = await response.json();
+        
+        if (data?.routes?.[0]?.geometry?.coordinates && isMounted) {
+          const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+          setRoutePath(coords);
+        }
+      } catch (err) {
+        console.error('Failed to fetch route from OSRM:', err);
+      }
+    }
+
+    setRoutePath(createRoutePath(originPoint, destination));
+    fetchRealRoute();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [destination]);
+
   const mapCenter = useMemo(() => [(originPoint.lat + destination.lat) / 2, (originPoint.lng + destination.lng) / 2], [destination]);
 
   const riderIcon = useMemo(
@@ -493,7 +536,18 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
     setIsResolvingDestination(true);
 
     const query = resolveDeliveryQuery();
-    const resolvedDestination = await geocodeDestination(query.address, query.city, controller.signal);
+    let resolvedDestination = null;
+
+    if (addressMode === 'registered' && user?.defaultAddress?.latitude && user?.defaultAddress?.longitude) {
+      resolvedDestination = {
+        lat: Number(user.defaultAddress.latitude),
+        lng: Number(user.defaultAddress.longitude),
+        label: user.defaultAddress.location_details || query.address,
+        display_name: user.defaultAddress.location_details || query.address
+      };
+    } else {
+      resolvedDestination = await geocodeDestination(query.address, query.city, controller.signal);
+    }
 
     if (controller.signal.aborted) {
       return;
@@ -989,6 +1043,7 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
                             handleMapClick(latlng);
                           }
                         }} />
+                        <MapUpdater center={mapCenter} />
                         <Polyline positions={routePath} pathOptions={{ color: '#0f6ecf', weight: 6, opacity: 0.85 }} />
                         <Marker position={[originPoint.lat, originPoint.lng]} icon={pointAIcon} />
                         <Marker position={[destination.lat, destination.lng]} icon={pointBIcon} />
