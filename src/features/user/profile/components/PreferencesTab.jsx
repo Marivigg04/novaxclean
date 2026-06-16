@@ -30,7 +30,7 @@ function ToggleSwitch({ checked, onChange }) {
 }
 
 export default function PreferencesTab({ embedded = false }) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [newsletter, setNewsletter] = useState(true);
   const [promotions, setPromotions] = useState(true);
   const [currency, setCurrency] = useState('USD');
@@ -80,6 +80,7 @@ export default function PreferencesTab({ embedded = false }) {
     setIsSaving(true);
     try {
       await updateUserPreferences(user.id, { newsletter, promotions, currency });
+      await refreshUser();
       showInventoryToast({
         type: 'success',
         title: 'Cambios guardados',

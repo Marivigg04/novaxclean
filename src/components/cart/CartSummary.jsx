@@ -1,6 +1,11 @@
-const formatMoney = (value) => `$${value.toFixed(2)}`;
+import { useAuth } from '../../context/AuthContext';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 export default function CartSummary({ subtotal, shipping, taxes, total, onOpenCheckout }) {
+  const { user } = useAuth();
+  const { rate } = useExchangeRate();
+  const currencyPref = user?.currency || 'VES';
   return (
     <aside className="sticky top-24 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 cloud-shadow">
       <h2 className="mb-6 text-headline-md font-semibold text-primary">Resumen del Pedido</h2>
@@ -8,26 +13,26 @@ export default function CartSummary({ subtotal, shipping, taxes, total, onOpenCh
       <div className="mb-6 space-y-4">
         <div className="flex min-w-0 justify-between gap-4 text-body-md text-on-surface-variant">
           <span>Subtotal</span>
-          <span>{formatMoney(subtotal)}</span>
+          <span>{formatCurrency(subtotal, rate, currencyPref)}</span>
         </div>
         <div className="flex min-w-0 justify-between gap-4 text-body-md text-on-surface-variant">
           <span className="min-w-0 break-words">Envío</span>
-          <span className="font-bold text-secondary">{shipping === 0 ? 'Gratis' : formatMoney(shipping)}</span>
+          <span className="font-bold text-secondary">{shipping === 0 ? 'Gratis' : formatCurrency(shipping, rate, currencyPref)}</span>
         </div>
         <div className="flex min-w-0 justify-between gap-4 text-body-md text-on-surface-variant">
           <span>Impuestos (IVA 16%)</span>
-          <span>{formatMoney(taxes)}</span>
+          <span>{formatCurrency(taxes, rate, currencyPref)}</span>
         </div>
         <div className="flex min-w-0 items-baseline justify-between gap-4 border-t border-outline-variant pt-4">
           <span className="text-headline-md font-bold text-primary">Total</span>
-          <span className="text-headline-md font-black text-primary">{formatMoney(total)}</span>
+          <span className="text-headline-md font-black text-primary">{formatCurrency(total, rate, currencyPref)}</span>
         </div>
       </div>
 
       <div className="mb-6 rounded-lg border-l-4 border-secondary bg-surface-container p-4">
         <p className="mb-1 flex items-center gap-2 text-label-md font-bold text-secondary">
           <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-          Envío gratis desde $25
+          Envío gratis desde {formatCurrency(25, rate, currencyPref)}
         </p>
         <p className="break-words text-xs text-on-surface-variant">Agrega un poco más a tu carrito y obtén envío gratis en tu pedido.</p>
       </div>

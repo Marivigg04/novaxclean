@@ -124,7 +124,15 @@ export async function fetchEnrichedUserProfile(userId, sessionUser = null) {
     console.warn('Could not fetch default address:', addressError.message);
   }
 
+  let preferences = null;
+  try {
+    preferences = await fetchUserPreferences(userId);
+  } catch (prefError) {
+    console.warn('Could not fetch user preferences:', prefError.message);
+  }
+
   const userObj = buildUserObject(profile, defaultAddress, sessionUser);
+  userObj.currency = preferences?.currency || 'VES';
 
   if (profile.avatar_url) {
     userObj.avatar = (await resolveAvatarDisplayUrl(profile.avatar_url)) || userObj.avatar;
@@ -348,7 +356,7 @@ export async function fetchUserOrders(userId) {
       id: order.order_number,
       orderId: order.id,
       date: formatOrderDate(order.created_at),
-      total: formatOrderTotal(order.total_amount),
+      totalRaw: order.total_amount,
       status: order.status,
       items,
       lineItems,

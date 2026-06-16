@@ -1,8 +1,16 @@
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
+import { formatCurrency } from '../../utils/currencyFormatter';
+import { useCart } from '../../context/CartContext';
 
 export default function CartRecommendations({ items = [] }) {
   const carouselRef = useRef(null);
+  const { user } = useAuth();
+  const { rate } = useExchangeRate();
+  const { addToCart } = useCart();
+  const currencyPref = user?.currency || 'VES';
 
   const scroll = (direction) => {
     if (carouselRef.current) {
@@ -57,16 +65,27 @@ export default function CartRecommendations({ items = [] }) {
             className="flex w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] snap-start shrink-0 flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 transition-all hover:border-[var(--color-brand)]/40 hover:shadow-lg group"
           >
             <div className="mb-4 aspect-square overflow-hidden rounded-xl bg-surface-container relative">
-              <img alt={item.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" src={item.image} />
+              <img alt={item.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" src={item.image_url || item.image} />
             </div>
             <p className="text-label-md font-bold text-primary group-hover:text-[var(--color-brand)] transition-colors truncate">{item.name}</p>
-            <p className="text-xs text-on-surface-variant mt-0.5 truncate">{item.subtitle}</p>
+            <p className="text-xs text-on-surface-variant mt-0.5 truncate">{item.category_name || item.subtitle}</p>
             <div className="mt-auto flex items-center justify-between pt-4">
-              <span className="font-extrabold text-primary">{item.price}</span>
+              <span className="font-extrabold text-primary">{formatCurrency(item.price || item.rawPrice, rate, currencyPref)}</span>
               <button
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-on-secondary shadow-md transition-all hover:scale-110 active:scale-90 hover:bg-primary"
                 type="button"
                 aria-label="Agregar al carrito"
+                onClick={() => {
+                  addToCart({
+                    id: item.id,
+                    sku: item.sku,
+                    name: item.name,
+                    price: formatCurrency(item.price || item.rawPrice, rate, currencyPref),
+                    rawPrice: item.price || item.rawPrice,
+                    image: item.image_url || item.image,
+                    category: item.category_name
+                  }, 1);
+                }}
               >
                 <Plus className="h-4 w-4" />
               </button>
