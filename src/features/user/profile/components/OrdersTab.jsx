@@ -11,6 +11,8 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { showInventoryToast } from '@/features/admin/inventory/components/toastService';
 import { fetchUserOrders } from '@/features/user/profile/data/userService';
+import { formatCurrency } from '@/utils/currencyFormatter';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 const PAYMENT_LABELS = {
   tarjeta: 'Tarjeta',
@@ -73,7 +75,7 @@ function OrderMetaItem({ icon: Icon, label, value, align = 'left' }) {
   );
 }
 
-function OrderCard({ order, isExpanded, onToggle }) {
+function OrderCard({ order, isExpanded, onToggle, rate, currencyPref }) {
   const paymentLabel = PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod ?? '—';
 
   return (
@@ -106,7 +108,7 @@ function OrderCard({ order, isExpanded, onToggle }) {
       <div className="mx-5 flex items-center justify-between gap-3 rounded-xl border border-[var(--color-app-panel-border)] bg-[var(--color-base-bg)] px-4 py-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-base-text)]/50">Total pagado</p>
-          <p className="text-lg font-extrabold text-[var(--color-base-text)]">{order.total}</p>
+          <p className="text-lg font-extrabold text-[var(--color-base-text)]">{formatCurrency(order.totalRaw, rate, currencyPref)}</p>
         </div>
         <button
           type="button"
@@ -166,6 +168,8 @@ function OrderCard({ order, isExpanded, onToggle }) {
 
 export default function OrdersTab() {
   const { user } = useAuth();
+  const { rate } = useExchangeRate();
+  const currencyPref = user?.currency || 'VES';
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
@@ -244,6 +248,8 @@ export default function OrdersTab() {
           <OrderCard
             key={order.orderId}
             order={order}
+            rate={rate}
+            currencyPref={currencyPref}
             isExpanded={expandedOrderId === order.id}
             onToggle={() => setExpandedOrderId((current) => (current === order.id ? null : order.id))}
           />

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { supabase } from '../../lib/supabase';
+import { formatCurrency } from '../../utils/currencyFormatter';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ReactLenis } from 'lenis/react';
 import { Check, CheckCircle2, Circle, LoaderCircle, MessageCircle, Phone } from 'lucide-react';
@@ -228,6 +230,8 @@ function MapUpdater({ center }) {
 export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () => {} }) {
   const { user, isAuthenticated } = useAuth();
   const { cart, clearCart, subtotal, taxes, total } = useCart();
+  const { rate } = useExchangeRate();
+  const currencyPref = user?.currency || 'VES';
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -956,15 +960,15 @@ export default function CartCheckoutModal({ isOpen, onClose, onGoToCatalog = () 
                   <div className="mt-6 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
                     <div className="flex items-center justify-between gap-3 border-b border-outline-variant pb-3">
                       <span className="text-body-md text-on-surface-variant">Subtotal</span>
-                      <span className="text-body-md font-semibold text-primary">${subtotal.toFixed(2)}</span>
+                      <span className="text-body-md font-semibold text-primary">{formatCurrency(subtotal, rate, currencyPref)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3 border-b border-outline-variant py-3">
                       <span className="text-body-md text-on-surface-variant">Impuestos</span>
-                      <span className="text-body-md font-semibold text-primary">${taxes.toFixed(2)}</span>
+                      <span className="text-body-md font-semibold text-primary">{formatCurrency(taxes, rate, currencyPref)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3 pt-3">
                       <span className="text-headline-md font-bold text-primary">Total</span>
-                      <span className="text-headline-md font-black text-primary">${total.toFixed(2)}</span>
+                      <span className="text-headline-md font-black text-primary">{formatCurrency(total, rate, currencyPref)}</span>
                     </div>
                   </div>
 

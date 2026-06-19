@@ -1,4 +1,7 @@
 import { Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 export default function CartTable({
   items,
@@ -8,6 +11,10 @@ export default function CartTable({
   onRemoveItem,
   onClearCart,
 }) {
+  const { user } = useAuth();
+  const { rate } = useExchangeRate();
+  const currencyPref = user?.currency || 'VES';
+
   return (
     <section className="cart-subtle-float overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-lg">
       {/* Desktop Table View */}
@@ -45,7 +52,7 @@ export default function CartTable({
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-6 text-body-md font-semibold text-on-surface">{item.price}</td>
+                <td className="px-6 py-6 text-body-md font-semibold text-on-surface">{formatCurrency(item.rawPrice, rate, currencyPref)}</td>
                 <td className="px-6 py-6 align-middle text-center">
                   <div className="flex flex-col items-center gap-1">
                     <div className={`cart-quantity-control ${item.pulse === 'increase' ? 'cart-quantity-control-increase' : item.pulse === 'decrease' ? 'cart-quantity-control-decrease' : ''}`}>
@@ -60,7 +67,7 @@ export default function CartTable({
                   </div>
                 </td>
                 <td className="px-6 py-6 text-right text-body-md font-extrabold text-primary">
-                  <span className="cart-subtotal-value">{item.subtotal}</span>
+                  <span className="cart-subtotal-value">{formatCurrency(item.rawPrice * item.quantity, rate, currencyPref)}</span>
                 </td>
               </tr>
             ))}
@@ -83,7 +90,7 @@ export default function CartTable({
               </div>
 
               <div className="flex items-center justify-between gap-4 mt-1">
-                <span className="text-body-md font-semibold text-on-surface">{item.price}</span>
+                <span className="text-body-md font-semibold text-on-surface">{formatCurrency(item.rawPrice, rate, currencyPref)}</span>
                 <div className={`cart-quantity-control ${item.pulse === 'increase' ? 'cart-quantity-control-increase' : item.pulse === 'decrease' ? 'cart-quantity-control-decrease' : ''}`}>
                   <button className="cart-quantity-button" type="button" onClick={() => onDecreaseQuantity(item.id)} aria-label={`Disminuir cantidad de ${item.name}`}>
                     -
@@ -104,7 +111,7 @@ export default function CartTable({
                   <Trash2 className="h-3.5 w-3.5" />
                   Eliminar
                 </button>
-                <span className="text-body-md font-extrabold text-primary">{item.subtotal}</span>
+                <span className="text-body-md font-extrabold text-primary">{formatCurrency(item.rawPrice * item.quantity, rate, currencyPref)}</span>
               </div>
             </div>
           </div>

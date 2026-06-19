@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { footerLinks, recommendedItems } from './data';
+import { useState, useEffect } from 'react';
+import { footerLinks, recommendedItems as staticRecommendedItems } from './data';
 import Header from '../layout/Header';
 import CartTable from './CartTable';
 import CartSummary from './CartSummary';
@@ -8,11 +8,32 @@ import Footer from '../layout/Footer';
 import CartCheckoutModal from './CartCheckoutModal';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { fetchProducts } from '@/features/admin/inventory/data/inventoryService';
 
 export default function CartPage({ onBackToCatalog, onOpenCart, onOpenAuth }) {
   const { isAuthenticated } = useAuth();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
   const { cart, updateQuantity, removeFromCart, clearCart, subtotal, taxes, total } = useCart();
+
+  useEffect(() => {
+    async function loadRecommendations() {
+      try {
+        const products = await fetchProducts();
+        const available = products.filter((p) => p.stock > 0);
+        // Exclude items already in cart
+        const cartIds = new Set(cart.map((i) => i.id));
+        const filtered = available.filter((p) => !cartIds.has(p.id));
+        
+        // Shuffle or simply take the first 8
+        setRecommendations(filtered.slice(0, 8));
+      } catch (err) {
+        console.error('Failed to fetch product recommendations:', err);
+        setRecommendations(staticRecommendedItems); // Fallback to static if failure
+      }
+    }
+    loadRecommendations();
+  }, [cart]);
 
   const shippingValue = 0;
 
@@ -66,7 +87,7 @@ export default function CartPage({ onBackToCatalog, onOpenCart, onOpenAuth }) {
         )}
 
         <div className="cart-entrance-delayed mt-10">
-          <CartRecommendations items={recommendedItems} />
+          <CartRecommendations items={recommendations.length > 0 ? recommendations : staticRecommendedItems} />
         </div>
       </main>
 
